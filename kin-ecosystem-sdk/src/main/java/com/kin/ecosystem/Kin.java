@@ -264,12 +264,26 @@ public class Kin {
 	 * Allowing your users to purchase virtual goods you define within your app, using KIN.
 	 * This call might take time, due to transaction validation on the blockchain network.
 	 *
-	 * @param offerJwt Represents the offer in a JWT manner.
+	 * @param offerJwt Represents a 'Spend' offer in a JWT manner.
 	 * @param callback {@link OrderConfirmation} the result will be a failure or a succeed with a jwt confirmation.
 	 */
 	public static void purchase(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
 		throws ClientException {
 		checkInstanceNotNull();
+		OrderRepository.getInstance().purchase(offerJwt, callback);
+	}
+
+	/**
+	 * Allowing a user to pay to a different user for an offer defined within your app, using KIN.
+	 * This call might take time, due to transaction validation on the blockchain network.
+	 *
+	 * @param offerJwt Represents a 'Pay to user' offer in a JWT manner.
+	 * @param callback {@link OrderConfirmation} the result will be a failure or a succeed with a jwt confirmation.
+	 */
+	public static void payToUser(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
+		throws ClientException {
+		checkInstanceNotNull();
+		//pay to user has a similar flow like purchase (spend), the only different is the expected input JWT.
 		OrderRepository.getInstance().purchase(offerJwt, callback);
 	}
 
