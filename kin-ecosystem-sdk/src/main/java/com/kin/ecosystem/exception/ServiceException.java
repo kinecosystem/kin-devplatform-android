@@ -16,7 +16,7 @@ public class ServiceException extends KinEcosystemException {
 	public static final int NETWORK_ERROR = 5002;
 	public static final int TIMEOUT_ERROR = 5003;
 	public static final int USER_NOT_FOUND_ERROR = 4046;
-	public static final int USER_DID_NOT_ACCEPT_TOS = 4015;
+	public static final int USER_NOT_ACTIVATED = 4015;
 
 
 	public ServiceException(@ServiceErrorCodes int code, String message, Throwable cause) {

@@ -497,7 +497,7 @@ public class OrderRepositoryTest extends BaseTestClass {
 	@Test
 	public void purchase_Failed_User_Did_Not_Found_Accept_TOS() throws Exception {
 		testPurchaseFailureWithAPIException(new ApiException(401, "some message", null,
-			new Error("user did not accept TOS", "user did not accept TOS", ServiceException.USER_DID_NOT_ACCEPT_TOS)));
+			new Error("user did not accept TOS", "user did not accept TOS", ServiceException.USER_NOT_ACTIVATED)));
 	}
 
 	@Test

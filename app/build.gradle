@@ -90,7 +90,7 @@ def loadCredential() {
         entry(key: "API_KEY", default: System.getenv('API_KEY') ?: default_api_key)
         entry(key: "RS512_PRIVATE_KEY", default: System.getenv('RS512_PRIVATE_KEY') ?: default_rs512_jwt_private_key)
         entry(key: "RS512_PRIVATE_KEY_ID", default: System.getenv('RS512_PRIVATE_KEY_ID') ?: default_rs512_jwt_private_key_id)
-        entry(key: "IS_JWT_REGISTRATION", default: System.getenv('IS_JWT_REGISTRATION') ?:  "true")
+        entry(key: "IS_JWT_REGISTRATION", default: System.getenv('IS_JWT_REGISTRATION') ?:  "false")
         entry(key: "CRASHLYTICS_API_KEY", default: System.getenv('CRASHLYTICS_API_KEY')  ?: crashlytics_demo_api_key)
     }
     def credentialPropertiesFile = project.file("credential.properties")
