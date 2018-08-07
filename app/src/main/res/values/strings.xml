@@ -11,4 +11,5 @@
     <string name="copy_public_address">Copy Public Address</string>
     <string name="native_earn">Native Earn</string>
     <string name="kin_marketplace_title">Kin Marketplace</string>
+    <string name="pay_to_user">Pay to User</string>
 </resources>

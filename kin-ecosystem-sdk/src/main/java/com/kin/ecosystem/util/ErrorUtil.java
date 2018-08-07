@@ -17,6 +17,8 @@ import com.kin.ecosystem.exception.BlockchainException;
 import com.kin.ecosystem.exception.ClientException;
 import com.kin.ecosystem.exception.KinEcosystemException;
 import com.kin.ecosystem.exception.ServiceException;
+import com.kin.ecosystem.network.model.Order;
+import com.kin.ecosystem.network.model.Order.Status;
 import kin.core.exception.AccountNotActivatedException;
 import kin.core.exception.AccountNotFoundException;
 import kin.core.exception.CreateAccountException;
@@ -42,6 +44,20 @@ public class ErrorUtil {
 
 	private static final int REQUEST_TIMEOUT_CODE = 408;
 
+	public static KinEcosystemException fromFailedOrder(Order order) {
+		if (order != null && order.getStatus() == Status.FAILED) {
+			Error orderError = order.getError();
+			if (orderError != null) {
+				return new ServiceException(orderError.getCode(), orderError.getMessage(),
+					null);
+			} else {
+				return new ServiceException(SERVICE_ERROR, THE_ECOSYSTEM_SERVER_RETURNED_AN_ERROR,
+					null);
+			}
+		}
+		return null;
+	}
+
 	public static KinEcosystemException fromApiException(ApiException apiException) {
 		KinEcosystemException exception;
 		if (apiException == null) {
@@ -54,8 +70,14 @@ public class ErrorUtil {
 				case 404:
 				case 409:
 				case 500:
-					exception = new ServiceException(SERVICE_ERROR, THE_ECOSYSTEM_SERVER_RETURNED_AN_ERROR,
-						apiException);
+					Error errorResponseBody = apiException.getResponseBody();
+					if (errorResponseBody != null) {
+						exception = new ServiceException(errorResponseBody.getCode(), errorResponseBody.getMessage(),
+							apiException);
+					} else {
+						exception = new ServiceException(SERVICE_ERROR, THE_ECOSYSTEM_SERVER_RETURNED_AN_ERROR,
+							apiException);
+					}
 					break;
 				case REQUEST_TIMEOUT_CODE:
 					exception = new ServiceException(TIMEOUT_ERROR, THE_OPERATION_TIMED_OUT, apiException);

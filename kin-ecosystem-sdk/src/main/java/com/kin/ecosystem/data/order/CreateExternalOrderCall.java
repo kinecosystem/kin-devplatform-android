@@ -14,6 +14,7 @@ import com.kin.ecosystem.network.model.JWTBodyPaymentConfirmationResult;
 import com.kin.ecosystem.network.model.Offer.OfferType;
 import com.kin.ecosystem.network.model.OpenOrder;
 import com.kin.ecosystem.network.model.Order;
+import com.kin.ecosystem.network.model.Order.Status;
 import com.kin.ecosystem.util.ErrorUtil;
 import java.math.BigDecimal;
 import java.util.List;
@@ -57,7 +58,9 @@ class CreateExternalOrderCall extends Thread {
 					runOnMainThread(new Runnable() {
 						@Override
 						public void run() {
-							externalOrderCallbacks.onOrderFailed(ErrorUtil.getBlockchainException(new InsufficientKinException()), openOrder);
+							externalOrderCallbacks
+								.onOrderFailed(ErrorUtil.getBlockchainException(new InsufficientKinException()),
+									openOrder);
 						}
 					});
 					return;
@@ -123,7 +126,7 @@ class CreateExternalOrderCall extends Thread {
 			switch (openOrder.getOfferType()) {
 				case SPEND:
 					final Throwable cause = exception.getCause();
-					final String reason =  cause != null ? cause.getMessage() : exception.getMessage();
+					final String reason = cause != null ? cause.getMessage() : exception.getMessage();
 					eventLogger.send(SpendOrderCreationFailed.create(reason, openOrder.getOfferId(), true));
 					break;
 				case EARN:
@@ -176,8 +179,13 @@ class CreateExternalOrderCall extends Thread {
 				runOnMainThread(new Runnable() {
 					@Override
 					public void run() {
-						externalOrderCallbacks
-							.onOrderConfirmed(((JWTBodyPaymentConfirmationResult) order.getResult()).getJwt(), order);
+						if (order.getStatus() == Status.FAILED) {
+							onOrderFailed(ErrorUtil.fromFailedOrder(order));
+						} else {
+							externalOrderCallbacks
+								.onOrderConfirmed(((JWTBodyPaymentConfirmationResult) order.getResult()).getJwt(),
+									order);
+						}
 					}
 				});
 

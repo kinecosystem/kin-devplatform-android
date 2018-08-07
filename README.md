@@ -523,6 +523,88 @@ Once the user has completed the task associated with the Earn offer, you request
     }
     ```
 
+<a name="CreateCustomPayToUserOffer"></a>
+### Creating a Custom Pay To User Offer ###
+
+A custom pay to user offer allows your users to unlock unique spend opportunities that you define within your app offered by other users. 
+(Custom offers are created by your app, as opposed to [built-in offers displayed in the Kin Marketplace offer wall](#AddingToMP).) 
+Your app displays the offer, request user approval, and then [requests payment using the Kin purchase API](#purcasheRequest).
+
+*To create a custom Pay To User offer:*
+
+### Requesting purchase Payment for a Custom Pay To User Offer ###
+
+*To request payment for a custom Pay To User offer:*
+
+1.	Create a JWT that represents a Pay To User offer signed by you, using the header and payload templates below. (See [Building the JWT Token](#BuildJWT) for more details about JWT structure).
+
+    **JWT header:**
+```
+   {
+        "alg": "ES256", // Hash function
+        "typ": "JWT",
+        "kid": string" // identifier of the keypair that was used to sign the JWT. identifiers and public keys will be provided by signer authority. This enables using multiple private/public key pairs (a list of public keys and their ids need to be provided by signer authority to verifier in advanced)
+    }
+```
+
+    **JWT payload:**
+```js
+{
+    // common fields
+    iat: number; // issued at - seconds from epoch
+    iss: string; // issuer - request origin 'app-id' provided by Ecosystem
+    exp: number; // expiration
+    sub: string; // subject - "pay_to_user"
+
+    offer: {
+        id: string; // offer id - id is decided by kik
+        amount: number; // amount of kin for this offer - price
+    },
+    sender: {
+        user_id: string; // optional: user_id who will perform the order
+        title: string; // offer title - appears in order history
+        description: string; // offer description - appears in order history
+    },
+    recipient: {
+        user_id: string; // user_id who will receive the order
+        title: string; // offer title - appears in order history
+        description: string; // offer description - appears in order history
+    }
+}
+```
+
+2.	Call ```Kin.payToUser(…)```, while passing the JWT you built and a callback function that will receive purchase confirmation.
+
+
+> **NOTES:** 
+> * The following snippet is taken from the SDK Sample App, in which the JWT is created and signed by the Android client side for presentation purposes only. Do not use this method in production! In production, the JWT must be signed by the server, with a secure private key. 
+> * See [BlockchainException](ADDLINK) and [ServiceException](ADDLINK) for possible errors.
+
+    ```java
+    try {
+      Kin.payToUser(offerJwt, new KinCallback<OrderConfirmation>() {
+      @Override public void onResponse(OrderConfirmation orderConfirmation) {
+                    // OrderConfirmation will be called once Ecosystem received the payment transaction from user.
+                    // OrderConfirmation can be kept on digital service side as a receipt proving user received his Kin.
+                    
+                    // Send confirmation JWT back to the server in order prove that the user
+                    // completed the blockchain transaction and purchase can be unlocked for this user.
+                    System.out.println("Succeed to create native pay to user.\n jwtConfirmation: " + orderConfirmation.getJwtConfirmation());
+                }
+                    
+                @Override
+                public void onFailure(KinEcosystemException exception) {
+                    System.out.println("Failed - " + error.getMessage());
+                }
+            });
+        } catch (ClientException e) {
+            e.printStackTrace();
+      }
+    ```
+
+3.	Complete the pay to user offer after you receive confirmation from the Kin Server that the funds were transferred successfully.
+
+
 ## License ##
 
 The ```kin-ecosystem-android-sdk``` library is licensed under the MIT license.

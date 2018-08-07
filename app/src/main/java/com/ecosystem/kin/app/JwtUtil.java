@@ -30,6 +30,7 @@ public class JwtUtil {
     private static final String JWT_SUBJECT_REGISTER = "register";
     private static final String JWT_SUBJECT_SPEND = "spend";
     private static final String JWT_SUBJECT_EARN = "earn";
+    private static final String JWT_SUBJECT_PAY_TO_USER = "pay_to_user";
 
     private static final String JWT_KEY_USER_ID = "user_id";
 
@@ -39,16 +40,16 @@ public class JwtUtil {
     private static final String JWT = "jwt";
 
 
-    public static String generateSignInExampleJWT(String appID, String userId) {
-        String jwt = getBasicJWT(appID)
+	public static String generateSignInExampleJWT(@NonNull String appID, @NonNull String userId) {
+		String jwt = getBasicJWT(appID)
             .setSubject(JWT_SUBJECT_REGISTER)
             .claim(JWT_KEY_USER_ID, userId)
             .signWith(SignatureAlgorithm.RS512, getRS512PrivateKey()).compact();
         return jwt;
     }
 
-    public static String generateSpendOfferExampleJWT(String appID, String userID) {
-        String jwt = getBasicJWT(appID)
+	public static String generateSpendOfferExampleJWT(@NonNull String appID, @NonNull String userID) {
+		String jwt = getBasicJWT(appID)
             .setSubject(JWT_SUBJECT_SPEND)
             .claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
             .claim(JWT_CLAIM_OBJECT_SENDER_PART, new JWTSenderPart(userID, "Bought a sticker", "Lion sticker"))
@@ -56,12 +57,24 @@ public class JwtUtil {
         return jwt;
     }
 
-    public static String generateEarnOfferExampleJWT(String appID, String userID) {
-        String jwt = getBasicJWT(appID)
+	public static String generateEarnOfferExampleJWT(@NonNull String appID, @NonNull String userID) {
+		String jwt = getBasicJWT(appID)
             .setSubject(JWT_SUBJECT_EARN)
             .claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
             .claim(JWT_CLAIM_OBJECT_RECIPIENT_PART, new JWTRecipientPart(userID, "Received Kin", "upload profile picture"))
             .signWith(SignatureAlgorithm.RS512, getRS512PrivateKey()).compact();
+        return jwt;
+    }
+
+	public static String generatePayToUserOfferExampleJWT(@NonNull String appID, @NonNull String userID,
+		@NonNull String recipientUserID) {
+		String jwt = getBasicJWT(appID)
+            .setSubject(JWT_SUBJECT_PAY_TO_USER)
+            .claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
+            .claim(JWT_CLAIM_OBJECT_SENDER_PART, new JWTSenderPart(userID, "Uploaded Profile Picture", "Lion sticker"))
+			.claim(JWT_CLAIM_OBJECT_RECIPIENT_PART,
+				new JWTRecipientPart(recipientUserID, "Received Kin", "Upload profile picture"))
+			.signWith(SignatureAlgorithm.RS512, getRS512PrivateKey()).compact();
         return jwt;
     }
 

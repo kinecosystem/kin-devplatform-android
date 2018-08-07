@@ -28,6 +28,7 @@ import com.kin.ecosystem.data.model.Payment;
 import com.kin.ecosystem.exception.BlockchainException;
 import com.kin.ecosystem.exception.DataNotAvailableException;
 import com.kin.ecosystem.exception.KinEcosystemException;
+import com.kin.ecosystem.exception.ServiceException;
 import com.kin.ecosystem.network.model.BlockchainData;
 import com.kin.ecosystem.network.model.JWTBodyPaymentConfirmationResult;
 import com.kin.ecosystem.network.model.Offer;
@@ -455,22 +456,21 @@ public class OrderRepositoryTest extends BaseTestClass {
 
 	}
 
-	@Test
-	public void purchase_Failed_Cant_Create_Order() throws Exception {
+	private void testPurchaseFailureWithAPIException(final Exception expectedException) throws Exception {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-		when(remote.createExternalOrderSync(anyString())).thenThrow(getApiException());
+		when(remote.createExternalOrderSync(anyString())).thenThrow(expectedException);
 
 		orderRepository.purchase("generatedOfferJWT", new KinCallback<OrderConfirmation>() {
 			@Override
 			public void onResponse(OrderConfirmation confirmationJwt) {
-
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
 				countDownLatch.countDown();
 				assertNotNull(exception);
+				assertEquals(expectedException, exception.getCause());
 				assertNull(orderRepository.getOpenOrder().getValue());
 			}
 		});
@@ -481,6 +481,23 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertNull(orderRepository.getOrderWatcher().getValue());
 
 		countDownLatch.await(500, TimeUnit.MICROSECONDS);
+	}
+
+	@Test
+	public void purchase_Failed_Cant_Create_Order() throws Exception {
+		testPurchaseFailureWithAPIException(getApiException());
+	}
+
+	@Test
+	public void purchase_Failed_User_Not_Found() throws Exception {
+		testPurchaseFailureWithAPIException(new ApiException(404, "some message", null,
+			new Error("user not found", "user is not found", ServiceException.USER_NOT_FOUND_ERROR)));
+	}
+
+	@Test
+	public void purchase_Failed_User_Did_Not_Found_Accept_TOS() throws Exception {
+		testPurchaseFailureWithAPIException(new ApiException(401, "some message", null,
+			new Error("user did not accept TOS", "user did not accept TOS", ServiceException.USER_NOT_ACTIVATED)));
 	}
 
 	@Test
