@@ -1,6 +1,6 @@
 package kin.devplatform.marketplace.view;
 
-import static kin.devplatform.core.util.DeviceUtils.DensityDpi.XXHDPI;
+import static kin.devplatform.core.util.DensityDpi.XXHDPI;
 import static kin.devplatform.core.util.StringUtil.getAmountFormatted;
 
 import android.content.Context;

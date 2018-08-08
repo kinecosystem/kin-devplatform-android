@@ -3,31 +3,19 @@ package kin.devplatform.core.util;
 import static android.util.DisplayMetrics.DENSITY_HIGH;
 import static android.util.DisplayMetrics.DENSITY_XHIGH;
 import static android.util.DisplayMetrics.DENSITY_XXHIGH;
-import static kin.devplatform.core.util.DeviceUtils.DensityDpi.HDPI;
-import static kin.devplatform.core.util.DeviceUtils.DensityDpi.XHDPI;
-import static kin.devplatform.core.util.DeviceUtils.DensityDpi.XXHDPI;
+import static kin.devplatform.core.util.DensityDpi.HDPI;
+import static kin.devplatform.core.util.DensityDpi.XHDPI;
+import static kin.devplatform.core.util.DensityDpi.XXHDPI;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.support.annotation.IntDef;
 import android.util.DisplayMetrics;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 public class DeviceUtils {
 
-
-	@IntDef({HDPI, XHDPI, XXHDPI})
-	@Retention(RetentionPolicy.SOURCE)
-	public @interface DensityDpi {
-
-		int HDPI = 0x00000240;
-		int XHDPI = 0x00000320;
-		int XXHDPI = 0x00000480;
-	}
-
 	private static @DensityDpi
 	int densityDpi = HDPI;
+
 	private static int screenHeight;
 	private static int screenWidth;
 
