@@ -11,10 +11,10 @@ public class Environment implements KinEnvironment {
 		"https://kin-bi.appspot.com/eco_");
 
 	private static final Environment PLAYGROUND = new Environment(
-		"https://stellar.kinplayground.com",
-		"ecosystem playground",
-		"GDVIWJ2NYBCPHMGTIBO5BBZCP5QCYC4YT4VINTV5PZOSE7BAJCH5JI64",
-		"https://api.kinplayground.com/v1",
+		"https://horizon-playground.kininfrastructure.com/",
+		"Kin Playground Network ; June 2018",
+		"GBC3SG6NGTSZ2OMH3FFGB7UVRQWILW367U4GSOOF4TFSZONV42UJXUH7",
+		"https://api-playground.kininfrastructure.com/v1",
 		"https://s3.amazonaws.com/assets.kinplayground.com/web-offers/cards-based/index.html",
 		"https://kin-bi.appspot.com/eco_play_");
 
