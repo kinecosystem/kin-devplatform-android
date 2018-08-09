@@ -41,7 +41,8 @@ public class Offer {
 	public enum OfferType {
 
 		EARN("earn"),
-		SPEND("spend");
+		SPEND("spend"),
+		PAY_TO_USER("pay_to_user");
 
 		private String value;
 

@@ -51,7 +51,7 @@ class CreateExternalOrderCall extends Thread {
 			openOrder = remote.createExternalOrderSync(orderJwt);
 			sendOrderCreationReceivedEvent();
 
-			if (openOrder.getOfferType() == OfferType.SPEND) {
+			if (openOrder.getOfferType() == OfferType.SPEND || openOrder.getOfferType() == OfferType.PAY_TO_USER) {
 				Balance balance = blockchainSource.getBalance();
 				if (balance.getAmount().intValue() < openOrder.getAmount()) {
 					remote.cancelOrderSync(openOrder.getId());
@@ -132,6 +132,9 @@ class CreateExternalOrderCall extends Thread {
 				case EARN:
 					//TODO add event
 					// We don't have event correctly
+				case PAY_TO_USER:
+					//TODO add event
+					// We don't have event correctly
 					break;
 			}
 
@@ -146,6 +149,7 @@ class CreateExternalOrderCall extends Thread {
 						.create(openOrder.getOfferId(), openOrder.getId(), true));
 					break;
 				case EARN:
+				case PAY_TO_USER:
 					break;
 			}
 		}
