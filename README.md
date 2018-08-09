@@ -1,12 +1,12 @@
-# Kin Ecosystem Android SDK #
+# Kin Android SDK #
 
-## What is the Kin Ecosystem SDK? ##
+## What is the Kin SDK? ##
 
-The Kin Ecosystem SDK allows you to quickly and easily integrate with the Kin platform. This enables you to provide your users with new opportunities to earn and spend the Kin digital currency from inside your app or from the Kin Marketplace offer wall. For each user, the SDK will create wallet and an account on Kin blockchain. By calling the appropriate SDK functions, your application can performs earn and spend transactions. Your users can also view their account balance and their transaction history.
+The Kin SDK allows you to quickly and easily integrate with the Kin platform. This enables you to provide your users with new opportunities to earn and spend the Kin digital currency from inside your app or from the Kin Marketplace offer wall. For each user, the SDK will create wallet and an account on Kin blockchain. By calling the appropriate SDK functions, your application can performs earn and spend transactions. Your users can also view their account balance and their transaction history.
 
 ## Playground and Production Environments ##
 
-The Kin Ecosystem provides two working environments:
+Kin provides two working environments:
 
 - **Playground** – a staging and testing environment using test servers and a blockchain test network.
 - **Production** – uses production servers and the main blockchain network.
@@ -21,7 +21,7 @@ When your app calls ```Kin.start(…)```, you specify which environment to work 
 
 ## Obtaining Authentication Credentials ##
 
-To access the Kin Ecosystem, you’ll need to obtain authentication credentials, which you then use to register your users.
+To access the Kin SDK, you’ll need to obtain authentication credentials, which you then use to register your users.
 
 There are 2 types of authentication:
 
@@ -82,7 +82,7 @@ This is the payload structure:
 
 ## Setting Up the Sample App ##
 
-The Kin Ecosystem SDK Sample App demonstrates how to perform common workflows such as creating a user account and creating Spend and Earn offers. You can build the Sample App from the ```app``` module in the Kin Ecosystem SDK Git repository. We recommend building and running the Sample App as a good way to get started with the Kin Ecosystem SDK and familiarize yourself with its functions.
+Kin SDK Sample App demonstrates how to perform common workflows such as creating a user account and creating Spend and Earn offers. You can build the Sample App from the ```sample-app``` module in the Kin SDK Git repository. We recommend building and running the Sample App as a good way to get started with the Kin SDK and familiarize yourself with its functions.
 
 >**NOTE:** The Sample App is for demonstration only, and should not be used for any other purpose.
 
@@ -125,14 +125,15 @@ The Sample App Gradle build loads the ```credential.properties``` setting and us
 ```
  dependencies {
      ...
-     implementation 'com.github.kinfoundation:kin-ecosystem-android-sdk:0.0.11
+     implementation 'com.github.kinfoundation:kin-devplatform-android-sdk:<latest release>'
 
  }
 ```
+latest version can be found in [github releases](https://github.com/kinecosystem/kin-devplatform-android/releases).
 
 ## Common Workflows ##
 
-The following sections show how to implement some common workflows using the Kin Ecosystem SDK.
+The following sections show how to implement some common workflows using the Kin SDK.
 
 <a name="CreateAccount"></a>
 ### Creating or Accessing a User’s Kin Account ###
@@ -301,7 +302,7 @@ A custom Spend offer allows your users to unlock unique spend opportunities that
     try {
       Kin.purchase(offerJwt, new KinCallback<OrderConfirmation>() {
       @Override public void onResponse(OrderConfirmation orderConfirmation) {
-      // OrderConfirmation will be called once Ecosystem received the payment transaction from user.
+      // OrderConfirmation will be called once Kin received the payment transaction from user.
       // OrderConfirmation can be kept on digital service side as a receipt proving user received his Kin.
                     
                     // Send confirmation JWT back to the server in order prove that the user
@@ -324,7 +325,7 @@ A custom Spend offer allows your users to unlock unique spend opportunities that
 <a name="AddingToMP"></a>
 ### Adding a Custom Spend Offer to the Kin Marketplace Offer Wall ###
 
-The Kin Marketplace offer wall displays built-in offers, which are served by the Kin Ecosystem Server. Their purpose is to provide users with opportunities to earn initial Kin funding, which they can later spend on spend offers provided by hosting apps.
+The Kin Marketplace offer wall displays built-in offers, which are served by the Kin Server. Their purpose is to provide users with opportunities to earn initial Kin funding, which they can later spend on spend offers provided by hosting apps.
 
 You can also choose to display a banner for your custom offer in the Kin Marketplace offer wall. This serves as additional "real estate" in which to let the user know about custom offers within your app. When the user clicks on your custom Spend offer in the Kin Marketplace, your app is notified, and then it continues to manage the offer activity in its own UX flow.
 
@@ -407,7 +408,7 @@ try {
 <a name="DisplayMPWindow"></a>
 ### Displaying the Kin Marketplace Offer Wall ###
 
-Optionally, your app can launch the Kin Marketplace offer wall. It displays Earn and Spend offers, which can be added to it by your app or by the Kin Ecosystem Server. When a user selects one of these offers, the Kin Marketplace notifies the app that created the offer. The app can then launch the Earn or Spend activity for the user to complete. 
+Optionally, your app can launch the Kin Marketplace offer wall. It displays Earn and Spend offers, which can be added to it by your app or by the Kin Server. When a user selects one of these offers, the Kin Marketplace notifies the app that created the offer. The app can then launch the Earn or Spend activity for the user to complete. 
 
 You may choose to add your custom Earn and Spend offers to the Kin Marketplace so that there is a convenient, visible place where the user can access all offers. Some offers displayed in-app might require that the user choose to navigate to a specific page, and therefore might not be so readily visible.
 
@@ -456,7 +457,7 @@ try {
 
 ### Requesting Payment for a Custom Earn Offer ###
 
-A custom Earn offer allows your users to earn Kin as a reward for performing tasks you want to incentivize, such as setting a profile picture or rating your app. (Custom offers are created by your app, as opposed to offers created by other platforms such as the Kin Ecosystem Server.)
+A custom Earn offer allows your users to earn Kin as a reward for performing tasks you want to incentivize, such as setting a profile picture or rating your app. (Custom offers are created by your app, as opposed to offers created by other platforms such as the Kin Server.)
 
 >**NOTE:** For now, custom Earn offers must be displayed and managed by your app, and cannot be added to the Kin Marketplace (unlike custom Spend offers).
 
@@ -496,7 +497,7 @@ Once the user has completed the task associated with the Earn offer, you request
        }
     }
     ```
-2.	Call ```Kin.requestPayment``` (see code example below). The Ecosystem Server credits the user account (assuming the app’s account has sufficient funds).
+2.	Call ```Kin.requestPayment``` (see code example below). Kin Server credits the user account (assuming the app’s account has sufficient funds).
 
     >**NOTES:** 
     >* The following snippet is taken from the SDK Sample App, in which the JWT is created and signed by the Android client side for presentation purposes only. Do not use this method in production! In production, the JWT must be signed by the server, with a secure private key. 
@@ -507,7 +508,7 @@ Once the user has completed the task associated with the Earn offer, you request
         Kin.requestPayment(offerJwt, new KinCallback<OrderConfirmation>() {
             @Override
             public void onResponse(OrderConfirmation orderConfirmation) {
-                // OrderConfirmation will be called once Ecosystem payment transaction to user completed successfully.
+                // OrderConfirmation will be called once Kin payment transaction to user completed successfully.
                 // OrderConfirmation can be kept on digital service side as a receipt proving user received his Kin.
                 System.out.println("Succeed to create native earn.\n jwtConfirmation: " + orderConfirmation.getJwtConfirmation());
             }
@@ -552,7 +553,7 @@ Your app displays the offer, request user approval, and then [requests payment u
 {
     // common fields
     iat: number; // issued at - seconds from epoch
-    iss: string; // issuer - request origin 'app-id' provided by Ecosystem
+    iss: string; // issuer - request origin 'app-id' provided by Kin
     exp: number; // expiration
     sub: string; // subject - "pay_to_user"
 
@@ -584,7 +585,7 @@ Your app displays the offer, request user approval, and then [requests payment u
     try {
       Kin.payToUser(offerJwt, new KinCallback<OrderConfirmation>() {
       @Override public void onResponse(OrderConfirmation orderConfirmation) {
-                    // OrderConfirmation will be called once Ecosystem received the payment transaction from user.
+                    // OrderConfirmation will be called once Kin received the payment transaction from user.
                     // OrderConfirmation can be kept on digital service side as a receipt proving user received his Kin.
                     
                     // Send confirmation JWT back to the server in order prove that the user
@@ -607,5 +608,5 @@ Your app displays the offer, request user approval, and then [requests payment u
 
 ## License ##
 
-The ```kin-ecosystem-android-sdk``` library is licensed under the MIT license.
+The ```kin-devplatform-android``` library is licensed under the MIT license.
 
