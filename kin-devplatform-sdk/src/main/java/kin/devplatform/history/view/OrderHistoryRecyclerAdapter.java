@@ -18,8 +18,8 @@ import android.widget.ImageView;
 import kin.devplatform.R;
 import kin.devplatform.base.AbstractBaseViewHolder;
 import kin.devplatform.base.BaseRecyclerAdapter;
+import kin.devplatform.data.blockchain.BlockchainSourceImpl;
 import kin.devplatform.history.view.OrderHistoryRecyclerAdapter.ViewHolder;
-import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
 
@@ -108,14 +108,43 @@ public class OrderHistoryRecyclerAdapter extends BaseRecyclerAdapter<Order, View
 		private void setAmountAndIcon(Order item) {
 			if (item.getStatus() == Status.COMPLETED) {
 				String amount = getAmountFormatted(item.getAmount());
-				if (item.getOfferType() == OfferType.SPEND) {
-					setImageResource(R.id.amount_ico, R.drawable.kinecosystem_invoice);
-					setText(R.id.amount_text, MINUS_SIGN + amount);
+				if (amITheRecipientOfOrder(item)) {
+					setEarnAmount(amount);
 				} else {
-					setImageResource(R.id.amount_ico, R.drawable.kinecosystem_coins);
-					setText(R.id.amount_text, PLUS_SIGN + amount);
+					setSpendAmount(amount);
 				}
+			} else {
+				clearAmount();
 			}
+		}
+
+		private boolean amITheRecipientOfOrder(Order item) {
+			switch (item.getOfferType()) {
+				case EARN:
+					return true;
+				case SPEND:
+					return false;
+				case PAY_TO_USER:
+					String publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
+					return item.getBlockchainData().getRecipientAddress().equals(publicAddress);
+			}
+			return false;
+		}
+
+
+		private void setEarnAmount(String amount) {
+			setImageResource(R.id.amount_ico, R.drawable.kinecosystem_coins);
+			setText(R.id.amount_text, PLUS_SIGN + amount);
+		}
+
+		private void setSpendAmount(String amount) {
+			setImageResource(R.id.amount_ico, R.drawable.kinecosystem_invoice);
+			setText(R.id.amount_text, MINUS_SIGN + amount);
+		}
+
+		private void clearAmount() {
+			setImageResource(R.id.amount_ico, 0);
+			setText(R.id.amount_text, null);
 		}
 
 		private void setSubtitle(Order item) {
@@ -138,15 +167,10 @@ public class OrderHistoryRecyclerAdapter extends BaseRecyclerAdapter<Order, View
 			setText(R.id.action_text, actionText);
 			switch (item.getStatus()) {
 				case COMPLETED:
-					if (item.getOfferType() == OfferType.SPEND) {
-						Spannable titleSpannable = new SpannableString(brand + delimiter);
-						titleSpannable.setSpan(new ForegroundColorSpan(colorBlue),
-							0, brand.length(),
-							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						setSpannableText(R.id.title, titleSpannable);
-						setTextColor(R.id.action_text, colorBlue);
+					if (amITheRecipientOfOrder(item)) {
+						setEarnText(brand);
 					} else {
-						setText(R.id.title, brand);
+						setSpendText(brand, delimiter);
 					}
 					break;
 				case FAILED:
@@ -157,6 +181,19 @@ public class OrderHistoryRecyclerAdapter extends BaseRecyclerAdapter<Order, View
 				default:
 					break;
 			}
+		}
+
+		private void setEarnText(String brand) {
+			setText(R.id.title, brand);
+		}
+
+		private void setSpendText(String brand, String delimiter) {
+			Spannable titleSpannable = new SpannableString(brand + delimiter);
+			titleSpannable.setSpan(new ForegroundColorSpan(colorBlue),
+				0, brand.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			setSpannableText(R.id.title, titleSpannable);
+			setTextColor(R.id.action_text, colorBlue);
 		}
 
 		private boolean isFailed(Status status) {
@@ -186,23 +223,28 @@ public class OrderHistoryRecyclerAdapter extends BaseRecyclerAdapter<Order, View
 			ImageView view = getView(R.id.dot);
 			LayerDrawable layerDrawable = ((LayerDrawable) view.getDrawable());
 			Drawable drawable = layerDrawable.getDrawable(1);
-			// Timeline dot color
-			if (item.getOfferType() == OfferType.SPEND) {
-				switch (item.getStatus()) {
-					case COMPLETED:
-						drawable.setColorFilter(colorBlue, PorterDuff.Mode.SRC_ATOP);
-						break;
-					case FAILED:
-						drawable.setColorFilter(colorRed, PorterDuff.Mode.SRC_ATOP);
-						break;
-					default:
-						break;
-				}
-			} else {
-				drawable.setColorFilter(colorGrayLight, PorterDuff.Mode.SRC_ATOP);
-			}
+			setTimelineDotColor(item, drawable);
+			setTimeLinePathSize();
+		}
 
-			// Timeline path size
+		private void setTimelineDotColor(Order item, Drawable drawable) {
+			switch (item.getStatus()) {
+				case COMPLETED:
+					if (!amITheRecipientOfOrder(item)) {
+						drawable.setColorFilter(colorBlue, PorterDuff.Mode.SRC_ATOP);
+					} else {
+						drawable.setColorFilter(colorGrayLight, PorterDuff.Mode.SRC_ATOP);
+					}
+					break;
+				case FAILED:
+					drawable.setColorFilter(colorRed, PorterDuff.Mode.SRC_ATOP);
+					break;
+				default:
+					break;
+			}
+		}
+
+		private void setTimeLinePathSize() {
 			int itemIndex = getLayoutPosition();
 			int lastIndex = getDataCount() - 1;
 			if (itemIndex == lastIndex) {
