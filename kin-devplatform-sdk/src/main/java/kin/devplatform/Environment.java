@@ -2,21 +2,13 @@ package kin.devplatform;
 
 public class Environment implements KinEnvironment {
 
-	private static final Environment PRODUCTION = new Environment(
-		"https://horizon-kin-ecosystem.kininfrastructure.com/",
-		"Public Global Kin Ecosystem Network ; June 2018",
-		"GDF42M3IPERQCBLWFEZKQRK77JQ65SCKTU3CW36HZVCX7XX5A5QXZIVK",
-		"https://api.kinmarketplace.com/v1",
-		"https://cdn.kinmarketplace.com/",
-		"https://kin-bi.appspot.com/eco_");
-
 	private static final Environment PLAYGROUND = new Environment(
 		"https://horizon-playground.kininfrastructure.com/",
 		"Kin Playground Network ; June 2018",
 		"GBC3SG6NGTSZ2OMH3FFGB7UVRQWILW367U4GSOOF4TFSZONV42UJXUH7",
 		"https://api.developers.kinecosystem.com/v1",
 		"https://s3.amazonaws.com/assets.kinplayground.com/web-offers/cards-based/index.html",
-		"https://kin-bi.appspot.com/eco_play_");
+		"https://kin-bi.appspot.com/devp_play_");
 
 	private final String blockchainNetworkUrl;
 	private final String blockchainPassphrase;
@@ -66,7 +58,7 @@ public class Environment implements KinEnvironment {
 	}
 
 	public static KinEnvironment getProduction() {
-		return PRODUCTION;
+		return null;
 	}
 
 	public static KinEnvironment getPlayground() {
