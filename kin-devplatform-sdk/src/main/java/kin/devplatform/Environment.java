@@ -57,10 +57,6 @@ public class Environment implements KinEnvironment {
 		return biUrl;
 	}
 
-	public static KinEnvironment getProduction() {
-		return null;
-	}
-
 	public static KinEnvironment getPlayground() {
 		return PLAYGROUND;
 	}
