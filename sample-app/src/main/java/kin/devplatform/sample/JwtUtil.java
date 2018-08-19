@@ -9,17 +9,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Date;
 import java.util.Random;
 
 public class JwtUtil {
-
-	private static final String ALGORITHM_RSA = "RSA";
-	private static final String SECURITY_PROVIDER_BC = "BC";
 
 	private static final long DAY_IN_MILLISECONDS = 1000 * 60 * 60 * 24;
 
@@ -39,12 +36,12 @@ public class JwtUtil {
 
 	private static final String JWT = "jwt";
 
-
 	public static String generateSignInExampleJWT(@NonNull String appID, @NonNull String userId) {
+
 		String jwt = getBasicJWT(appID)
 			.setSubject(JWT_SUBJECT_REGISTER)
 			.claim(JWT_KEY_USER_ID, userId)
-			.signWith(SignatureAlgorithm.RS512, getRS512PrivateKey()).compact();
+			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
 		return jwt;
 	}
 
@@ -53,7 +50,7 @@ public class JwtUtil {
 			.setSubject(JWT_SUBJECT_SPEND)
 			.claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
 			.claim(JWT_CLAIM_OBJECT_SENDER_PART, new JWTSenderPart(userID, "Bought a sticker", "Lion sticker"))
-			.signWith(SignatureAlgorithm.RS512, getRS512PrivateKey()).compact();
+			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
 		return jwt;
 	}
 
@@ -63,7 +60,7 @@ public class JwtUtil {
 			.claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
 			.claim(JWT_CLAIM_OBJECT_RECIPIENT_PART,
 				new JWTRecipientPart(userID, "Received Kin", "upload profile picture"))
-			.signWith(SignatureAlgorithm.RS512, getRS512PrivateKey()).compact();
+			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
 		return jwt;
 	}
 
@@ -75,7 +72,7 @@ public class JwtUtil {
 			.claim(JWT_CLAIM_OBJECT_SENDER_PART, new JWTSenderPart(userID, "Uploaded Profile Picture", "Lion sticker"))
 			.claim(JWT_CLAIM_OBJECT_RECIPIENT_PART,
 				new JWTRecipientPart(recipientUserID, "Received Kin", "Upload profile picture"))
-			.signWith(SignatureAlgorithm.RS512, getRS512PrivateKey()).compact();
+			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
 		return jwt;
 	}
 
@@ -93,25 +90,16 @@ public class JwtUtil {
 	}
 
 	@Nullable
-	private static PrivateKey getRS512PrivateKey() {
-		PrivateKey privateKey = null;
-		KeyFactory keyFactory;
-
-		byte[] bytes = Base64.decode(getPrivateKeyForJWT(), Base64.NO_WRAP);
+	private static PrivateKey getES256PrivateKey() {
 		try {
-			keyFactory = KeyFactory.getInstance(ALGORITHM_RSA, SECURITY_PROVIDER_BC);
-			privateKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-
-		} catch (InvalidKeySpecException e) {
-			e.printStackTrace();
-
-		} catch (NoSuchProviderException e) {
+			KeyFactory kf = KeyFactory.getInstance("EC");
+			byte[] bytes = Base64.decode(getPrivateKeyForJWT(), Base64.NO_WRAP);
+			EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+			return kf.generatePrivate(keySpec);
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			e.printStackTrace();
 		}
-		return privateKey;
+		return null;
 	}
 
 	private static JWTOfferPart createOfferPartExampleObject() {

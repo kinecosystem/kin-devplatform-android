@@ -83,8 +83,8 @@ def loadCredential() {
     def crashlytics_demo_api_key = "4b7647b5860d29039e16910e281fcf8d9cad21bb"
     def default_app_id = '"test"'
     def default_api_key = '"AyINT44OAKagkSav2vzMz"'
-    def default_rs512_jwt_private_key = '"MIICXgIBAAKBgQDW3g5Acwjxdyh+OLi8NH9jO4KEOruXozCbhsXL+CYGIG1sYykk/P1nPWiy7rlVHWy5x9B2pYtKb+vm/DaZ5gpTqzlb9D964yKRvWlCLCOjyLN/zh1/xHoieQ530kveTYY+tZHz1QzXnIOlxF6HjscU8PtDWw85CKngzgVA9oS4KwIDAQABAoGBAJwq/u7G7VwbQDolXdekzGXCbgVPbuMyv/R6Sy8JqBFR5lYd6Fyy6DbuQjezHM8JOOn6mcByZ7/tgub6r3DB6wQ6ALmvmVztCt9BH7eP1X/VFQavqYhmrXBfTBVhGmK/qDvBzZWIQENuaSspBzxp7Ujl0CuevyfbSgb/s8FlEyxhAkEA7J2ecPHcoeNMZc388CiLZ94CowSi6il3lkODK9/TXtx/LuW3iUhvSHp90tcMfI7sWGuXUGYqwvu+ij20d6en2wJBAOh4UxIXNcYcAfaLaCYji4GN4D9fp3/vK3hvk3f+X3uFgDRS8sp0Su0xYsrY7CMwJBCVH++qdIosKZ5RgSErCfECQQCZyvUhykKywo90mEewPVom/8lM9gWCF8PP2j/W85tqS/0qmUsLIxaZ0GwZ74cBKtB5xCzMqCthIsm9BtBW+ZUDAkBjbiuhvjmqzYntaL0YKvXdaNB0arZa2vJN5fM+TJeMXpJyTtQ30bvGbewidNuzRUD3ssDhIpgMDU2TwKqphB4RAkEAp+a7ra80Jlb+r1ab9rkO0LHfHng2qmRTDq1i/PQ7OVob/qwUkYPn75DOg2qONFBmEUgcQS/MQ9SE13mdszMvzw=="'
-    def default_rs512_jwt_private_key_id = '"rs512_0"'
+    def default_rs512_jwt_private_key = '"MIGEAgEAMBAGByqGSM49AgEGBSuBBAAKBG0wawIBAQQgSu7aMsjm065XMI+d8HuIt6pg8vP6kXzEIUWWNUEJnQmhRANCAATmmkRSAHNFClxx/1quX+3Gjy3qEOkY+crVLFVOlp2OuUKLhiYozjFUTPJhKw5Ae9YDojvSBPQPJXFKTrjOxjQw"'
+    def default_rs512_jwt_private_key_id = '"es256_0"'
     ant.propertyfile(file: "credential.properties") {
         entry(key: "APP_ID", default: System.getenv('APP_ID') ?: default_app_id)
         entry(key: "API_KEY", default: System.getenv('API_KEY') ?: default_api_key)
