@@ -20,7 +20,7 @@ When your app calls ```Kin.start(…)```, you specify which environment to work 
 
 ## Setting Up the Sample App ##
 
-Kin SDK Sample App demonstrates how to perform common workflows such as creating a user account and creating Spend and Earn offers. You can build the Sample App from the `app` module in the Kin SDK [github repository]("https://github.com/kinecosystem/kin-devplatform-android").  
+Kin SDK Sample App demonstrates how to perform common workflows such as creating a user account and creating Spend and Earn offers. You can build the Sample App from the `app` module in the Kin SDK [github repository](https://github.com/kinecosystem/kin-devplatform-android).  
 We recommend building and running the Sample App as a good way to get started with the Kin SDK and familiarize yourself with its functions.
 
 >**NOTE:** The Sample App is for demonstration only, and should not be used for any other purpose.
@@ -68,7 +68,7 @@ Add the following lines to the app module's ```build.gradle``` file.
  }
 ```
 
-latest version can be found in [github releases]("https://github.com/kinecosystem/kin-devplatform-android/releases").
+latest version can be found in [github releases](https://github.com/kinecosystem/kin-devplatform-android/releases).
 
 ## Creating or Accessing a User’s Kin Account ###
 
@@ -98,7 +98,7 @@ apiKey - your secret apiKey as provided by Kin.
 
 #### JWT:
 
-Request a [registration JWT]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#register-payload-a-name-registerpayload") from your server, once the client received this token, you can now start the sdk using this token. (See [Authentication and JWT]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt.html") for more details about JWT Authentication )
+Request a [registration JWT](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#register-payload-a-name-registerpayload) from your server, once the client received this token, you can now start the sdk using this token. (See [Authentication and JWT](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt.html) for more details about JWT Authentication )
 
 ```java
 try {
@@ -190,8 +190,8 @@ Your app displays the offer, request user approval, and then performing the purc
 
 ### Purchase Payment
 
-1. Create a JWT that represents a [Spend offer JWT]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#spend-payload-a-name-spendpayload") signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service").  
-Once you have the JWT Service set up, perform a [Spend query]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service#spend-a-name-spend"),
+1. Create a JWT that represents a [Spend offer JWT]https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#spend-payload-a-name-spendpayload) signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service).  
+Once you have the JWT Service set up, perform a [Spend query](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service#spend-a-name-spend),
 the service will response with the generated signed JWT token.
 
 2. Call `purchase` method, while passing the JWT you built and a callback function that will receive purchase confirmation.
@@ -354,8 +354,8 @@ Once the user has completed the task associated with the Earn offer, you request
 
 ### Request A Payment
 
-1. Create a JWT that represents a [Earn offer JWT]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#earn-payload-a-name-earnpayload") signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service.html").  
-Once you have the JWT Service set up, perform a [Earn query]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service#earn-a-name-earn"),
+1. Create a JWT that represents a [Earn offer JWT](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#earn-payload-a-name-earnpayload) signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service.html).  
+Once you have the JWT Service set up, perform a [Earn query](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service#earn-a-name-earn),
 the service will response with the generated signed JWT token.
 
 2. Call `requestPayment` while passing the JWT you built and a callback function that will receive purchase confirmation.
@@ -393,8 +393,8 @@ Your app displays the offer, request user approval, and then performing the purc
 
 *To request payment for a custom Pay To User offer:*
 
-1. Create a JWT that represents a [Pay to User offer JWT]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#paytouser-payload-a-name-paytouserpayload") signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service.html").  
-Once you have the JWT Service set up, perform a [Pay To User query]("https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service#pay-to-user-a-name-paytouser"),
+1. Create a JWT that represents a [Pay to User offer JWT](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#paytouser-payload-a-name-paytouserpayload) signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service.html).  
+Once you have the JWT Service set up, perform a [Pay To User query](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service#pay-to-user-a-name-paytouser),
 the service will response with the generated signed JWT token.
 
 
