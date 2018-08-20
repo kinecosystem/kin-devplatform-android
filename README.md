@@ -125,7 +125,7 @@ The Sample App Gradle build loads the ```credential.properties``` setting and us
 ```
  dependencies {
      ...
-     implementation 'com.github.kinfoundation:kin-devplatform-android-sdk:<latest release>'
+     implementation 'com.github.kinecosystem.kin-devplatform-android:kin-devplatform-sdk:<latest release>'
 
  }
 ```
