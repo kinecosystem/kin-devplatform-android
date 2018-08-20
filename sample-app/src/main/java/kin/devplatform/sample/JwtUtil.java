@@ -20,20 +20,21 @@ public class JwtUtil {
 
 	private static final long DAY_IN_MILLISECONDS = 1000 * 60 * 60 * 24;
 
+	private static final String ALGORITHM_EC = "EC";
 	private static final String JWT_CLAIM_OBJECT_OFFER_PART = "offer";
 	private static final String JWT_CLAIM_OBJECT_SENDER_PART = "sender"; // Should be part of native SPEND jwt
-	private static final String JWT_CLAIM_OBJECT_RECIPIENT_PART = "recipient"; // Should be part of native EARN jwt
 
+	private static final String JWT_CLAIM_OBJECT_RECIPIENT_PART = "recipient"; // Should be part of native EARN jwt
 	private static final String JWT_SUBJECT_REGISTER = "register";
 	private static final String JWT_SUBJECT_SPEND = "spend";
 	private static final String JWT_SUBJECT_EARN = "earn";
+
 	private static final String JWT_SUBJECT_PAY_TO_USER = "pay_to_user";
 
 	private static final String JWT_KEY_USER_ID = "user_id";
-
 	private static final String JWT_HEADER_KID = "kid";
-	private static final String JWT_HEADER_TYP = "typ";
 
+	private static final String JWT_HEADER_TYP = "typ";
 	private static final String JWT = "jwt";
 
 	public static String generateSignInExampleJWT(@NonNull String appID, @NonNull String userId) {
@@ -92,7 +93,7 @@ public class JwtUtil {
 	@Nullable
 	private static PrivateKey getES256PrivateKey() {
 		try {
-			KeyFactory kf = KeyFactory.getInstance("EC");
+			KeyFactory kf = KeyFactory.getInstance(ALGORITHM_EC);
 			byte[] bytes = Base64.decode(getPrivateKeyForJWT(), Base64.NO_WRAP);
 			EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
 			return kf.generatePrivate(keySpec);
