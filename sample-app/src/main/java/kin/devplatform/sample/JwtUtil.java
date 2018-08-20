@@ -79,11 +79,11 @@ public class JwtUtil {
 
 	@NonNull
 	private static String getPrivateKeyForJWT() {
-		return BuildConfig.RS512_PRIVATE_KEY;
+		return BuildConfig.ES256_PRIVATE_KEY;
 	}
 
 	private static JwtBuilder getBasicJWT(String appID) {
-		return Jwts.builder().setHeaderParam(JWT_HEADER_KID, BuildConfig.RS512_PRIVATE_KEY_ID)
+		return Jwts.builder().setHeaderParam(JWT_HEADER_KID, BuildConfig.ES256_PRIVATE_KEY_ID)
 			.setHeaderParam(JWT_HEADER_TYP, JWT)
 			.setIssuedAt(new Date())
 			.setIssuer(appID)
