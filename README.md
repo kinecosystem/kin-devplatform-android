@@ -190,7 +190,7 @@ Your app displays the offer, request user approval, and then performing the purc
 
 ### Purchase Payment
 
-1. Create a JWT that represents a [Spend offer JWT]https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#spend-payload-a-name-spendpayload) signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service).  
+1. Create a JWT that represents a [Spend offer JWT](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt#spend-payload-a-name-spendpayload) signed by your application server. The fastest way for building JWT tokens is to use the [JWT Service](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service).  
 Once you have the JWT Service set up, perform a [Spend query](https://kinecosystem.github.io/kin-ecosystem-sdk-docs/docs/jwt-service#spend-a-name-spend),
 the service will response with the generated signed JWT token.
 
