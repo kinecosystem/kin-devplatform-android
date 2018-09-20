@@ -5,7 +5,7 @@
         <attr format="dimension" name="kinEcosystemDashLength"/>
         <attr format="dimension" name="kinEcosystemDashGap"/>
         <attr format="dimension" name="kinEcosystemDashThickness"/>
-        <attr format="enum" name="orientation">
+        <attr format="enum" name="kinEcosystemOrientation">
             <enum name="horizontal" value="0"/>
             <enum name="vertical" value="1"/>
         </attr>
