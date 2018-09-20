@@ -25,10 +25,10 @@ public class KinDashView extends View {
 			.obtainStyledAttributes(attrs, R.styleable.KinEcosystemDashView, 0, 0);
 
 		try {
-			dashGap = styledAttributes.getDimensionPixelSize(R.styleable.KinEcosystemDashView_dashGap, 5);
-			dashLength = styledAttributes.getDimensionPixelSize(R.styleable.KinEcosystemDashView_dashLength, 5);
-			dashThickness = styledAttributes.getDimensionPixelSize(R.styleable.KinEcosystemDashView_dashThickness, 3);
-			color = styledAttributes.getColor(R.styleable.KinEcosystemDashView_color, 0xff000000);
+			dashGap = styledAttributes.getDimensionPixelSize(R.styleable.KinEcosystemDashView_kinEcosystemDashGap, 5);
+			dashLength = styledAttributes.getDimensionPixelSize(R.styleable.KinEcosystemDashView_kinEcosystemDashLength, 5);
+			dashThickness = styledAttributes.getDimensionPixelSize(R.styleable.KinEcosystemDashView_kinEcosystemDashThickness, 3);
+			color = styledAttributes.getColor(R.styleable.KinEcosystemDashView_kinEcosystemColor, 0xff000000);
 			orientation = styledAttributes.getInt(R.styleable.KinEcosystemDashView_orientation, ORIENTATION_HORIZONTAL);
 		} finally {
 			styledAttributes.recycle();

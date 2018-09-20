@@ -81,7 +81,7 @@ public class BalanceView extends ConstraintLayout implements IBalanceView {
 			.obtainStyledAttributes(attrs, R.styleable.KinEcosystemBalanceView, 0, 0);
 		String subtitle;
 		try {
-			subtitle = styledAttributes.getString(R.styleable.KinEcosystemBalanceView_subTitle);
+			subtitle = styledAttributes.getString(R.styleable.KinEcosystemBalanceView_kinEcosystemSubTitle);
 
 		} finally {
 			styledAttributes.recycle();

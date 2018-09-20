@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="KinEcosystemDashView">
-        <attr format="color" name="color"/>
-        <attr format="dimension" name="dashLength"/>
-        <attr format="dimension" name="dashGap"/>
-        <attr format="dimension" name="dashThickness"/>
+        <attr format="color" name="kinEcosystemColor"/>
+        <attr format="dimension" name="kinEcosystemDashLength"/>
+        <attr format="dimension" name="kinEcosystemDashGap"/>
+        <attr format="dimension" name="kinEcosystemDashThickness"/>
         <attr format="enum" name="orientation">
             <enum name="horizontal" value="0"/>
             <enum name="vertical" value="1"/>
@@ -12,6 +12,6 @@
     </declare-styleable>
 
     <declare-styleable name="KinEcosystemBalanceView">
-        <attr format="string" name="subTitle"/>
+        <attr format="string" name="kinEcosystemSubTitle"/>
     </declare-styleable>
 </resources>
