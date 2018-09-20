@@ -9,10 +9,10 @@
         android:id="@+id/dash_line"
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        app:color="@color/kinecosystem_gray_light"
+        app:kinEcosystemColor="@color/kinecosystem_gray_light"
         app:layout_constraintEnd_toEndOf="@+id/dot"
         app:layout_constraintStart_toStartOf="@+id/dot"
-        app:orientation="vertical"/>
+        app:kinEcosystemOrientation="vertical"/>
 
     <ImageView
         android:id="@+id/dot"
