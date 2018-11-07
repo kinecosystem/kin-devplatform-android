@@ -2,6 +2,7 @@ package kin.devplatform.history.presenter;
 
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import kin.devplatform.KinCallback;
 import kin.devplatform.base.BasePresenter;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
+import kin.devplatform.bi.events.GeneralEcosystemSdkError;
 import kin.devplatform.bi.events.OrderHistoryItemTapped;
 import kin.devplatform.bi.events.OrderHistoryPageViewed;
 import kin.devplatform.bi.events.SpendRedeemPageViewed.RedeemTrigger;
@@ -67,7 +69,9 @@ public class OrderHistoryPresenter extends BasePresenter<IOrderHistoryView> impl
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-
+				eventLogger.send(GeneralEcosystemSdkError
+					.create("OrderHistoryPresenter.getOrderHistoryList onFailure. exception = " + Log
+						.getStackTraceString(exception)));
 			}
 		});
 	}
