@@ -60,7 +60,7 @@ public class JwtUtil {
 			.setSubject(JWT_SUBJECT_EARN)
 			.claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
 			.claim(JWT_CLAIM_OBJECT_RECIPIENT_PART,
-				new JWTRecipientPart(userID, "Received Kin", "upload profile picture"))
+				new JWTRecipientPart(userID, "Received Kin", null))
 			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
 		return jwt;
 	}
