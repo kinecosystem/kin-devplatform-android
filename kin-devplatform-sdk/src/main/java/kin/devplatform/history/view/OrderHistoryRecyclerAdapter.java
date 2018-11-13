@@ -152,12 +152,16 @@ public class OrderHistoryRecyclerAdapter extends BaseRecyclerAdapter<Order, View
 			String dateString = item.getCompletionDate();
 			dateString = getDateFormatted(dateString);
 			String subTitle = null;
+			StringBuilder sb = new StringBuilder();
 
 			if (dateString != null && !TextUtils.isEmpty(dateString)) {
 				if (TextUtils.isEmpty(desc)) {
 					subTitle = dateString;
 				} else {
-					subTitle = desc + DASH_DELIMITER + dateString;
+					sb.append(desc)
+						.append(DASH_DELIMITER)
+						.append(dateString);
+					subTitle = sb.toString();
 				}
 			}
 			setText(R.id.sub_title, subTitle);
