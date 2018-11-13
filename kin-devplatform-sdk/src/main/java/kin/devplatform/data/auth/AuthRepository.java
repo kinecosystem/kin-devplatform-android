@@ -12,6 +12,7 @@ import kin.devplatform.base.ObservableData;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.events.StellarAccountCreationRequested;
 import kin.devplatform.core.network.ApiException;
+import kin.devplatform.core.util.DateUtil;
 import kin.devplatform.data.Callback;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
@@ -25,25 +26,22 @@ public class AuthRepository implements AuthDataSource {
 	private final AuthDataSource.Local localData;
 	private final AuthDataSource.Remote remoteData;
 
-	private final EventLogger eventLogger;
-
 	private SignInData cachedSignInData;
 	private AuthToken cachedAuthToken;
 	private ObservableData<String> appId = ObservableData.create(null);
 
-	private AuthRepository(@NonNull EventLogger eventLogger, @NonNull AuthDataSource.Local local,
+	private AuthRepository(@NonNull AuthDataSource.Local local,
 		@NonNull AuthDataSource.Remote remote) {
-		this.eventLogger = eventLogger;
 		this.localData = local;
 		this.remoteData = remote;
 	}
 
-	public static void init(@NonNull EventLogger eventLogger, @NonNull AuthDataSource.Local localData,
+	public static void init(@NonNull AuthDataSource.Local localData,
 		@NonNull AuthDataSource.Remote remoteData) {
 		if (instance == null) {
 			synchronized (AuthRepository.class) {
 				if (instance == null) {
-					instance = new AuthRepository(eventLogger, localData, remoteData);
+					instance = new AuthRepository(localData, remoteData);
 				}
 			}
 		}
@@ -59,6 +57,23 @@ public class AuthRepository implements AuthDataSource {
 		localData.setSignInData(signInData);
 		remoteData.setSignInData(signInData);
 		postAppID(signInData.getAppId());
+	}
+
+	@Override
+	public void updateWalletAddress(final String address, @NonNull final KinCallback<Boolean> callback) {
+		remoteData.updateWalletAddress(address, new Callback<Void, ApiException>() {
+			@Override
+			public void onResponse(Void response) {
+				cachedSignInData.setWalletAddress(address);
+				setSignInData(cachedSignInData);
+				callback.onResponse(true);
+			}
+
+			@Override
+			public void onFailure(ApiException exception) {
+				callback.onFailure(ErrorUtil.fromApiException(exception));
+			}
+		});
 	}
 
 	@Override
@@ -84,17 +99,10 @@ public class AuthRepository implements AuthDataSource {
 
 	private void loadCachedAppIDIfNeeded() {
 		if (TextUtils.isEmpty(appId.getValue())) {
-			localData.getAppId(new Callback<String, Void>() {
-				@Override
-				public void onResponse(String appID) {
-					postAppID(appID);
-				}
-
-				@Override
-				public void onFailure(Void t) {
-					// No Data Available
-				}
-			});
+			final String localAppId = localData.getAppId();
+			if (!TextUtils.isEmpty(localAppId)) {
+				postAppID(localAppId);
+			}
 		}
 	}
 
@@ -108,9 +116,6 @@ public class AuthRepository implements AuthDataSource {
 				if (authToken != null && !isAuthTokenExpired(authToken)) {
 					setAuthToken(authToken);
 				} else {
-					if (authToken == null) {
-						eventLogger.send(StellarAccountCreationRequested.create());
-					}
 					refreshTokenSync();
 				}
 				return cachedAuthToken;
@@ -120,33 +125,12 @@ public class AuthRepository implements AuthDataSource {
 		}
 	}
 
-	@Override
-	public boolean isActivated() {
-		return localData.isActivated();
-	}
-
-	@Override
-	public void activateAccount(@NonNull final KinCallback<Void> callback) {
-		remoteData.activateAccount(new Callback<AuthToken, ApiException>() {
-			@Override
-			public void onResponse(AuthToken response) {
-				localData.activateAccount();
-				setAuthToken(response);
-				callback.onResponse(null);
-			}
-
-			@Override
-			public void onFailure(ApiException e) {
-				callback.onFailure(ErrorUtil.fromApiException(e));
-			}
-		});
-	}
 
 	private boolean isAuthTokenExpired(AuthToken authToken) {
 		if (authToken == null) {
 			return true;
 		} else {
-			Date expirationDate = getDateFromUTCString(authToken.getExpirationDate());
+			Date expirationDate = DateUtil.getDateFromUTCString(authToken.getExpirationDate());
 			if (expirationDate != null) {
 				return Calendar.getInstance().getTimeInMillis() > expirationDate.getTime();
 			} else {
@@ -167,6 +151,26 @@ public class AuthRepository implements AuthDataSource {
 		cachedAuthToken = authToken;
 		localData.setAuthToken(authToken);
 		postAppID(authToken.getAppID());
+	}
+
+	@Override
+	public void getAuthToken(@Nullable final KinCallback<AuthToken> callback) {
+		remoteData.getAuthToken(new Callback<AuthToken, ApiException>() {
+			@Override
+			public void onResponse(AuthToken authToken) {
+				setAuthToken(authToken);
+				if (callback != null) {
+					callback.onResponse(cachedAuthToken);
+				}
+			}
+
+			@Override
+			public void onFailure(ApiException exception) {
+				if (callback != null) {
+					callback.onFailure(ErrorUtil.fromApiException(exception));
+				}
+			}
+		});
 	}
 
 	private void postAppID(@Nullable String appID) {

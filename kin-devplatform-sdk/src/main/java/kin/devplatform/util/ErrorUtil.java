@@ -12,6 +12,7 @@ import static kin.devplatform.exception.KinEcosystemException.UNKNOWN;
 import static kin.devplatform.exception.ServiceException.SERVICE_ERROR;
 import static kin.devplatform.exception.ServiceException.TIMEOUT_ERROR;
 
+import android.annotation.SuppressLint;
 import android.support.annotation.Nullable;
 import kin.core.exception.AccountNotActivatedException;
 import kin.core.exception.AccountNotFoundException;
@@ -40,6 +41,7 @@ public class ErrorUtil {
 	private static final String FAILED_TO_ACTIVATE_ON_THE_BLOCKCHAIN_NETWORK = "A Wallet was created locally, but failed to activate on the blockchain network";
 	private static final String ECOSYSTEM_SDK_IS_NOT_STARTED = "Operation not permitted: Ecosystem SDK is not started";
 	private static final String BAD_OR_MISSING_PARAMETERS = "Bad or missing parameters";
+	private static final String FAILED_TO_LOAD_ACCOUNT_ON_INDEX = "Failed to load blockchain wallet on index %d";
 
 
 	private static final int REQUEST_TIMEOUT_CODE = 408;
@@ -143,5 +145,11 @@ public class ErrorUtil {
 		}
 
 		return exception;
+	}
+
+	@SuppressLint("DefaultLocale")
+	public static BlockchainException createAccountCannotLoadedExcpetion(int accountIndex) {
+		return new BlockchainException(BlockchainException.ACCOUNT_LOADING_FAILED,
+			String.format(FAILED_TO_LOAD_ACCOUNT_ON_INDEX, accountIndex), null);
 	}
 }
