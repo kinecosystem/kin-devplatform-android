@@ -4,7 +4,6 @@ import static kin.devplatform.settings.view.ISettingsView.BLUE;
 import static kin.devplatform.settings.view.ISettingsView.GRAY;
 import static kin.devplatform.settings.view.ISettingsView.ITEM_BACKUP;
 
-import android.accounts.AccountManager;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import com.kin.ecosystem.recovery.BackupCallback;
@@ -14,12 +13,14 @@ import java.math.BigDecimal;
 import kin.devplatform.KinCallback;
 import kin.devplatform.Log;
 import kin.devplatform.Logger;
+import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.base.BasePresenter;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.RecoveryBackupEvents;
 import kin.devplatform.bi.RecoveryRestoreEvents;
 import kin.devplatform.bi.events.BackupWalletCompleted;
+import kin.devplatform.bi.events.GeneralEcosystemSdkError;
 import kin.devplatform.bi.events.RestoreWalletCompleted;
 import kin.devplatform.data.blockchain.BlockchainSource;
 import kin.devplatform.data.model.Balance;
@@ -180,6 +181,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
+				eventLogger.send(GeneralEcosystemSdkError.create(android.util.Log.getStackTraceString(exception)));
 				showCouldNotImportAccountError();
 			}
 		});

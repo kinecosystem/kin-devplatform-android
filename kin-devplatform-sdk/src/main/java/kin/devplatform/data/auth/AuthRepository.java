@@ -1,7 +1,5 @@
 package kin.devplatform.data.auth;
 
-import static kin.devplatform.core.util.DateUtil.getDateFromUTCString;
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -9,13 +7,12 @@ import java.util.Calendar;
 import java.util.Date;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.ObservableData;
-import kin.devplatform.bi.EventLogger;
-import kin.devplatform.bi.events.StellarAccountCreationRequested;
 import kin.devplatform.core.network.ApiException;
 import kin.devplatform.core.util.DateUtil;
 import kin.devplatform.data.Callback;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
+import kin.devplatform.network.model.UserProperties;
 import kin.devplatform.util.ErrorUtil;
 
 public class AuthRepository implements AuthDataSource {
@@ -61,7 +58,8 @@ public class AuthRepository implements AuthDataSource {
 
 	@Override
 	public void updateWalletAddress(final String address, @NonNull final KinCallback<Boolean> callback) {
-		remoteData.updateWalletAddress(address, new Callback<Void, ApiException>() {
+		final UserProperties userProperties = new UserProperties().walletAddress(address);
+		remoteData.updateWalletAddress(userProperties, new Callback<Void, ApiException>() {
 			@Override
 			public void onResponse(Void response) {
 				cachedSignInData.setWalletAddress(address);
@@ -99,10 +97,17 @@ public class AuthRepository implements AuthDataSource {
 
 	private void loadCachedAppIDIfNeeded() {
 		if (TextUtils.isEmpty(appId.getValue())) {
-			final String localAppId = localData.getAppId();
-			if (!TextUtils.isEmpty(localAppId)) {
-				postAppID(localAppId);
-			}
+			localData.getAppId(new Callback<String, Void>() {
+				@Override
+				public void onResponse(String appID) {
+					postAppID(appID);
+				}
+
+				@Override
+				public void onFailure(Void t) {
+					// No Data Available
+				}
+			});
 		}
 	}
 
@@ -175,5 +180,27 @@ public class AuthRepository implements AuthDataSource {
 
 	private void postAppID(@Nullable String appID) {
 		appId.postValue(appID);
+	}
+
+	@Override
+	public boolean isActivated() {
+		return localData.isActivated();
+	}
+
+	@Override
+	public void activateAccount(@NonNull final KinCallback<Void> callback) {
+		remoteData.activateAccount(new Callback<AuthToken, ApiException>() {
+			@Override
+			public void onResponse(AuthToken response) {
+				localData.activateAccount();
+				setAuthToken(response);
+				callback.onResponse(null);
+			}
+
+			@Override
+			public void onFailure(ApiException e) {
+				callback.onFailure(ErrorUtil.fromApiException(e));
+			}
+		});
 	}
 }

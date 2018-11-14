@@ -13,6 +13,7 @@
 
 package kin.devplatform.network.api;
 
+import static kin.devplatform.core.network.ApiClient.PATCH;
 import static kin.devplatform.core.network.ApiClient.POST;
 
 import com.google.gson.reflect.TypeToken;
@@ -32,6 +33,7 @@ import kin.devplatform.core.network.ProgressRequestBody;
 import kin.devplatform.core.network.ProgressResponseBody;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
+import kin.devplatform.network.model.UserProperties;
 import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -345,6 +347,72 @@ public class AuthApi {
 		}.getType();
 		apiClient.executeAsync(call, localVarReturnType, callback);
 		return call;
+	}
+
+	/**
+	 * Update user (asynchronously) Update user - wallet address
+	 *
+	 * @param userproperties (required)
+	 * @param callback The callback to be executed when the API call finishes
+	 * @return The request call
+	 * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+	 */
+	public Call updateUserAsync(UserProperties userproperties, final ApiCallback<Void> callback) throws ApiException {
+		Call call = updateUserValidateBeforeCall(userproperties);
+		apiClient.executeAsync(call, callback);
+		return call;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private Call updateUserValidateBeforeCall(UserProperties userproperties) throws ApiException {
+
+		// verify the required parameter 'userproperties' is set
+		if (userproperties == null) {
+			throw new ApiException("Missing the required parameter 'userproperties' when calling updateUser(Async)");
+		}
+
+		Call call = updateUserCall(userproperties);
+		return call;
+	}
+
+	/**
+	 * Build call for updateUser
+	 *
+	 * @param userproperties (required)
+	 * @return Call to execute
+	 * @throws ApiException If fail to serialize the request body object
+	 */
+	public Call updateUserCall(UserProperties userproperties) throws ApiException {
+		Object localVarPostBody = userproperties;
+
+		// create path and map variables
+		String localVarPath = "/users";
+
+		List<Pair> localVarQueryParams = new ArrayList<Pair>();
+		List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+
+		Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+
+		Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+		final String[] localVarAccepts = {
+			"application/json"
+		};
+		final String localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+		if (localVarAccept != null) {
+			localVarHeaderParams.put("Accept", localVarAccept);
+		}
+
+		final String[] localVarContentTypes = {
+			"application/json"
+		};
+		final String localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+		localVarHeaderParams.put("Content-Type", localVarContentType);
+
+		String[] localVarAuthNames = new String[]{};
+		return apiClient
+			.buildCall(localVarPath, PATCH, localVarQueryParams, localVarCollectionQueryParams, localVarPostBody,
+				localVarHeaderParams, localVarFormParams, localVarAuthNames, null);
 	}
 
 }

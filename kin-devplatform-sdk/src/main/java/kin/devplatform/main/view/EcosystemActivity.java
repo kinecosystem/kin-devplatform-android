@@ -5,9 +5,16 @@ import static kin.devplatform.main.ScreenId.ORDER_HISTORY;
 import static kin.devplatform.main.Title.MARKETPLACE_TITLE;
 import static kin.devplatform.main.Title.ORDER_HISTORY_TITLE;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import kin.devplatform.R;
 import kin.devplatform.balance.presenter.BalancePresenter;
 import kin.devplatform.balance.presenter.IBalancePresenter;
@@ -18,6 +25,8 @@ import kin.devplatform.bi.EventLoggerImpl;
 import kin.devplatform.data.blockchain.BlockchainSourceImpl;
 import kin.devplatform.data.offer.OfferRepository;
 import kin.devplatform.data.order.OrderRepository;
+import kin.devplatform.data.settings.SettingsDataSourceImpl;
+import kin.devplatform.data.settings.SettingsDataSourceLocal;
 import kin.devplatform.history.presenter.OrderHistoryPresenter;
 import kin.devplatform.history.view.OrderHistoryFragment;
 import kin.devplatform.main.INavigator;
@@ -28,6 +37,7 @@ import kin.devplatform.main.presenter.IEcosystemPresenter;
 import kin.devplatform.marketplace.presenter.IMarketplacePresenter;
 import kin.devplatform.marketplace.presenter.MarketplacePresenter;
 import kin.devplatform.marketplace.view.MarketplaceFragment;
+import kin.devplatform.settings.view.SettingsActivity;
 
 
 public class EcosystemActivity extends BaseToolbarActivity implements IEcosystemView, INavigator {
@@ -38,6 +48,8 @@ public class EcosystemActivity extends BaseToolbarActivity implements IEcosystem
 	private IBalancePresenter balancePresenter;
 	private IEcosystemPresenter ecosystemPresenter;
 	private IMarketplacePresenter marketplacePresenter;
+
+	private View actionView;
 
 	@Override
 	protected int getLayoutRes() {
@@ -51,7 +63,7 @@ public class EcosystemActivity extends BaseToolbarActivity implements IEcosystem
 
 	@Override
 	protected int getNavigationIcon() {
-		return R.drawable.kinecosystem_ic_back;
+		return R.drawable.kinecosystem_ic_back_black;
 	}
 
 	@Override
@@ -76,7 +88,51 @@ public class EcosystemActivity extends BaseToolbarActivity implements IEcosystem
 				ecosystemPresenter.balanceItemClicked();
 			}
 		});
-		ecosystemPresenter = new EcosystemPresenter(this, this);
+		ecosystemPresenter = new EcosystemPresenter(this,
+			new SettingsDataSourceImpl(new SettingsDataSourceLocal(getApplicationContext())),
+			BlockchainSourceImpl.getInstance(), this);
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		ecosystemPresenter.onStart();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.kinecosystem_menu_marketplace, menu);
+		setupActionView(menu);
+		ecosystemPresenter.onMenuInitialized();
+		return true;
+	}
+
+	private void setupActionView(final Menu menu) {
+		final MenuItem settingsItem = menu.findItem(R.id.menu_settings);
+		if (settingsItem != null) {
+			actionView = MenuItemCompat.getActionView(settingsItem);
+			actionView.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					ecosystemPresenter.settingsMenuClicked();
+				}
+			});
+		}
+	}
+
+	@Override
+	public void showMenuTouchIndicator(boolean isVisible) {
+		if (actionView != null) {
+			ImageView infoBadge = actionView.findViewById(R.id.ic_info_dot);
+			if (infoBadge != null) {
+				if (isVisible) {
+					infoBadge.setVisibility(View.VISIBLE);
+				} else {
+					infoBadge.setVisibility(View.GONE);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -109,7 +165,6 @@ public class EcosystemActivity extends BaseToolbarActivity implements IEcosystem
 			.commit();
 
 		setVisibleScreen(MARKETPLACE);
-
 	}
 
 	private IMarketplacePresenter getMarketplacePresenter(MarketplaceFragment marketplaceFragment) {
@@ -147,12 +202,24 @@ public class EcosystemActivity extends BaseToolbarActivity implements IEcosystem
 			.setCustomAnimations(
 				R.anim.kinecosystem_slide_in_right,
 				R.anim.kinecosystem_slide_out_left,
-				R.anim.kinecosystem_slide_in_left,
+				R.anim.kinrecovery_slide_in_left,
 				R.anim.kinecosystem_slide_out_right)
 			.replace(R.id.fragment_frame, orderHistoryFragment, ECOSYSTEM_ORDER_HISTORY_FRAGMENT_TAG)
 			.addToBackStack(null).commit();
 
 		setVisibleScreen(ORDER_HISTORY);
+	}
+
+	@Override
+	public void navigateToSettings() {
+		Intent settingsIntent = new Intent(this, SettingsActivity.class);
+		startActivity(settingsIntent);
+		overridePendingTransition(R.anim.kinecosystem_slide_in_right, R.anim.kinecosystem_slide_out_left);
+	}
+
+	@Override
+	public void close() {
+		finish();
 	}
 
 	@Override

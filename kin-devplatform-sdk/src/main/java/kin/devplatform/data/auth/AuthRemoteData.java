@@ -11,6 +11,7 @@ import kin.devplatform.data.Callback;
 import kin.devplatform.network.api.AuthApi;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
+import kin.devplatform.network.model.UserProperties;
 
 public class AuthRemoteData implements AuthDataSource.Remote {
 
@@ -117,6 +118,51 @@ public class AuthRemoteData implements AuthDataSource.Remote {
 				@Override
 				public void onSuccess(final AuthToken result, int statusCode,
 					Map<String, List<String>> responseHeaders) {
+					executorsUtil.mainThread().execute(new Runnable() {
+						@Override
+						public void run() {
+							callback.onResponse(result);
+						}
+					});
+				}
+
+				@Override
+				public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
+
+				}
+
+				@Override
+				public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
+
+				}
+			});
+		} catch (final ApiException e) {
+			executorsUtil.mainThread().execute(new Runnable() {
+				@Override
+				public void run() {
+					callback.onFailure(e);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void updateWalletAddress(@NonNull UserProperties userProperties,
+		@NonNull final Callback<Void, ApiException> callback) {
+		try {
+			authApi.updateUserAsync(userProperties, new ApiCallback<Void>() {
+				@Override
+				public void onFailure(final ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
+					executorsUtil.mainThread().execute(new Runnable() {
+						@Override
+						public void run() {
+							callback.onFailure(e);
+						}
+					});
+				}
+
+				@Override
+				public void onSuccess(final Void result, int statusCode, Map<String, List<String>> responseHeaders) {
 					executorsUtil.mainThread().execute(new Runnable() {
 						@Override
 						public void run() {

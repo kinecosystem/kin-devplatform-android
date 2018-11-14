@@ -7,7 +7,7 @@
 
     <include layout="@layout/kinecosystem_toolbar_layout"/>
 
-    <com.kin.ecosystem.settings.view.SettingsItem
+    <kin.devplatform.settings.view.SettingsItem
         android:id="@+id/keep_your_kin_safe"
         android:layout_width="match_parent"
         android:layout_height="@dimen/kinecosystem_settings_item_height"
@@ -16,7 +16,7 @@
 
     <include layout="@layout/kinecosystem_separator_line"/>
 
-    <com.kin.ecosystem.settings.view.SettingsItem
+    <kin.devplatform.settings.view.SettingsItem
         android:id="@+id/restore_prev_wallet"
         android:layout_width="match_parent"
         android:layout_height="@dimen/kinecosystem_settings_item_height"
