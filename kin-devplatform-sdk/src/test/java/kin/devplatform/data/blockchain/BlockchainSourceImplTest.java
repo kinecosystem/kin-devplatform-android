@@ -107,7 +107,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		when(kinAccount.getPublicAddress()).thenReturn(PUBLIC_ADDRESS);
 		doNothing().when(kinAccount).activateSync();
 
-
 		resetInstance();
 
 		// Account Creation
@@ -120,7 +119,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		verify(kinAccount).activateSync();
 		verify(eventLogger).send(any(StellarKinTrustlineSetupSucceeded.class));
 
-
 		// init Balance
 		verify(getBalanceReq).run(getBalanceCaptor.capture());
 		getBalanceCaptor.getValue().onResult(balanceObj);
@@ -128,7 +126,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 		when(kinClient.getAccount(0)).thenReturn(kinAccount);
 		balance = new Balance();
-
 
 
 	}
