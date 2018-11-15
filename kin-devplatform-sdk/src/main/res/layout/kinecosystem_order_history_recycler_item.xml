@@ -31,29 +31,39 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/kinecosystem_block_margin"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="@+id/dot"
+        app:layout_constraintEnd_toStartOf="@+id/action_text"
         app:layout_constraintStart_toEndOf="@+id/dot"
         app:layout_constraintTop_toTopOf="@+id/dot"
-        tools:text="Spotify - "/>
+        tools:text="My Order Name Goes here" />
 
     <TextView
         android:id="@+id/action_text"
         style="@style/KinecosysSubTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="@+id/title"
+        app:layout_constraintEnd_toStartOf="@+id/amount_ico"
         app:layout_constraintStart_toEndOf="@+id/title"
         app:layout_constraintTop_toTopOf="@+id/title"
-        tools:text="tap to reveal your code"/>
+        tools:text="tap to reveal your code" />
 
     <TextView
         android:id="@+id/sub_title"
         style="@style/KinecosysSubTitle"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="20dp"
         app:layout_constraintStart_toStartOf="@+id/title"
         app:layout_constraintTop_toBottomOf="@+id/title"
-        tools:text="Completed poll - 23.1.18"/>
+        tools:text="Completed poll - 23.1.18" />
 
     <ImageView
         android:id="@+id/amount_ico"
