@@ -272,10 +272,19 @@ public class MarketplacePresenter extends BasePresenter<IMarketplaceView> implem
 		}
 	}
 
+	private boolean isValidPosition(int position, @NonNull List<Offer> list) {
+		return !list.isEmpty() && position < list.size() && position >= 0 ;
+	}
+
 	@Override
 	public void onItemClicked(int position, OfferType offerType) {
+
 		final Offer offer;
 		if (offerType == OfferType.EARN) {
+			if (!isValidPosition(position, earnList)) {
+				showSomethingWentWrong();
+				return;
+			}
 			offer = earnList.get(position);
 			sendEranOfferTapped(offer);
 			if (this.view != null) {
@@ -288,6 +297,10 @@ public class MarketplacePresenter extends BasePresenter<IMarketplaceView> implem
 				this.view.showOfferActivity(pollBundle);
 			}
 		} else {
+			if (!isValidPosition(position, spendList)) {
+				showSomethingWentWrong();
+				return;
+			}
 			offer = spendList.get(position);
 			sendSpendOfferTapped(offer);
 			if (offer.getContentType() == ContentTypeEnum.EXTERNAL) {
