@@ -78,17 +78,4 @@ public class Environment implements KinEnvironment {
 		return PRODUCTION;
 	}
 
-	public static KinEnvironment getLocal() {
-		if (PLAYGROUND == null) {
-			PLAYGROUND = new Environment(
-				"https://horizon-playground.kininfrastructure.com/",
-				"Kin Playground Network ; June 2018",
-				"GBC3SG6NGTSZ2OMH3FFGB7UVRQWILW367U4GSOOF4TFSZONV42UJXUH7",
-				"http://10.0.2.2:3000/v1",
-				"https://s3.amazonaws.com/assets.kinplayground.com/web-offers/cards-based/index.html",
-				"https://kin-bi.appspot.com/devp_play_");
-		}
-		return PLAYGROUND;
-	}
-
 }
