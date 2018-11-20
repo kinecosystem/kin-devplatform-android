@@ -1,5 +1,7 @@
 package kin.devplatform.data.order;
 
+import static kin.devplatform.data.model.Payment.EARN;
+import static kin.devplatform.data.model.Payment.SPEND;
 import static kin.devplatform.exception.BlockchainException.INSUFFICIENT_KIN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,13 +40,13 @@ import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.DataNotAvailableException;
 import kin.devplatform.exception.KinEcosystemException;
-import kin.devplatform.exception.ServiceException;
 import kin.devplatform.network.model.BlockchainData;
 import kin.devplatform.network.model.JWTBodyPaymentConfirmationResult;
 import kin.devplatform.network.model.Offer;
 import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.network.model.Order;
+import kin.devplatform.network.model.Order.Origin;
 import kin.devplatform.network.model.Order.Status;
 import kin.devplatform.network.model.OrderList;
 import kin.devplatform.network.model.OrderSpendResult.TypeEnum;
@@ -204,7 +206,7 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertEquals(order, orderRepository.getOrderWatcher().getValue());
 
 		when(payment.getAmount()).thenReturn(new BigDecimal(20));
-		when(payment.isEarn()).thenReturn(true);
+		when(payment.getType()).thenReturn(EARN);
 		paymentCapture.getValue().onChanged(payment);
 
 		verify(eventLogger).send(any(EarnOrderPaymentConfirmed.class));
@@ -220,13 +222,14 @@ public class OrderRepositoryTest extends BaseTestClass {
 	}
 
 	@Test
-	public void submitOrder_Succeed_SpendOrder_StautsCompleted() throws Exception {
+	public void submitOrder_Succeed_SpendOrder_StatusCompleted() throws Exception {
 		KinCallback<Order> orderCallback = mock(KinCallback.class);
 		ArgumentCaptor<Callback<Order, ApiException>> submitOrderCapture = ArgumentCaptor.forClass(Callback.class);
 		ArgumentCaptor<Observer<Payment>> paymentCapture = ArgumentCaptor.forClass(Observer.class);
 		ArgumentCaptor<Callback<Order, ApiException>> getOrderCapture = ArgumentCaptor.forClass(Callback.class);
 
 		when(order.getOfferType()).thenReturn(OfferType.SPEND);
+		when(order.getOrigin()).thenReturn(Origin.MARKETPLACE);
 
 		// Create Order
 		orderRepository.createOrder(order.getOfferId(), openOrderCallback);
@@ -245,7 +248,7 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertEquals(order, orderRepository.getOrderWatcher().getValue());
 
 		when(payment.getAmount()).thenReturn(new BigDecimal(-20));
-		when(payment.isEarn()).thenReturn(false);
+		when(payment.getType()).thenReturn(SPEND);
 		paymentCapture.getValue().onChanged(payment);
 
 		verify(eventLogger, never()).send(any(EarnOrderPaymentConfirmed.class));
@@ -286,7 +289,7 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertEquals(order, orderRepository.getOrderWatcher().getValue());
 
 		when(payment.getAmount()).thenReturn(new BigDecimal(-20));
-		when(payment.isEarn()).thenReturn(false);
+		when(payment.getType()).thenReturn(SPEND);
 		paymentCapture.getValue().onChanged(payment);
 
 		verify(eventLogger, never()).send(any(EarnOrderPaymentConfirmed.class));
@@ -365,7 +368,7 @@ public class OrderRepositoryTest extends BaseTestClass {
 		ArgumentCaptor<Observer<Payment>> paymentCapture = ArgumentCaptor.forClass(Observer.class);
 		ArgumentCaptor<Callback<Order, ApiException>> getOrderCapture = ArgumentCaptor.forClass(Callback.class);
 
-		Order confirmedOrder = new Order().orderId(orderID).offerId(offerID).status(Status.COMPLETED);
+		Order confirmedOrder = new Order().orderId(orderID).offerId(offerID).status(Status.COMPLETED).amount(30);
 		confirmedOrder.setResult(
 			new JWTBodyPaymentConfirmationResult().jwt("A JWT CONFIRMATION").type(TypeEnum.PAYMENT_CONFIRMATION));
 
@@ -456,21 +459,22 @@ public class OrderRepositoryTest extends BaseTestClass {
 
 	}
 
-	private void testPurchaseFailureWithAPIException(final Exception expectedException) throws Exception {
+	@Test
+	public void purchase_Failed_Cant_Create_Order() throws Exception {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-		when(remote.createExternalOrderSync(anyString())).thenThrow(expectedException);
+		when(remote.createExternalOrderSync(anyString())).thenThrow(getApiException());
 
 		orderRepository.purchase("generatedOfferJWT", new KinCallback<OrderConfirmation>() {
 			@Override
 			public void onResponse(OrderConfirmation confirmationJwt) {
+
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
 				countDownLatch.countDown();
 				assertNotNull(exception);
-				assertEquals(expectedException, exception.getCause());
 				assertNull(orderRepository.getOpenOrder().getValue());
 			}
 		});
@@ -481,23 +485,6 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertNull(orderRepository.getOrderWatcher().getValue());
 
 		countDownLatch.await(500, TimeUnit.MICROSECONDS);
-	}
-
-	@Test
-	public void purchase_Failed_Cant_Create_Order() throws Exception {
-		testPurchaseFailureWithAPIException(getApiException());
-	}
-
-	@Test
-	public void purchase_Failed_User_Not_Found() throws Exception {
-		testPurchaseFailureWithAPIException(new ApiException(404, "some message", null,
-			new Error("user not found", "user is not found", ServiceException.USER_NOT_FOUND_ERROR)));
-	}
-
-	@Test
-	public void purchase_Failed_User_Did_Not_Found_Accept_TOS() throws Exception {
-		testPurchaseFailureWithAPIException(new ApiException(401, "some message", null,
-			new Error("user did not accept TOS", "user did not accept TOS", ServiceException.USER_NOT_ACTIVATED)));
 	}
 
 	@Test

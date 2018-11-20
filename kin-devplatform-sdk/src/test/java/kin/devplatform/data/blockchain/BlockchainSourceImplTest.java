@@ -2,6 +2,7 @@ package kin.devplatform.data.blockchain;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +18,6 @@ import kin.core.BlockchainEvents;
 import kin.core.EventListener;
 import kin.core.KinAccount;
 import kin.core.KinClient;
-import kin.core.ListenerRegistration;
 import kin.core.Request;
 import kin.core.ResultCallback;
 import kin.core.TransactionId;
@@ -26,7 +26,6 @@ import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainFailed;
 import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSucceeded;
-import kin.devplatform.bi.events.StellarKinTrustlineSetupSucceeded;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import org.junit.Before;
@@ -66,21 +65,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	@Mock
 	private BlockchainEvents blockchainEvents;
 
-
-	@Captor
-	private ArgumentCaptor<EventListener<Void>> accountCreationCaptor;
-
-	@Mock
-	private ListenerRegistration accountRegistration;
-
-
-	@Mock
-	private Request<Void> activateAccountReq;
-
-	@Captor
-	private ArgumentCaptor<ResultCallback<Void>> accountActivateCaptor;
-
-
 	@Mock
 	private Request<kin.core.Balance> getBalanceReq;
 
@@ -101,8 +85,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		when(kinClient.addAccount()).thenReturn(kinAccount);
 		when(kinAccount.blockchainEvents()).thenReturn(blockchainEvents);
 		when(kinAccount.getBalance()).thenReturn(getBalanceReq);
-		when(kinAccount.activate()).thenReturn(activateAccountReq);
-		when(blockchainEvents.addAccountCreationListener(any(EventListener.class))).thenReturn(accountRegistration);
 		when(balanceObj.value()).thenReturn(new BigDecimal(20));
 		when(kinAccount.getPublicAddress()).thenReturn(PUBLIC_ADDRESS);
 		doNothing().when(kinAccount).activateSync();
@@ -113,14 +95,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		// Account Creation
 		verify(kinClient).addAccount();
 
-		verify(blockchainEvents).addAccountCreationListener(accountCreationCaptor.capture());
-		accountCreationCaptor.getValue().onEvent(null);
-
-		Thread.sleep(250);
-		verify(kinAccount).activateSync();
-		verify(eventLogger).send(any(StellarKinTrustlineSetupSucceeded.class));
-
-
 		// init Balance
 		verify(getBalanceReq).run(getBalanceCaptor.capture());
 		getBalanceCaptor.getValue().onResult(balanceObj);
@@ -128,9 +102,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 		when(kinClient.getAccount(0)).thenReturn(kinAccount);
 		balance = new Balance();
-
-
-
 	}
 
 
@@ -184,7 +155,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 			forClass(ResultCallback.class);
 		when(kinAccount.sendTransaction(any(String.class), any(BigDecimal.class), any(String.class)))
 			.thenReturn(transactionRequest);
-		when(local.hasTrustLine()).thenReturn(true);
 
 		blockchainSource.setAppID(APP_ID);
 		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID");
@@ -209,7 +179,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 			forClass(ResultCallback.class);
 		when(kinAccount.sendTransaction(any(String.class), any(BigDecimal.class), any(String.class)))
 			.thenReturn(transactionRequest);
-		when(local.hasTrustLine()).thenReturn(true);
 
 		blockchainSource.setAppID(APP_ID);
 		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID");
@@ -223,6 +192,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 				assertFalse(value.isSucceed());
 				assertEquals(orderID, value.getOrderID());
 				assertEquals(exception, value.getException());
+				assertEquals(Payment.UNKNOWN, value.getType());
 			}
 		});
 
@@ -282,5 +252,10 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		assertEquals(value, balance.getAmount());
 		verify(local).setBalance(value.intValue());
 
+	}
+
+	@Test
+	public void get_KeyStoreProvider_is_not_null() {
+		assertNotNull(blockchainSource.getKeyStoreProvider());
 	}
 }

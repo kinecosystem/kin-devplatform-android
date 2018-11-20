@@ -1,13 +1,26 @@
 package kin.devplatform.data.model;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.math.BigDecimal;
 
 /**
- * Payment object, after sending a blockchain transaction as payment to an order.
- * Determine if the payment succeeded and for which orderID it connected.
+ * Payment object, after sending a blockchain transaction as payment to an order. Determine if the payment succeeded and
+ * for which orderID it connected.
  */
 public class Payment {
+
+	public static final int UNKNOWN = 0x00000000;
+	public static final int EARN = 0x00000001;
+	public static final int SPEND = 0x00000002;
+
+	@IntDef({UNKNOWN, EARN, SPEND})
+	@Retention(RetentionPolicy.SOURCE)
+	public @interface Type {
+
+	}
 
 	/**
 	 * Order id that the transaction is related to.
@@ -36,19 +49,26 @@ public class Payment {
 	 */
 	private Exception exception;
 
-	public Payment(String orderID, @Nullable String transactionID, @Nullable BigDecimal amount) {
+	/**
+	 * The {@link Type} of payment: EARN, SPEND or UNKNOWN if the payment failed.
+	 */
+	private @Type
+	int type = UNKNOWN;
+
+	public Payment(String orderID, @Nullable String transactionID, @Nullable BigDecimal amount, @Type int type) {
 		this.orderID = orderID;
 		this.transactionID = transactionID;
 		this.amount = amount;
 		this.isSucceed = true;
+		this.type = type;
 	}
 
-	public Payment(String orderID, boolean isSucceed, Exception error) {
+	public Payment(String orderID, boolean isSucceed, Exception exception) {
 		this.orderID = orderID;
 		this.transactionID = null;
 		this.amount = null;
 		this.isSucceed = isSucceed;
-		this.exception = error;
+		this.exception = exception;
 	}
 
 	public String getOrderID() {
@@ -73,7 +93,7 @@ public class Payment {
 		return exception;
 	}
 
-	public boolean isEarn() {
-		return amount != null && amount.compareTo(BigDecimal.ZERO) == 1;
+	public int getType() {
+		return type;
 	}
 }

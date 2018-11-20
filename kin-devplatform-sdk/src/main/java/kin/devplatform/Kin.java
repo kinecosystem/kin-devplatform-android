@@ -10,6 +10,8 @@ import android.support.annotation.Nullable;
 import java.util.UUID;
 import kin.core.KinClient;
 import kin.core.ServiceProvider;
+import kin.devplatform.accountmanager.AccountManagerImpl;
+import kin.devplatform.accountmanager.AccountManagerLocal;
 import kin.devplatform.base.ObservableData;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
@@ -109,9 +111,19 @@ public class Kin {
 		registerAccount(appContext, signInData);
 		initEventCommonData(appContext);
 		instance.eventLogger.send(KinSdkInitiated.create());
+		initAccountManager(appContext);
 		initOrderRepository(appContext);
 		initOfferRepository();
 		setAppID();
+	}
+
+	private static void initAccountManager(@NonNull final Context context) {
+		AccountManagerImpl
+			.init(AccountManagerLocal.getInstance(context), instance.eventLogger, AuthRepository.getInstance(),
+				BlockchainSourceImpl.getInstance());
+		if (!AccountManagerImpl.getInstance().isAccountCreated()) {
+			AccountManagerImpl.getInstance().start();
+		}
 	}
 
 	private static void initEventLogger() {
@@ -149,7 +161,7 @@ public class Kin {
 
 	private static void registerAccount(@NonNull final Context context, @NonNull final SignInData signInData)
 		throws ClientException {
-		AuthRepository.init(instance.eventLogger, AuthLocalData.getInstance(context, instance.executorsUtil),
+		AuthRepository.init(AuthLocalData.getInstance(context, instance.executorsUtil),
 			AuthRemoteData.getInstance(instance.executorsUtil));
 		String deviceID = AuthRepository.getInstance().getDeviceID();
 		signInData.setDeviceId(deviceID != null ? deviceID : UUID.randomUUID().toString());
@@ -159,7 +171,6 @@ public class Kin {
 
 	private static void initOfferRepository() {
 		OfferRepository.init(OfferRemoteData.getInstance(instance.executorsUtil), OrderRepository.getInstance());
-		OfferRepository.getInstance().getOffers(null);
 	}
 
 	private static void initOrderRepository(@NonNull final Context context) {
@@ -248,8 +259,8 @@ public class Kin {
 	}
 
 	/**
-	 * Remove the balance observer, this method will close the live network connection to the blockchain network
-	 * if there is no more observers.
+	 * Remove the balance observer, this method will close the live network connection to the blockchain network if
+	 * there is no more observers.
 	 */
 	public static void removeBalanceObserver(@NonNull final Observer<Balance> observer) throws ClientException {
 		checkInstanceNotNull();
@@ -257,8 +268,8 @@ public class Kin {
 	}
 
 	/**
-	 * Allowing your users to purchase virtual goods you define within your app, using KIN.
-	 * This call might take time, due to transaction validation on the blockchain network.
+	 * Allowing your users to purchase virtual goods you define within your app, using KIN. This call might take time,
+	 * due to transaction validation on the blockchain network.
 	 *
 	 * @param offerJwt Represents a 'Spend' offer in a JWT manner.
 	 * @param callback {@link OrderConfirmation} the result will be a failure or a succeed with a jwt confirmation.
@@ -270,8 +281,8 @@ public class Kin {
 	}
 
 	/**
-	 * Allowing a user to pay to a different user for an offer defined within your app, using KIN.
-	 * This call might take time, due to transaction validation on the blockchain network.
+	 * Allowing a user to pay to a different user for an offer defined within your app, using KIN. This call might take
+	 * time, due to transaction validation on the blockchain network.
 	 *
 	 * @param offerJwt Represents a 'Pay to user' offer in a JWT manner.
 	 * @param callback {@link OrderConfirmation} the result will be a failure or a succeed with a jwt confirmation.
@@ -284,8 +295,8 @@ public class Kin {
 	}
 
 	/**
-	 * Allowing your users to earn Kin as a reward for native task you define.
-	 * This call might take time, due to transaction validation on the blockchain network.
+	 * Allowing your users to earn Kin as a reward for native task you define. This call might take time, due to
+	 * transaction validation on the blockchain network.
 	 *
 	 * @param offerJwt the offer details represented in a JWT manner.
 	 * @param callback after validating the info and sending the payment to the user, you will receive {@link
@@ -327,8 +338,8 @@ public class Kin {
 	}
 
 	/**
-	 * Adds an {@link NativeSpendOffer} to spend offer list on Kin Marketplace activity.
-	 * The offer will be added at index 0 in the spend list.
+	 * Adds an {@link NativeSpendOffer} to spend offer list on Kin Marketplace activity. The offer will be added at
+	 * index 0 in the spend list.
 	 *
 	 * @param nativeSpendOffer The spend offer you want to add to the spend list.
 	 * @return true if the offer added successfully, the list was changed.

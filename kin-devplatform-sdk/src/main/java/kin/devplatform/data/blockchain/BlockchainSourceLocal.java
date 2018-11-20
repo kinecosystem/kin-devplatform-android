@@ -9,9 +9,8 @@ public class BlockchainSourceLocal implements BlockchainSource.Local {
 	private static volatile BlockchainSourceLocal instance;
 
 	private static final String BLOCKCHAIN_PREF_NAME_FILE_KEY = "kinecosystem_blockchain_source";
-
 	private static final String BALANCE_KEY = "balance_key";
-	private static final String HAS_TRUSTLINE_KEY = "has_trustline_key";
+	private static final String ACCOUNT_INDEX_KEY = "account_index_key";
 
 	private final SharedPreferences blockchainSharedPreferences;
 
@@ -44,12 +43,12 @@ public class BlockchainSourceLocal implements BlockchainSource.Local {
 	}
 
 	@Override
-	public boolean hasTrustLine() {
-		return blockchainSharedPreferences.getBoolean(HAS_TRUSTLINE_KEY, false);
+	public int getAccountIndex() {
+		return blockchainSharedPreferences.getInt(ACCOUNT_INDEX_KEY, 0);
 	}
 
 	@Override
-	public void setHasTrustline(boolean hasTrustline) {
-		blockchainSharedPreferences.edit().putBoolean(HAS_TRUSTLINE_KEY, hasTrustline).apply();
+	public void setAccountIndex(int index) {
+		blockchainSharedPreferences.edit().putInt(ACCOUNT_INDEX_KEY, index).apply();
 	}
 }

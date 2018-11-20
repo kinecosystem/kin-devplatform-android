@@ -2,6 +2,7 @@
     <!--Activity Name-->
     <string name="kinecosystem_kin_marketplace">Kin Marketplace (Beta)</string>
     <string name="kinecosystem_transaction_history">Transaction History</string>
+    <string name="kinecosystem_settings">Settings</string>
 
     <!--Button-->
     <string name="kinecosystem_more">MORE</string>
@@ -21,11 +22,15 @@
     <string name="kinecosystem_digging_for_gems">Digging for Gems…</string>
     <string name="kinecosystem_welcome_to_kin_marketplace">Welcome to Kin Marketplace</string>
     <string name="kinecosystem_something_went_wrong">Oops something went wrong…</string>
+    <string name="kinecosystem_try_again_later">Please try again later</string>
     <string name="kinecosystem_earn_pending">Thanks! %s Kin are on the way</string>
     <string name="kinecosystem_spend_pending">Thanks! We\'re generating your code…</string>
     <string name="kinecosystem_earn_completed">Done! %s Kin earned</string>
     <string name="kinecosystem_spend_completed">Great, your code is ready</string>
     <string name="kinecosystem_sorry_this_may_take_some_time">Sorry - this may take some time</string>
+    <string name="kinecosystem_keep_your_kin_safe">Keep your Kin Safe</string>
+    <string name="kinecosystem_restore_previous_wallet">Restore previous wallet</string>
+    <string name="kinecosystem_could_not_restore_the_wallet">Could not restore the wallet, try again later.</string>
 
 
     <!--Menu-->

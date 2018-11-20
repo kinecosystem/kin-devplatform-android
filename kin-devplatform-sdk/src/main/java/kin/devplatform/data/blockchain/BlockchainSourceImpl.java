@@ -1,12 +1,11 @@
 package kin.devplatform.data.blockchain;
 
-import static kin.devplatform.Log.ERROR;
-
 import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
+import com.kin.ecosystem.recovery.KeyStoreProvider;
 import java.math.BigDecimal;
 import kin.core.EventListener;
 import kin.core.KinAccount;
@@ -29,7 +28,6 @@ import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSubmitted;
 import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSucceeded;
 import kin.devplatform.bi.events.StellarKinTrustlineSetupFailed;
 import kin.devplatform.bi.events.StellarKinTrustlineSetupSucceeded;
-import kin.devplatform.bi.events.WalletCreationSucceeded;
 import kin.devplatform.core.util.ExecutorsUtil.MainThreadExecutor;
 import kin.devplatform.data.KinCallbackAdapter;
 import kin.devplatform.data.blockchain.CreateTrustLineCall.TrustlineCallback;
@@ -51,8 +49,8 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	private KinAccount account;
 	private ObservableData<Balance> balance = ObservableData.create(new Balance());
 	/**
-	 * Listen for {@code completedPayment} in order to be notify about completed transaction sent to
-	 * the blockchain, it could failed or succeed.
+	 * Listen for {@code completedPayment} in order to be notify about completed transaction sent to the blockchain, it
+	 * could failed or succeed.
 	 */
 	private ObservableData<Payment> completedPayment = ObservableData.create();
 	private final Object paymentObserversLock = new Object();
@@ -62,7 +60,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	private ListenerRegistration paymentRegistration;
 	private ListenerRegistration balanceRegistration;
-	private ListenerRegistration accountCreationRegistration;
+
 	private final MainThreadExecutor mainThread = new MainThreadExecutor();
 
 	private String appID;
@@ -102,62 +100,26 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	private void createKinAccountIfNeeded() throws BlockchainException {
-		account = kinClient.getAccount(0);
-		if (account == null) {
+		int accountIndex = local.getAccountIndex();
+		if (kinClient.hasAccount()) {
+			account = kinClient.getAccount(accountIndex);
+		} else {
 			try {
 				account = kinClient.addAccount();
-				startAccountCreationListener();
 			} catch (CreateAccountException e) {
 				throw ErrorUtil.getBlockchainException(e);
 			}
-		} else {
-			createTrustLineIfNeeded(null);
+		}
+		if (account == null) {
+			throw ErrorUtil.createAccountCannotLoadedExcpetion(accountIndex);
 		}
 	}
 
-	private void startAccountCreationListener() {
-		Logger.log(new Log().withTag(TAG).text("startAccountCreationListener"));
-		accountCreationRegistration = account.blockchainEvents()
-			.addAccountCreationListener(new EventListener<Void>() {
-				@Override
-				public void onEvent(Void data) {
-					createTrustLine(null);
-					removeRegistration(accountCreationRegistration);
-				}
-			});
-	}
 
-	private void createTrustLineIfNeeded(@Nullable final TrustlineCallback callback) {
-		if (!local.hasTrustLine()) {
-			createTrustLine(callback);
-		} else {
-			if (callback != null) {
-				callback.onSuccess();
-			}
-		}
-	}
-
-	private void createTrustLine(@Nullable final TrustlineCallback callback) {
-		new CreateTrustLineCall(account, new TrustlineCallback() {
-			@Override
-			public void onSuccess() {
-				if (callback != null) {
-					callback.onSuccess();
-				}
-				local.setHasTrustline(true);
-				eventLogger.send(StellarKinTrustlineSetupSucceeded.create());
-				eventLogger.send(WalletCreationSucceeded.create());
-
-			}
-
-			@Override
-			public void onFailure(OperationFailedException e) {
-				if (callback != null) {
-					callback.onFailure(e);
-				}
-				eventLogger.send(StellarKinTrustlineSetupFailed.create(e.getMessage()));
-			}
-		}).start();
+	@Override
+	@Nullable
+	public KinAccount getKinAccount() {
+		return account;
 	}
 
 	@Override
@@ -171,38 +133,23 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	public void sendTransaction(@NonNull final String publicAddress, @NonNull final BigDecimal amount,
 		@NonNull final String orderID, @NonNull final String offerID) {
 		eventLogger.send(SpendTransactionBroadcastToBlockchainSubmitted.create(offerID, orderID));
-		createTrustLineIfNeeded(new TrustlineCallback() {
-			@Override
-			public void onSuccess() {
-				account.sendTransaction(publicAddress, amount, generateMemo(orderID)).run(
-					new ResultCallback<TransactionId>() {
-						@Override
-						public void onResult(TransactionId result) {
-							eventLogger.send(
-								SpendTransactionBroadcastToBlockchainSucceeded.create(result.id(), offerID, orderID));
-							Logger.log(new Log().withTag(TAG).put("sendTransaction onResult", result.id()));
-						}
+		account.sendTransaction(publicAddress, amount, generateMemo(orderID)).run(
+			new ResultCallback<TransactionId>() {
+				@Override
+				public void onResult(TransactionId result) {
+					eventLogger
+						.send(SpendTransactionBroadcastToBlockchainSucceeded.create(result.id(), offerID, orderID));
+					Logger.log(new Log().withTag(TAG).put("sendTransaction onResult", result.id()));
+				}
 
-						@Override
-						public void onError(Exception e) {
-							eventLogger.send(
-								SpendTransactionBroadcastToBlockchainFailed.create(e.getMessage(), offerID, orderID));
-							completedPayment.postValue(new Payment(orderID, false, e));
-							Logger.log(
-								new Log().withTag(TAG).priority(ERROR).put("sendTransaction onError", e.getMessage()));
-						}
-					});
-			}
-
-			@Override
-			public void onFailure(OperationFailedException e) {
-				final String errorMessage = "Trustline failed - " + e.getMessage();
-				eventLogger.send(SpendTransactionBroadcastToBlockchainFailed.create(errorMessage, offerID, orderID));
-				completedPayment.postValue(new Payment(orderID, false, e));
-				Logger.log(new Log().withTag(TAG).priority(ERROR).put("sendTransaction onError", e.getMessage()));
-			}
-		});
-
+				@Override
+				public void onError(Exception e) {
+					eventLogger
+						.send(SpendTransactionBroadcastToBlockchainFailed.create(e.getMessage(), offerID, orderID));
+					completedPayment.postValue(new Payment(orderID, false, e));
+					Logger.log(new Log().withTag(TAG).put("sendTransaction onError", e.getMessage()));
+				}
+			});
 	}
 
 	@SuppressLint("DefaultLocale")
@@ -226,29 +173,33 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
-	public void getBalance(@NonNull final KinCallback<Balance> callback) {
+	public void getBalance(@Nullable final KinCallback<Balance> callback) {
 		account.getBalance().run(new ResultCallback<kin.core.Balance>() {
 			@Override
 			public void onResult(final kin.core.Balance balanceObj) {
 				setBalance(balanceObj);
-				mainThread.execute(new Runnable() {
-					@Override
-					public void run() {
-						callback.onResponse(balance.getValue());
-					}
-				});
+				if (callback != null) {
+					mainThread.execute(new Runnable() {
+						@Override
+						public void run() {
+							callback.onResponse(balance.getValue());
+						}
+					});
+				}
 				Logger.log(new Log().withTag(TAG).put("getBalance onResult", balanceObj.value().intValue()));
 			}
 
 			@Override
 			public void onError(final Exception e) {
-				mainThread.execute(new Runnable() {
-					@Override
-					public void run() {
-						callback.onFailure(ErrorUtil.getBlockchainException(e));
-					}
-				});
-				Logger.log(new Log().withTag(TAG).priority(ERROR).put("getBalance onError", e));
+				if (callback != null) {
+					mainThread.execute(new Runnable() {
+						@Override
+						public void run() {
+							callback.onFailure(ErrorUtil.getBlockchainException(e));
+						}
+					});
+				}
+				Logger.log(new Log().withTag(TAG).priority(Log.ERROR).put("getBalance onError", e));
 			}
 		});
 	}
@@ -337,8 +288,14 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
+	@Nullable
+	public String getPublicAddress(final int accountIndex) {
+		KinAccount account = kinClient.getAccount(accountIndex);
+		return account != null ? account.getPublicAddress() : null;
+	}
+
+	@Override
 	public void addPaymentObservable(Observer<Payment> observer) {
-		createTrustLineIfNeeded(null);
 		completedPayment.addObserver(observer);
 		incrementPaymentCount();
 	}
@@ -357,11 +314,12 @@ public class BlockchainSourceImpl implements BlockchainSource {
 			.addPaymentListener(new EventListener<PaymentInfo>() {
 				@Override
 				public void onEvent(PaymentInfo data) {
-					String orderID = extractOrderId(data.memo());
+					final String orderID = extractOrderId(data.memo());
 					Logger.log(new Log().withTag(TAG).put("startPaymentListener onEvent: the orderId", orderID)
 						.put("with memo", data.memo()));
-					if (orderID != null) {
-						completedPayment.postValue(new Payment(orderID, data.hash().id(), data.amount()));
+					final String accountPublicAddress = getPublicAddress();
+					if (orderID != null && accountPublicAddress != null) {
+						completedPayment.postValue(PaymentConverter.toPayment(data, orderID, accountPublicAddress));
 						Logger.log(new Log().withTag(TAG).put("completedPayment order id", orderID));
 					}
 					// UpdateBalance if there is no balance sse open connection.
@@ -382,6 +340,49 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	public void removePaymentObserver(Observer<Payment> observer) {
 		completedPayment.removeObserver(observer);
 		decrementPaymentCount();
+	}
+
+	@Override
+	public void createTrustLine(@NonNull final KinCallback<Void> callback) {
+		new CreateTrustLineCall(account, new TrustlineCallback() {
+			@Override
+			public void onSuccess() {
+				eventLogger.send(StellarKinTrustlineSetupSucceeded.create());
+				mainThread.execute(new Runnable() {
+					@Override
+					public void run() {
+						callback.onResponse(null);
+					}
+				});
+			}
+
+			@Override
+			public void onFailure(final OperationFailedException e) {
+				eventLogger.send(StellarKinTrustlineSetupFailed.create(e.getMessage()));
+				mainThread.execute(new Runnable() {
+					@Override
+					public void run() {
+						callback.onFailure(ErrorUtil.getBlockchainException(e));
+					}
+				});
+			}
+		}).start();
+	}
+
+	@Override
+	public KeyStoreProvider getKeyStoreProvider() {
+		return new KeyStoreProviderImpl(kinClient, account);
+	}
+
+	@Override
+	public void updateActiveAccount(int accountIndex) throws BlockchainException {
+		local.setAccountIndex(accountIndex);
+		createKinAccountIfNeeded();
+
+		balanceRegistration.remove();
+		startBalanceListener();
+		//trigger balance update
+		getBalance(null);
 	}
 
 	private void decrementPaymentCount() {

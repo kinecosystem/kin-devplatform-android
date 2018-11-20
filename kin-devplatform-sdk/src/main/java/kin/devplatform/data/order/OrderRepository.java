@@ -171,7 +171,7 @@ public class OrderRepository implements OrderDataSource {
 	}
 
 	private void sendEarnPaymentConfirmed(Payment payment) {
-		if (payment.isSucceed() && payment.getAmount() != null && payment.isEarn()) {
+		if (payment.isSucceed() && payment.getAmount() != null && payment.getType() == Payment.EARN) {
 			eventLogger.send(EarnOrderPaymentConfirmed.create(payment.getTransactionID(), null, payment.getOrderID()));
 		}
 	}

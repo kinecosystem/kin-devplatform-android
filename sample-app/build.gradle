@@ -25,9 +25,6 @@ repositories {
 
 android {
     compileSdkVersion 26
-
-
-
     defaultConfig {
         applicationId "kin.devplatform.sample"
         minSdkVersion 19
@@ -46,7 +43,6 @@ android {
 
         manifestPlaceholders = [crashlytics_api_key: credentialProperties.getProperty("CRASHLYTICS_API_KEY")]
     }
-
     buildTypes {
         release {
             minifyEnabled true
@@ -54,7 +50,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     android.applicationVariants.all { variant ->
         variant.outputs.all {
             outputFileName = "SampleApp-${variant.name}-${variant.versionName}.apk"
@@ -63,13 +58,12 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     api project(':kin-devplatform-sdk')
     //implementation 'com.github.kinfoundation:kin-ecosystem-android-sdk:0.0.11'
     implementation 'io.jsonwebtoken:jjwt:0.9.0'
     implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
         transitive = true;
     }
