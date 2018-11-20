@@ -171,7 +171,6 @@ public class Kin {
 
 	private static void initOfferRepository() {
 		OfferRepository.init(OfferRemoteData.getInstance(instance.executorsUtil), OrderRepository.getInstance());
-		OfferRepository.getInstance().getOffers(null);
 	}
 
 	private static void initOrderRepository(@NonNull final Context context) {

@@ -44,8 +44,7 @@ public class Configuration {
 
 
 	/**
-	 * Get the default API client, which would be used when creating API
-	 * instances without providing an API client.
+	 * Get the default API client, which would be used when creating API instances without providing an API client.
 	 *
 	 * @return Default API client
 	 */
@@ -60,10 +59,11 @@ public class Configuration {
 
 						final String path = originalRequest.url().encodedPath();
 						AuthToken authToken = null;
-						if (!(path.equals(USERS_PATH) && originalRequest.method().equals(POST))) {
-							authToken = AuthRepository.getInstance().getAuthTokenSync();
+						if (path.equals(USERS_PATH) && originalRequest.method().equals(POST)) {
+							return chain.proceed(originalRequest);
 						}
 
+						authToken = AuthRepository.getInstance().getAuthTokenSync();
 						if (authToken != null) {
 							Request authorisedRequest = originalRequest.newBuilder()
 								.header(AUTHORIZATION, BEARER + authToken.getToken())
