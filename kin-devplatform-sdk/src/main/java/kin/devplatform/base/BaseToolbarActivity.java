@@ -39,6 +39,12 @@ public abstract class BaseToolbarActivity extends AppCompatActivity {
 		initViews();
 	}
 
+	@Override
+	protected void onDestroy() {
+		topToolBar = null;
+		super.onDestroy();
+	}
+
 	private void setupToolbar() {
 		topToolBar = findViewById(R.id.toolbar);
 		if (getTitleRes() != EMPTY_TITLE) {

@@ -138,8 +138,10 @@ public class PollWebViewActivity extends BaseToolbarActivity implements IPollWeb
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				webViewContainer.removeView(webView);
-				webView.release();
+				if (webViewContainer != null)
+					webViewContainer.removeView(webView);
+				if (webView != null)
+					webView.release();
 			}
 		});
 		finish();
@@ -147,9 +149,12 @@ public class PollWebViewActivity extends BaseToolbarActivity implements IPollWeb
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
 		close();
-		pollWebViewPresenter.onDetach();
+		if (pollWebViewPresenter != null) {
+			pollWebViewPresenter.onClose();
+			pollWebViewPresenter = null;
+		}
+		super.onDestroy();
 	}
 
 	public static class PollBundle {

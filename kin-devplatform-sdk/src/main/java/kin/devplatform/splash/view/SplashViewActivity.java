@@ -147,7 +147,8 @@ public class SplashViewActivity extends AppCompatActivity implements ISplashView
 
 	@Override
 	protected void onDestroy() {
+		splashPresenter.onClose();
+		splashPresenter = null;
 		super.onDestroy();
-		splashPresenter.onDetach();
 	}
 }

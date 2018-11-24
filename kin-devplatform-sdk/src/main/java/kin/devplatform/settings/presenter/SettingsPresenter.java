@@ -33,7 +33,7 @@ import kin.devplatform.settings.view.ISettingsView.Item;
 public class SettingsPresenter extends BasePresenter<ISettingsView> implements ISettingsPresenter {
 
 	private static final String TAG = SettingsPresenter.class.getSimpleName();
-	private final BackupManager backupManager;
+	private BackupManager backupManager;
 	private final SettingsDataSource settingsDataSource;
 	private final BlockchainSource blockchainSource;
 	private final EventLogger eventLogger;
@@ -68,6 +68,13 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 		super.onDetach();
 		removeBalanceObserver();
 		backupManager.release();
+	}
+
+	@Override
+	public void onClose() {
+		super.onClose();
+		backupManager.release();
+		backupManager = null;
 	}
 
 	private void addBalanceObserver() {
@@ -106,6 +113,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 	private void removeBalanceObserver() {
 		if (balanceObserver != null) {
 			blockchainSource.removeBalanceObserver(balanceObserver);
+			balanceObserver = null;
 		}
 	}
 

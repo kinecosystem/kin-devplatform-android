@@ -6,5 +6,7 @@ public interface IBasePresenter<T extends IBaseView> {
 
 	void onDetach();
 
+	void onClose();
+
 	T getView();
 }

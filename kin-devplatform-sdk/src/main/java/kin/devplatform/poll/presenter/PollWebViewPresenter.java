@@ -98,13 +98,10 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		release();
-	}
-
-	private void release() {
-		if (openOrderObserver != null) {
+		if (openOrderObserver != null && orderRepository.getOpenOrder() != null) {
 			orderRepository.getOpenOrder().removeObserver(openOrderObserver);
 		}
+		openOrderObserver = null;
 	}
 
 	@Override

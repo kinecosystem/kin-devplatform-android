@@ -67,6 +67,17 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	}
 
 	@Override
+	protected void onDestroy() {
+		if (settingsPresenter != null) {
+			settingsPresenter.onClose();
+			settingsPresenter = null;
+		}
+		backupItem = null;
+		restoreItem = null;
+		super.onDestroy();
+	}
+
+	@Override
 	protected void initViews() {
 
 	}

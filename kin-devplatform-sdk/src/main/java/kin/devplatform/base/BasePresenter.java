@@ -20,6 +20,11 @@ public class BasePresenter<T extends IBaseView> implements IBasePresenter<T> {
 	}
 
 	@Override
+	public void onClose() {
+		onDetach();
+	}
+
+	@Override
 	public T getView() {
 		return view;
 	}

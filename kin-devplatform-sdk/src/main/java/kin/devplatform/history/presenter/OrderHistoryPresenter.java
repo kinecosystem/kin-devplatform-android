@@ -197,5 +197,6 @@ public class OrderHistoryPresenter extends BasePresenter<IOrderHistoryView> impl
 	public void onDetach() {
 		super.onDetach();
 		orderRepository.removeOrderObserver(completedOrderObserver);
+		completedOrderObserver = null;
 	}
 }

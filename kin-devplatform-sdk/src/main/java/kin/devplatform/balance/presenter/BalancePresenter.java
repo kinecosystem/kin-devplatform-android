@@ -184,12 +184,16 @@ public class BalancePresenter extends BasePresenter<IBalanceView> implements IBa
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		removeObservers();
-	}
-
-	private void removeObservers() {
 		orderRepository.removeOrderObserver(orderObserver);
 		blockchainSource.removeBalanceObserver(balanceObserver);
+	}
+
+	@Override
+	public void onClose() {
+		super.onClose();
+		balanceObserver = null;
+		orderObserver = null;
+		balanceClickListener = null;
 	}
 
 	@Override

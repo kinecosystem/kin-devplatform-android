@@ -23,7 +23,7 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 
 	private @ScreenId
 	int visibleScreen = NONE;
-	private final INavigator navigator;
+	private INavigator navigator;
 	private final SettingsDataSource settingsDataSource;
 	private final BlockchainSource blockchainSource;
 
@@ -59,6 +59,12 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 	public void onDetach() {
 		super.onDetach();
 		removeBalanceObserver();
+	}
+
+	@Override
+	public void onClose() {
+		super.onClose();
+		navigator = null;
 	}
 
 	private void addBalanceObserver() {
