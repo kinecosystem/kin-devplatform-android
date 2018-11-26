@@ -179,11 +179,11 @@ public class OrderRepository implements OrderDataSource {
 	}
 
 	private void sendEarnPaymentConfirmed(Payment payment, kin.devplatform.network.model.Origin origin) {
-		boolean isNative = origin == kin.devplatform.network.model.Origin.EXTERNAL;
 		if (payment.isSucceed() && payment.getAmount() != null && payment.getType() == Payment.EARN) {
 			eventLogger
-				.send(EarnOrderPaymentConfirmed.create(payment.getTransactionID(), payment.getOrderID(), isNative,
-					isNative ? EarnOrderPaymentConfirmed.Origin.EXTERNAL : EarnOrderPaymentConfirmed.Origin.MARKETPLACE,
+				.send(EarnOrderPaymentConfirmed.create(payment.getTransactionID(), payment.getOrderID(),
+					origin == kin.devplatform.network.model.Origin.EXTERNAL ? EarnOrderPaymentConfirmed.Origin.EXTERNAL
+						: EarnOrderPaymentConfirmed.Origin.MARKETPLACE,
 					""));
 		}
 	}
@@ -237,10 +237,10 @@ public class OrderRepository implements OrderDataSource {
 		if (order.getOrigin() == Origin.MARKETPLACE) {
 			if (order.getStatus() == Status.COMPLETED) {
 				if (order.getOfferType() == OfferType.SPEND) {
-					eventLogger.send(SpendOrderCompleted.create(order.getOfferId(), order.getOrderId(), false,
+					eventLogger.send(SpendOrderCompleted.create(order.getOfferId(), order.getOrderId(),
 						SpendOrderCompleted.Origin.MARKETPLACE, Double.valueOf(order.getAmount())));
 				} else if (order.getOfferType() == OfferType.EARN) {
-					eventLogger.send(EarnOrderCompleted.create(order.getOfferId(), order.getOrderId(), false,
+					eventLogger.send(EarnOrderCompleted.create(order.getOfferId(), order.getOrderId(),
 						EarnOrderCompleted.Origin.MARKETPLACE, Double.valueOf(order.getAmount())));
 				}
 			} else {
@@ -253,10 +253,10 @@ public class OrderRepository implements OrderDataSource {
 					message = order.getError().getError();
 				}
 				if (order.getOfferType() == OfferType.SPEND) {
-					eventLogger.send(SpendOrderFailed.create(reason, order.getOfferId(), order.getOrderId(), false,
+					eventLogger.send(SpendOrderFailed.create(reason, order.getOfferId(), order.getOrderId(),
 						SpendOrderFailed.Origin.MARKETPLACE, errorCode, message));
 				} else if (order.getOfferType() == OfferType.EARN) {
-					eventLogger.send(EarnOrderFailed.create(reason, order.getOfferId(), order.getOrderId(), false,
+					eventLogger.send(EarnOrderFailed.create(reason, order.getOfferId(), order.getOrderId(),
 						EarnOrderFailed.Origin.MARKETPLACE, errorCode, message));
 				}
 			}
@@ -319,9 +319,9 @@ public class OrderRepository implements OrderDataSource {
 		@Nullable final KinCallback<OrderConfirmation> callback) {
 		if (isPayToUser) {
 			eventLogger.send(
-				PayToUserOrderCreationRequested.create("", true, PayToUserOrderCreationRequested.Origin.EXTERNAL));
+				PayToUserOrderCreationRequested.create("", PayToUserOrderCreationRequested.Origin.EXTERNAL));
 		} else {
-			eventLogger.send(SpendOrderCreationRequested.create("", true, SpendOrderCreationRequested.Origin.EXTERNAL));
+			eventLogger.send(SpendOrderCreationRequested.create("", SpendOrderCreationRequested.Origin.EXTERNAL));
 		}
 		new ExternalSpendOrderCall(remoteData, blockchainSource, offerJwt, eventLogger,
 			new ExternalSpendOrderCallbacks() {
@@ -341,11 +341,11 @@ public class OrderRepository implements OrderDataSource {
 						});
 					if (isPayToUser) {
 						eventLogger.send(PayToUserOrderCompletionSubmitted
-							.create(openOrder.getOfferId(), openOrder.getId(), true,
+							.create(openOrder.getOfferId(), openOrder.getId(),
 								PayToUserOrderCompletionSubmitted.Origin.EXTERNAL));
 					} else {
 						eventLogger.send(SpendOrderCompletionSubmitted
-							.create(openOrder.getOfferId(), openOrder.getId(), true,
+							.create(openOrder.getOfferId(), openOrder.getId(),
 								SpendOrderCompletionSubmitted.Origin.EXTERNAL));
 					}
 				}
@@ -377,11 +377,11 @@ public class OrderRepository implements OrderDataSource {
 					}
 					if (isPayToUser) {
 						eventLogger.send(PayToUserOrderCompleted
-							.create(offerID, orderId, true, PayToUserOrderCompleted.Origin.EXTERNAL,
+							.create(offerID, orderId, PayToUserOrderCompleted.Origin.EXTERNAL,
 								Double.valueOf(order.getAmount())));
 					} else {
 						eventLogger.send(SpendOrderCompleted
-							.create(offerID, orderId, true, SpendOrderCompleted.Origin.EXTERNAL,
+							.create(offerID, orderId, SpendOrderCompleted.Origin.EXTERNAL,
 								Double.valueOf(order.getAmount())));
 					}
 
@@ -402,12 +402,12 @@ public class OrderRepository implements OrderDataSource {
 				private void handleOnFailure(KinEcosystemException exception, String offerId, String orderId) {
 					if (isPayToUser) {
 						eventLogger.send(PayToUserOrderFailed
-							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId, true,
+							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
 								PayToUserOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
 								exception.getMessage()));
 					} else {
 						eventLogger.send(SpendOrderFailed
-							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId, true,
+							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
 								SpendOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
 								exception.getMessage()));
 					}
@@ -423,7 +423,7 @@ public class OrderRepository implements OrderDataSource {
 	@Override
 	public void requestPayment(String offerJwt, final KinCallback<OrderConfirmation> callback) {
 		eventLogger
-			.send(EarnOrderCreationRequested.create(null, 0.0, "", true, EarnOrderCreationRequested.Origin.EXTERNAL));
+			.send(EarnOrderCreationRequested.create(null, 0.0, "", EarnOrderCreationRequested.Origin.EXTERNAL));
 		new ExternalEarnOrderCall(remoteData, blockchainSource, offerJwt, eventLogger, new ExternalOrderCallbacks() {
 			@Override
 			public void onOrderCreated(final OpenOrder openOrder) {
@@ -436,7 +436,7 @@ public class OrderRepository implements OrderDataSource {
 						}
 					});
 				eventLogger
-					.send(EarnOrderCompletionSubmitted.create(openOrder.getOfferId(), openOrder.getId(), true,
+					.send(EarnOrderCompletionSubmitted.create(openOrder.getOfferId(), openOrder.getId(),
 						EarnOrderCompletionSubmitted.Origin.EXTERNAL));
 			}
 
@@ -449,8 +449,7 @@ public class OrderRepository implements OrderDataSource {
 					orderId = order.getOrderId();
 				}
 				eventLogger.send(EarnOrderCompleted
-					.create(offerID, orderId, true, EarnOrderCompleted.Origin.EXTERNAL,
-						Double.valueOf(order.getAmount())));
+					.create(offerID, orderId, EarnOrderCompleted.Origin.EXTERNAL, Double.valueOf(order.getAmount())));
 
 				if (callback != null) {
 					callback.onResponse(createOrderConfirmation(confirmationJwt));
@@ -469,7 +468,7 @@ public class OrderRepository implements OrderDataSource {
 
 			private void handleOnFailure(KinEcosystemException exception, String offerId, String orderId) {
 				eventLogger
-					.send(EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId, true,
+					.send(EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
 						EarnOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), exception.getMessage()));
 
 				if (callback != null) {

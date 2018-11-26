@@ -5,32 +5,28 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import java.util.HashMap;
-import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * Client receives the spending offer he purchased (e.g. coupon code) 
- * 
+ * Clients submits payments to the blockchain and get confirmation
  */
-public class PayToUserOrderCompleted implements Event {
+public class PayToUserTransactionBroadcastToBlockchainSucceeded implements Event {
 
-	public static final String EVENT_NAME = "pay_to_user_order_completed";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "pay_to_user_transaction_broadcast_to_blockchain_succeeded";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static PayToUserOrderCompleted create(String offerId, String orderId, PayToUserOrderCompleted.Origin origin,
-		Double kinAmount) {
-		return new PayToUserOrderCompleted(
+	public static PayToUserTransactionBroadcastToBlockchainSucceeded create(String transactionId, String offerId,
+		String orderId) {
+		return new PayToUserTransactionBroadcastToBlockchainSucceeded(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
+			transactionId,
 			offerId,
-			orderId,
-			origin,
-			kinAmount);
+			orderId);
 	}
 
 	/**
@@ -66,6 +62,12 @@ public class PayToUserOrderCompleted implements Event {
 	/**
 	 * (Required)
 	 */
+	@SerializedName("transaction_id")
+	@Expose
+	private String transactionId;
+	/**
+	 * (Required)
+	 */
 	@SerializedName("offer_id")
 	@Expose
 	private String offerId;
@@ -75,47 +77,33 @@ public class PayToUserOrderCompleted implements Event {
 	@SerializedName("order_id")
 	@Expose
 	private String orderId;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("origin")
-	@Expose
-	private PayToUserOrderCompleted.Origin origin;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("kin_amount")
-	@Expose
-	private Double kinAmount;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public PayToUserOrderCompleted() {
+	public PayToUserTransactionBroadcastToBlockchainSucceeded() {
 	}
 
 	/**
 	 *
 	 * @param common
 	 * @param orderId
-	 * @param origin
 
 	 * @param client
 	 * @param offerId
-	 * @param kinAmount
 
 	 * @param user
+	 * @param transactionId
 	 */
-	public PayToUserOrderCompleted(Common common, User user, Client client, String offerId, String orderId,
-		PayToUserOrderCompleted.Origin origin, Double kinAmount) {
+	public PayToUserTransactionBroadcastToBlockchainSucceeded(Common common, User user, Client client,
+		String transactionId, String offerId, String orderId) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
+		this.transactionId = transactionId;
 		this.offerId = offerId;
 		this.orderId = orderId;
-		this.origin = origin;
-		this.kinAmount = kinAmount;
 	}
 
 	/**
@@ -191,6 +179,20 @@ public class PayToUserOrderCompleted implements Event {
 	/**
 	 * (Required)
 	 */
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
+
+	/**
+	 * (Required)
+	 */
 	public String getOfferId() {
 		return offerId;
 	}
@@ -214,73 +216,6 @@ public class PayToUserOrderCompleted implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public PayToUserOrderCompleted.Origin getOrigin() {
-		return origin;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setOrigin(PayToUserOrderCompleted.Origin origin) {
-		this.origin = origin;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Double getKinAmount() {
-		return kinAmount;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setKinAmount(Double kinAmount) {
-		this.kinAmount = kinAmount;
-	}
-
-	public enum Origin {
-
-		@SerializedName("marketplace")
-		MARKETPLACE("marketplace"),
-		@SerializedName("external")
-		EXTERNAL("external");
-		private final String value;
-		private final static Map<String, PayToUserOrderCompleted.Origin> CONSTANTS = new HashMap<String, PayToUserOrderCompleted.Origin>();
-
-		static {
-			for (PayToUserOrderCompleted.Origin c : values()) {
-				CONSTANTS.put(c.value, c);
-			}
-		}
-
-		private Origin(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return this.value;
-		}
-
-		public String value() {
-			return this.value;
-		}
-
-		public static PayToUserOrderCompleted.Origin fromValue(String value) {
-			PayToUserOrderCompleted.Origin constant = CONSTANTS.get(value);
-			if (constant == null) {
-				throw new IllegalArgumentException(value);
-			} else {
-				return constant;
-			}
-		}
-
 	}
 
 }

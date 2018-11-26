@@ -21,7 +21,7 @@ public class EarnOrderCreationReceived implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnOrderCreationReceived create(String offerId, String orderId, Boolean isNative,
+	public static EarnOrderCreationReceived create(String offerId, String orderId,
 		EarnOrderCreationReceived.Origin origin) {
 		return new EarnOrderCreationReceived(
 			(Common) EventsStore.common(),
@@ -29,7 +29,6 @@ public class EarnOrderCreationReceived implements Event {
 			(Client) EventsStore.client(),
 			offerId,
 			orderId,
-			isNative,
 			origin);
 	}
 
@@ -78,12 +77,6 @@ public class EarnOrderCreationReceived implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("origin")
 	@Expose
 	private EarnOrderCreationReceived.Origin origin;
@@ -104,17 +97,15 @@ public class EarnOrderCreationReceived implements Event {
 	 * @param offerId
 
 	 * @param user
-	 * @param isNative
 	 */
 	public EarnOrderCreationReceived(Common common, User user, Client client, String offerId, String orderId,
-		Boolean isNative, EarnOrderCreationReceived.Origin origin) {
+		EarnOrderCreationReceived.Origin origin) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.offerId = offerId;
 		this.orderId = orderId;
-		this.isNative = isNative;
 		this.origin = origin;
 	}
 
@@ -214,20 +205,6 @@ public class EarnOrderCreationReceived implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
 	}
 
 	/**

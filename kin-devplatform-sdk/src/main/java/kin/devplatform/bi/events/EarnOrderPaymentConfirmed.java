@@ -21,7 +21,7 @@ public class EarnOrderPaymentConfirmed implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnOrderPaymentConfirmed create(String transactionId, String orderId, Boolean isNative,
+	public static EarnOrderPaymentConfirmed create(String transactionId, String orderId,
 		EarnOrderPaymentConfirmed.Origin origin, String operationId) {
 		return new EarnOrderPaymentConfirmed(
 			(Common) EventsStore.common(),
@@ -29,7 +29,6 @@ public class EarnOrderPaymentConfirmed implements Event {
 			(Client) EventsStore.client(),
 			transactionId,
 			orderId,
-			isNative,
 			origin,
 			operationId);
 	}
@@ -79,12 +78,6 @@ public class EarnOrderPaymentConfirmed implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("origin")
 	@Expose
 	private EarnOrderPaymentConfirmed.Origin origin;
@@ -112,17 +105,15 @@ public class EarnOrderPaymentConfirmed implements Event {
 
 	 * @param user
 	 * @param transactionId
-	 * @param isNative
 	 */
 	public EarnOrderPaymentConfirmed(Common common, User user, Client client, String transactionId, String orderId,
-		Boolean isNative, EarnOrderPaymentConfirmed.Origin origin, String operationId) {
+		EarnOrderPaymentConfirmed.Origin origin, String operationId) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.transactionId = transactionId;
 		this.orderId = orderId;
-		this.isNative = isNative;
 		this.origin = origin;
 		this.operationId = operationId;
 	}
@@ -223,20 +214,6 @@ public class EarnOrderPaymentConfirmed implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
 	}
 
 	/**

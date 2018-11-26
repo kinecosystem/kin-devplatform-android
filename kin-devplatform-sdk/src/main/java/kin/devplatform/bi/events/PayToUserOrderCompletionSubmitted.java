@@ -13,6 +13,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * Client submits completed orderID to server
+ * 
  */
 public class PayToUserOrderCompletionSubmitted implements Event {
 
@@ -20,7 +21,7 @@ public class PayToUserOrderCompletionSubmitted implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static PayToUserOrderCompletionSubmitted create(String offerId, String orderId, Boolean isNative,
+	public static PayToUserOrderCompletionSubmitted create(String offerId, String orderId,
 		PayToUserOrderCompletionSubmitted.Origin origin) {
 		return new PayToUserOrderCompletionSubmitted(
 			(Common) EventsStore.common(),
@@ -28,7 +29,6 @@ public class PayToUserOrderCompletionSubmitted implements Event {
 			(Client) EventsStore.client(),
 			offerId,
 			orderId,
-			isNative,
 			origin);
 	}
 
@@ -77,12 +77,6 @@ public class PayToUserOrderCompletionSubmitted implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("origin")
 	@Expose
 	private PayToUserOrderCompletionSubmitted.Origin origin;
@@ -103,17 +97,15 @@ public class PayToUserOrderCompletionSubmitted implements Event {
 	 * @param offerId
 
 	 * @param user
-	 * @param isNative
 	 */
 	public PayToUserOrderCompletionSubmitted(Common common, User user, Client client, String offerId, String orderId,
-		Boolean isNative, PayToUserOrderCompletionSubmitted.Origin origin) {
+		PayToUserOrderCompletionSubmitted.Origin origin) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.offerId = offerId;
 		this.orderId = orderId;
-		this.isNative = isNative;
 		this.origin = origin;
 	}
 
@@ -213,20 +205,6 @@ public class PayToUserOrderCompletionSubmitted implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
 	}
 
 	/**

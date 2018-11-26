@@ -13,6 +13,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * Spend order fails
+ * 
  */
 public class PayToUserOrderFailed implements Event {
 
@@ -20,7 +21,7 @@ public class PayToUserOrderFailed implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static PayToUserOrderFailed create(String errorReason, String offerId, String orderId, Boolean isNative,
+	public static PayToUserOrderFailed create(String errorReason, String offerId, String orderId,
 		PayToUserOrderFailed.Origin origin, String errorCode, String errorMessage) {
 		return new PayToUserOrderFailed(
 			(Common) EventsStore.common(),
@@ -29,7 +30,6 @@ public class PayToUserOrderFailed implements Event {
 			errorReason,
 			offerId,
 			orderId,
-			isNative,
 			origin,
 			errorCode,
 			errorMessage);
@@ -86,12 +86,6 @@ public class PayToUserOrderFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("origin")
 	@Expose
 	private PayToUserOrderFailed.Origin origin;
@@ -127,10 +121,9 @@ public class PayToUserOrderFailed implements Event {
 	 * @param errorCode
 
 	 * @param user
-	 * @param isNative
 	 */
 	public PayToUserOrderFailed(Common common, User user, Client client, String errorReason, String offerId,
-		String orderId, Boolean isNative, PayToUserOrderFailed.Origin origin, String errorCode, String errorMessage) {
+		String orderId, PayToUserOrderFailed.Origin origin, String errorCode, String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
@@ -138,7 +131,6 @@ public class PayToUserOrderFailed implements Event {
 		this.errorReason = errorReason;
 		this.offerId = offerId;
 		this.orderId = orderId;
-		this.isNative = isNative;
 		this.origin = origin;
 		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
@@ -254,20 +246,6 @@ public class PayToUserOrderFailed implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
 	}
 
 	/**

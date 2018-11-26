@@ -5,32 +5,30 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import java.util.HashMap;
-import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * Client receives the spending offer he purchased (e.g. coupon code) 
- * 
+ * Client failed to submit payment to the blockchain
  */
-public class PayToUserOrderCompleted implements Event {
+public class PayToUserTransactionBroadcastToBlockchainFailed implements Event {
 
-	public static final String EVENT_NAME = "pay_to_user_order_completed";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "pay_to_user_transaction_broadcast_to_blockchain_failed";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static PayToUserOrderCompleted create(String offerId, String orderId, PayToUserOrderCompleted.Origin origin,
-		Double kinAmount) {
-		return new PayToUserOrderCompleted(
+	public static PayToUserTransactionBroadcastToBlockchainFailed create(String errorReason, String offerId,
+		String orderId, String errorCode, String errorMessage) {
+		return new PayToUserTransactionBroadcastToBlockchainFailed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
+			errorReason,
 			offerId,
 			orderId,
-			origin,
-			kinAmount);
+			errorCode,
+			errorMessage);
 	}
 
 	/**
@@ -66,6 +64,12 @@ public class PayToUserOrderCompleted implements Event {
 	/**
 	 * (Required)
 	 */
+	@SerializedName("error_reason")
+	@Expose
+	private String errorReason;
+	/**
+	 * (Required)
+	 */
 	@SerializedName("offer_id")
 	@Expose
 	private String offerId;
@@ -78,44 +82,46 @@ public class PayToUserOrderCompleted implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("origin")
+	@SerializedName("error_code")
 	@Expose
-	private PayToUserOrderCompleted.Origin origin;
+	private String errorCode;
 	/**
 	 * (Required)
 	 */
-	@SerializedName("kin_amount")
+	@SerializedName("error_message")
 	@Expose
-	private Double kinAmount;
+	private String errorMessage;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public PayToUserOrderCompleted() {
+	public PayToUserTransactionBroadcastToBlockchainFailed() {
 	}
 
 	/**
 	 *
 	 * @param common
 	 * @param orderId
-	 * @param origin
+	 * @param errorReason
+	 * @param errorMessage
 
 	 * @param client
 	 * @param offerId
-	 * @param kinAmount
+	 * @param errorCode
 
 	 * @param user
 	 */
-	public PayToUserOrderCompleted(Common common, User user, Client client, String offerId, String orderId,
-		PayToUserOrderCompleted.Origin origin, Double kinAmount) {
+	public PayToUserTransactionBroadcastToBlockchainFailed(Common common, User user, Client client, String errorReason,
+		String offerId, String orderId, String errorCode, String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
+		this.errorReason = errorReason;
 		this.offerId = offerId;
 		this.orderId = orderId;
-		this.origin = origin;
-		this.kinAmount = kinAmount;
+		this.errorCode = errorCode;
+		this.errorMessage = errorMessage;
 	}
 
 	/**
@@ -191,6 +197,20 @@ public class PayToUserOrderCompleted implements Event {
 	/**
 	 * (Required)
 	 */
+	public String getErrorReason() {
+		return errorReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorReason(String errorReason) {
+		this.errorReason = errorReason;
+	}
+
+	/**
+	 * (Required)
+	 */
 	public String getOfferId() {
 		return offerId;
 	}
@@ -219,68 +239,29 @@ public class PayToUserOrderCompleted implements Event {
 	/**
 	 * (Required)
 	 */
-	public PayToUserOrderCompleted.Origin getOrigin() {
-		return origin;
+	public String getErrorCode() {
+		return errorCode;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setOrigin(PayToUserOrderCompleted.Origin origin) {
-		this.origin = origin;
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public Double getKinAmount() {
-		return kinAmount;
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setKinAmount(Double kinAmount) {
-		this.kinAmount = kinAmount;
-	}
-
-	public enum Origin {
-
-		@SerializedName("marketplace")
-		MARKETPLACE("marketplace"),
-		@SerializedName("external")
-		EXTERNAL("external");
-		private final String value;
-		private final static Map<String, PayToUserOrderCompleted.Origin> CONSTANTS = new HashMap<String, PayToUserOrderCompleted.Origin>();
-
-		static {
-			for (PayToUserOrderCompleted.Origin c : values()) {
-				CONSTANTS.put(c.value, c);
-			}
-		}
-
-		private Origin(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return this.value;
-		}
-
-		public String value() {
-			return this.value;
-		}
-
-		public static PayToUserOrderCompleted.Origin fromValue(String value) {
-			PayToUserOrderCompleted.Origin constant = CONSTANTS.get(value);
-			if (constant == null) {
-				throw new IllegalArgumentException(value);
-			} else {
-				return constant;
-			}
-		}
-
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 
 }

@@ -13,6 +13,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * Client request OrderID for purchase an offer
+ * 
  */
 public class PayToUserOrderCreationRequested implements Event {
 
@@ -20,14 +21,13 @@ public class PayToUserOrderCreationRequested implements Event {
 	public static final String EVENT_TYPE = "business";
 
 	// Augmented by script
-	public static PayToUserOrderCreationRequested create(String offerId, Boolean isNative,
+	public static PayToUserOrderCreationRequested create(String offerId,
 		PayToUserOrderCreationRequested.Origin origin) {
 		return new PayToUserOrderCreationRequested(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			offerId,
-			isNative,
 			origin);
 	}
 
@@ -70,12 +70,6 @@ public class PayToUserOrderCreationRequested implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("origin")
 	@Expose
 	private PayToUserOrderCreationRequested.Origin origin;
@@ -95,16 +89,14 @@ public class PayToUserOrderCreationRequested implements Event {
 	 * @param offerId
 
 	 * @param user
-	 * @param isNative
 	 */
-	public PayToUserOrderCreationRequested(Common common, User user, Client client, String offerId, Boolean isNative,
+	public PayToUserOrderCreationRequested(Common common, User user, Client client, String offerId,
 		PayToUserOrderCreationRequested.Origin origin) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.offerId = offerId;
-		this.isNative = isNative;
 		this.origin = origin;
 	}
 
@@ -190,20 +182,6 @@ public class PayToUserOrderCreationRequested implements Event {
 	 */
 	public void setOfferId(String offerId) {
 		this.offerId = offerId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
 	}
 
 	/**

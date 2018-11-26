@@ -78,7 +78,7 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 	private void createOrder() {
 		try {
 			eventLogger.send(EarnOrderCreationRequested
-				.create(EarnOrderCreationRequested.OfferType.fromValue(contentType), (double) amount, offerID, false,
+				.create(EarnOrderCreationRequested.OfferType.fromValue(contentType), (double) amount, offerID,
 					Origin.MARKETPLACE));
 		} catch (IllegalArgumentException ex) {
 			//TODO: add general error event
@@ -87,7 +87,7 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 			@Override
 			public void onResponse(OpenOrder response) {
 				eventLogger.send(EarnOrderCreationReceived
-					.create(offerID, response != null ? response.getId() : null, false,
+					.create(offerID, response != null ? response.getId() : null,
 						EarnOrderCreationReceived.Origin.MARKETPLACE));
 				// we are listening to open orders.
 			}
@@ -97,7 +97,8 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 				showToast(SOMETHING_WENT_WRONG);
 				eventLogger
 					.send(EarnOrderCreationFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerID,
-						false, EarnOrderCreationFailed.Origin.MARKETPLACE, String.valueOf(exception.getCode()), ""));
+						EarnOrderCreationFailed.Origin.MARKETPLACE, String.valueOf(exception.getCode()),
+						exception.getMessage()));
 				closeView();
 			}
 		});
@@ -155,7 +156,7 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 			isOrderSubmitted = true;
 			final String orderId = openOrder.getId();
 			eventLogger.send(EarnOrderCompletionSubmitted
-				.create(offerID, orderId, false, EarnOrderCompletionSubmitted.Origin.MARKETPLACE));
+				.create(offerID, orderId, EarnOrderCompletionSubmitted.Origin.MARKETPLACE));
 			orderRepository.submitOrder(offerID, result, orderId, kin.devplatform.network.model.Origin.MARKETPLACE,
 				new KinCallback<Order>() {
 					@Override
@@ -165,8 +166,9 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 
 					@Override
 					public void onFailure(KinEcosystemException exception) {
-						EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerID, orderId, false,
-							EarnOrderFailed.Origin.MARKETPLACE, String.valueOf(exception.getCode()), "");
+						EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerID, orderId,
+							EarnOrderFailed.Origin.MARKETPLACE, String.valueOf(exception.getCode()),
+							exception.getMessage());
 						showToast(ORDER_SUBMISSION_FAILED);
 					}
 				});

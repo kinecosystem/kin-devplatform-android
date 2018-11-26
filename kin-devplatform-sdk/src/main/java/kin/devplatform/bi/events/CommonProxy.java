@@ -5,103 +5,103 @@ import kin.devplatform.bi.EventsStore;
 
 public class CommonProxy implements CommonInterface {
 
-	public Common snapshot() {
-		return new Common(
-			this.getVersion(),
-			this.getUserId(),
-			this.getTimestamp(),
-			this.getSchemaVersion(),
-			this.getEventId());
-	}
+    public Common snapshot() {
+        return new Common(
+            this.getVersion(),
+            this.getUserId(),
+            this.getTimestamp(),
+            this.getSchemaVersion(),
+            this.getEventId());
+    }
 
-	private String version;
-	private EventsStore.DynamicValue<String> dynamicVersion;
+    private String version;
+    private EventsStore.DynamicValue<String> dynamicVersion;
 
-	public String getVersion() {
-		return this.version != null ? this.version : this.dynamicVersion.get();
-	}
+    public String getVersion() {
+        return this.version != null ? this.version : this.dynamicVersion.get();
+    }
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
-	public void setVersion(EventsStore.DynamicValue<String> version) {
-		this.dynamicVersion = version;
-	}
+    public void setVersion(EventsStore.DynamicValue<String> version) {
+        this.dynamicVersion = version;
+    }
 
-	private String userId;
-	private EventsStore.DynamicValue<String> dynamicUserId;
+    private String userId;
+    private EventsStore.DynamicValue<String> dynamicUserId;
 
-	public String getUserId() {
-		return this.userId != null ? this.userId : this.dynamicUserId.get();
-	}
+    public String getUserId() {
+        return this.userId != null ? this.userId : this.dynamicUserId.get();
+    }
 
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-	public void setUserId(EventsStore.DynamicValue<String> userId) {
-		this.dynamicUserId = userId;
-	}
+    public void setUserId(EventsStore.DynamicValue<String> userId) {
+        this.dynamicUserId = userId;
+    }
 
-	private Long timestamp;
-	private EventsStore.DynamicValue<Long> dynamicTimestamp;
+    private Long timestamp;
+    private EventsStore.DynamicValue<Long> dynamicTimestamp;
 
-	public Long getTimestamp() {
-		return this.timestamp != null ? this.timestamp : this.dynamicTimestamp.get();
-	}
+    public Long getTimestamp() {
+        return this.timestamp != null ? this.timestamp : this.dynamicTimestamp.get();
+    }
 
-	public void setTimestamp(Long timestamp) {
-		this.timestamp = timestamp;
-	}
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	public void setTimestamp(EventsStore.DynamicValue<Long> timestamp) {
-		this.dynamicTimestamp = timestamp;
-	}
+    public void setTimestamp(EventsStore.DynamicValue<Long> timestamp) {
+        this.dynamicTimestamp = timestamp;
+    }
 
-	private String platform;
-	private EventsStore.DynamicValue<String> dynamicPlatform;
+    private String platform;
+    private EventsStore.DynamicValue<String> dynamicPlatform;
 
-	public String getPlatform() {
-		return this.platform != null ? this.platform : this.dynamicPlatform.get();
-	}
+    public String getPlatform() {
+        return this.platform != null ? this.platform : this.dynamicPlatform.get();
+    }
 
-	public void setPlatform(String platform) {
-		this.platform = platform;
-	}
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
 
-	public void setPlatform(EventsStore.DynamicValue<String> platform) {
-		this.dynamicPlatform = platform;
-	}
+    public void setPlatform(EventsStore.DynamicValue<String> platform) {
+        this.dynamicPlatform = platform;
+    }
 
-	private String schemaVersion = "1";
-	private EventsStore.DynamicValue<String> dynamicSchemaVersion;
+    private String schemaVersion = "";
+    private EventsStore.DynamicValue<String> dynamicSchemaVersion;
 
-	public String getSchemaVersion() {
-		return this.schemaVersion != null ? this.schemaVersion : this.dynamicSchemaVersion.get();
-	}
+    public String getSchemaVersion() {
+        return this.schemaVersion != null ? this.schemaVersion : this.dynamicSchemaVersion.get();
+    }
 
-	public void setSchemaVersion(String schemaVersion) {
-		this.schemaVersion = schemaVersion;
-	}
+    public void setSchemaVersion(String schemaVersion) {
+        this.schemaVersion = schemaVersion;
+    }
 
-	public void setSchemaVersion(EventsStore.DynamicValue<String> schemaVersion) {
-		this.dynamicSchemaVersion = schemaVersion;
-	}
+    public void setSchemaVersion(EventsStore.DynamicValue<String> schemaVersion) {
+        this.dynamicSchemaVersion = schemaVersion;
+    }
 
-	private UUID eventId;
-	private EventsStore.DynamicValue<UUID> dynamicEventId;
+    private UUID eventId;
+    private EventsStore.DynamicValue<UUID> dynamicEventId;
 
-	public UUID getEventId() {
-		return this.eventId != null ? this.eventId : this.dynamicEventId.get();
-	}
+    public UUID getEventId() {
+        return this.eventId != null ? this.eventId : this.dynamicEventId.get();
+    }
 
-	public void setEventId(UUID eventId) {
-		this.eventId = eventId;
-	}
+    public void setEventId(UUID eventId) {
+        this.eventId = eventId;
+    }
 
-	public void setEventId(EventsStore.DynamicValue<UUID> eventId) {
-		this.dynamicEventId = eventId;
-	}
+    public void setEventId(EventsStore.DynamicValue<UUID> eventId) {
+        this.dynamicEventId = eventId;
+    }
 
 }

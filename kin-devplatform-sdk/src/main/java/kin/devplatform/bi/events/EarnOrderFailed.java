@@ -21,7 +21,7 @@ public class EarnOrderFailed implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnOrderFailed create(String errorReason, String offerId, String orderId, Boolean isNative,
+	public static EarnOrderFailed create(String errorReason, String offerId, String orderId,
 		EarnOrderFailed.Origin origin, String errorCode, String errorMessage) {
 		return new EarnOrderFailed(
 			(Common) EventsStore.common(),
@@ -30,7 +30,6 @@ public class EarnOrderFailed implements Event {
 			errorReason,
 			offerId,
 			orderId,
-			isNative,
 			origin,
 			errorCode,
 			errorMessage);
@@ -87,12 +86,6 @@ public class EarnOrderFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("origin")
 	@Expose
 	private EarnOrderFailed.Origin origin;
@@ -128,10 +121,9 @@ public class EarnOrderFailed implements Event {
 	 * @param errorCode
 
 	 * @param user
-	 * @param isNative
 	 */
 	public EarnOrderFailed(Common common, User user, Client client, String errorReason, String offerId, String orderId,
-		Boolean isNative, EarnOrderFailed.Origin origin, String errorCode, String errorMessage) {
+		EarnOrderFailed.Origin origin, String errorCode, String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
@@ -139,7 +131,6 @@ public class EarnOrderFailed implements Event {
 		this.errorReason = errorReason;
 		this.offerId = offerId;
 		this.orderId = orderId;
-		this.isNative = isNative;
 		this.origin = origin;
 		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
@@ -255,20 +246,6 @@ public class EarnOrderFailed implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
 	}
 
 	/**

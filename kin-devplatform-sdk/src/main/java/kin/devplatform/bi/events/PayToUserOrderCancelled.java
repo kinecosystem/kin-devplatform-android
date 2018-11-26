@@ -11,6 +11,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * Client cancels spend order
+ * 
  */
 public class PayToUserOrderCancelled implements Event {
 

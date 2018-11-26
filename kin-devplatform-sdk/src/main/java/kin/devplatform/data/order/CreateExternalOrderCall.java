@@ -90,7 +90,8 @@ class CreateExternalOrderCall extends Thread {
 
 		if (externalOrderCallbacks instanceof ExternalSpendOrderCallbacks) {
 			blockchainSource.sendTransaction(openOrder.getBlockchainData().getRecipientAddress(),
-				new BigDecimal(openOrder.getAmount()), openOrder.getId(), openOrder.getOfferId());
+				new BigDecimal(openOrder.getAmount()), openOrder.getId(), openOrder.getOfferId(),
+				openOrder.getOfferType());
 
 			runOnMainThread(new Runnable() {
 				@Override
@@ -130,17 +131,20 @@ class CreateExternalOrderCall extends Thread {
 			switch (openOrder.getOfferType()) {
 				case SPEND:
 					eventLogger.send(SpendOrderCreationFailed
-						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(), true,
-							SpendOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), ""));
+						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(),
+							SpendOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+							exception.getMessage()));
 					break;
 				case EARN:
 					eventLogger.send(EarnOrderCreationFailed
-						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(), true,
-							EarnOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), ""));
+						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(),
+							EarnOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+							exception.getMessage()));
 				case PAY_TO_USER:
 					eventLogger.send(PayToUserOrderCreationFailed
-						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(), true,
-							PayToUserOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), ""));
+						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(),
+							PayToUserOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+							exception.getMessage()));
 					break;
 			}
 
@@ -152,16 +156,14 @@ class CreateExternalOrderCall extends Thread {
 			switch (openOrder.getOfferType()) {
 				case SPEND:
 					eventLogger.send(SpendOrderCreationReceived
-						.create(openOrder.getOfferId(), openOrder.getId(), true,
-							SpendOrderCreationReceived.Origin.EXTERNAL));
+						.create(openOrder.getOfferId(), openOrder.getId(), SpendOrderCreationReceived.Origin.EXTERNAL));
 					break;
 				case EARN:
 					eventLogger.send(EarnOrderCreationReceived
-						.create(openOrder.getOfferId(), openOrder.getId(), true,
-							EarnOrderCreationReceived.Origin.EXTERNAL));
+						.create(openOrder.getOfferId(), openOrder.getId(), EarnOrderCreationReceived.Origin.EXTERNAL));
 				case PAY_TO_USER:
 					eventLogger.send(PayToUserOrderCreationReceived
-						.create(openOrder.getOfferId(), openOrder.getId(), true,
+						.create(openOrder.getOfferId(), openOrder.getId(),
 							PayToUserOrderCreationReceived.Origin.EXTERNAL));
 					break;
 			}

@@ -22,7 +22,7 @@ public class EarnOrderCreationRequested implements Event {
 
 	// Augmented by script
 	public static EarnOrderCreationRequested create(EarnOrderCreationRequested.OfferType offerType, Double kinAmount,
-		String offerId, Boolean isNative, EarnOrderCreationRequested.Origin origin) {
+		String offerId, EarnOrderCreationRequested.Origin origin) {
 		return new EarnOrderCreationRequested(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
@@ -30,7 +30,6 @@ public class EarnOrderCreationRequested implements Event {
 			offerType,
 			kinAmount,
 			offerId,
-			isNative,
 			origin);
 	}
 
@@ -85,12 +84,6 @@ public class EarnOrderCreationRequested implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("origin")
 	@Expose
 	private EarnOrderCreationRequested.Origin origin;
@@ -112,10 +105,9 @@ public class EarnOrderCreationRequested implements Event {
 	 * @param kinAmount
 
 	 * @param user
-	 * @param isNative
 	 */
 	public EarnOrderCreationRequested(Common common, User user, Client client,
-		EarnOrderCreationRequested.OfferType offerType, Double kinAmount, String offerId, Boolean isNative,
+		EarnOrderCreationRequested.OfferType offerType, Double kinAmount, String offerId,
 		EarnOrderCreationRequested.Origin origin) {
 		super();
 		this.common = common;
@@ -124,7 +116,6 @@ public class EarnOrderCreationRequested implements Event {
 		this.offerType = offerType;
 		this.kinAmount = kinAmount;
 		this.offerId = offerId;
-		this.isNative = isNative;
 		this.origin = origin;
 	}
 
@@ -238,20 +229,6 @@ public class EarnOrderCreationRequested implements Event {
 	 */
 	public void setOfferId(String offerId) {
 		this.offerId = offerId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
 	}
 
 	/**
