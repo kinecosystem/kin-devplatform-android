@@ -13,6 +13,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * Generic earn page loaded
+ * 
  */
 public class EarnPageLoaded implements Event {
 
@@ -20,7 +21,7 @@ public class EarnPageLoaded implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnPageLoaded create(OfferType offerType) {
+	public static EarnPageLoaded create(EarnPageLoaded.OfferType offerType) {
 		return new EarnPageLoaded(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
@@ -41,22 +42,19 @@ public class EarnPageLoaded implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
@@ -66,7 +64,7 @@ public class EarnPageLoaded implements Event {
 	 */
 	@SerializedName("offer_type")
 	@Expose
-	private OfferType offerType;
+	private EarnPageLoaded.OfferType offerType;
 
 	/**
 	 * No args constructor for use in serialization
@@ -83,7 +81,7 @@ public class EarnPageLoaded implements Event {
 
 	 * @param user
 	 */
-	public EarnPageLoaded(Common common, User user, Client client, OfferType offerType) {
+	public EarnPageLoaded(Common common, User user, Client client, EarnPageLoaded.OfferType offerType) {
 		super();
 		this.common = common;
 		this.user = user;
@@ -120,48 +118,42 @@ public class EarnPageLoaded implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
@@ -170,14 +162,14 @@ public class EarnPageLoaded implements Event {
 	/**
 	 * (Required)
 	 */
-	public OfferType getOfferType() {
+	public EarnPageLoaded.OfferType getOfferType() {
 		return offerType;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setOfferType(OfferType offerType) {
+	public void setOfferType(EarnPageLoaded.OfferType offerType) {
 		this.offerType = offerType;
 	}
 
@@ -192,12 +184,14 @@ public class EarnPageLoaded implements Event {
 		@SerializedName("tutorial")
 		TUTORIAL("tutorial"),
 		@SerializedName("external")
-		EXTERNAL("external");
+		EXTERNAL("external"),
+		@SerializedName("P2P")
+		P_2_P("P2P");
 		private final String value;
-		private final static Map<String, OfferType> CONSTANTS = new HashMap<String, OfferType>();
+		private final static Map<String, EarnPageLoaded.OfferType> CONSTANTS = new HashMap<String, EarnPageLoaded.OfferType>();
 
 		static {
-			for (OfferType c : values()) {
+			for (EarnPageLoaded.OfferType c : values()) {
 				CONSTANTS.put(c.value, c);
 			}
 		}
@@ -215,8 +209,8 @@ public class EarnPageLoaded implements Event {
 			return this.value;
 		}
 
-		public static OfferType fromValue(String value) {
-			OfferType constant = CONSTANTS.get(value);
+		public static EarnPageLoaded.OfferType fromValue(String value) {
+			EarnPageLoaded.OfferType constant = CONSTANTS.get(value);
 			if (constant == null) {
 				throw new IllegalArgumentException(value);
 			} else {

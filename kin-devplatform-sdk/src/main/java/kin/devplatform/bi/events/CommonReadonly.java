@@ -4,8 +4,6 @@ import java.util.UUID;
 
 public interface CommonReadonly {
 
-	UUID getEventId();
-
 	String getVersion();
 
 	String getUserId();
@@ -13,5 +11,9 @@ public interface CommonReadonly {
 	Long getTimestamp();
 
 	String getPlatform();
+
+	String getSchemaVersion();
+
+	UUID getEventId();
 
 }

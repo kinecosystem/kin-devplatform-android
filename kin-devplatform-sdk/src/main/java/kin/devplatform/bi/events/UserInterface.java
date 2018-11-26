@@ -4,6 +4,8 @@ public interface UserInterface extends UserReadonly {
 
 	void setDigitalServiceUserId(String digitalServiceUserId);
 
+	void setTransactionCount(Integer transactionCount);
+
 	void setBalance(Double balance);
 
 	void setEarnCount(Integer earnCount);
@@ -11,8 +13,6 @@ public interface UserInterface extends UserReadonly {
 	void setTotalKinSpent(Double totalKinSpent);
 
 	void setDigitalServiceId(String digitalServiceId);
-
-	void setTransactionCount(Integer transactionCount);
 
 	void setEntryPointParam(String entryPointParam);
 

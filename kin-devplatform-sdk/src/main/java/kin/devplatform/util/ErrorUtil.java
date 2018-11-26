@@ -14,6 +14,9 @@ import static kin.devplatform.exception.ServiceException.TIMEOUT_ERROR;
 
 import android.annotation.SuppressLint;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import kin.core.exception.AccountNotActivatedException;
 import kin.core.exception.AccountNotFoundException;
 import kin.core.exception.CreateAccountException;
@@ -151,5 +154,17 @@ public class ErrorUtil {
 	public static BlockchainException createAccountCannotLoadedExcpetion(int accountIndex) {
 		return new BlockchainException(BlockchainException.ACCOUNT_LOADING_FAILED,
 			String.format(FAILED_TO_LOAD_ACCOUNT_ON_INDEX, accountIndex), null);
+	}
+
+	public static String getPrintableStackTrace(Throwable t) {
+		String stackTrace = Log.getStackTraceString(t);
+		//Handle Unknown Host Exception errors that are swallowed by Android Log
+		if (stackTrace == null || stackTrace.isEmpty()) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			t.printStackTrace(pw);
+			stackTrace = sw.toString();
+		}
+		return stackTrace;
 	}
 }

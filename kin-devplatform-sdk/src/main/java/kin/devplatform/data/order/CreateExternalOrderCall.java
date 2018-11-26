@@ -7,6 +7,10 @@ import java.util.Map;
 import kin.core.exception.InsufficientKinException;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
+import kin.devplatform.bi.events.EarnOrderCreationFailed;
+import kin.devplatform.bi.events.EarnOrderCreationReceived;
+import kin.devplatform.bi.events.PayToUserOrderCreationFailed;
+import kin.devplatform.bi.events.PayToUserOrderCreationReceived;
 import kin.devplatform.bi.events.SpendOrderCreationFailed;
 import kin.devplatform.bi.events.SpendOrderCreationReceived;
 import kin.devplatform.core.network.ApiException;
@@ -125,16 +129,18 @@ class CreateExternalOrderCall extends Thread {
 		if (openOrder != null && openOrder.getOfferType() != null) {
 			switch (openOrder.getOfferType()) {
 				case SPEND:
-					final Throwable cause = exception.getCause();
-					final String reason = cause != null ? cause.getMessage() : exception.getMessage();
-					eventLogger.send(SpendOrderCreationFailed.create(reason, openOrder.getOfferId(), true));
+					eventLogger.send(SpendOrderCreationFailed
+						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(), true,
+							SpendOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), ""));
 					break;
 				case EARN:
-					//TODO add event
-					// We don't have event correctly
+					eventLogger.send(EarnOrderCreationFailed
+						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(), true,
+							EarnOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), ""));
 				case PAY_TO_USER:
-					//TODO add event
-					// We don't have event correctly
+					eventLogger.send(PayToUserOrderCreationFailed
+						.create(ErrorUtil.getPrintableStackTrace(exception), openOrder.getOfferId(), true,
+							PayToUserOrderCreationFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), ""));
 					break;
 			}
 
@@ -146,10 +152,17 @@ class CreateExternalOrderCall extends Thread {
 			switch (openOrder.getOfferType()) {
 				case SPEND:
 					eventLogger.send(SpendOrderCreationReceived
-						.create(openOrder.getOfferId(), openOrder.getId(), true));
+						.create(openOrder.getOfferId(), openOrder.getId(), true,
+							SpendOrderCreationReceived.Origin.EXTERNAL));
 					break;
 				case EARN:
+					eventLogger.send(EarnOrderCreationReceived
+						.create(openOrder.getOfferId(), openOrder.getId(), true,
+							EarnOrderCreationReceived.Origin.EXTERNAL));
 				case PAY_TO_USER:
+					eventLogger.send(PayToUserOrderCreationReceived
+						.create(openOrder.getOfferId(), openOrder.getId(), true,
+							PayToUserOrderCreationReceived.Origin.EXTERNAL));
 					break;
 			}
 		}

@@ -8,17 +8,13 @@ import java.util.UUID;
 
 /**
  * common properties for all events
+ * 
  */
 public class Common implements CommonInterface {
 
 	public static final String PLATFORM = "Android";
+	public static final String SCHEMA_VERSION = "ae402f5971a1e697f0495f03ef048c01c923c971";
 
-	/**
-	 * (Required)
-	 */
-	@SerializedName("event_id")
-	@Expose
-	private UUID eventId;
 	/**
 	 * (Required)
 	 */
@@ -43,6 +39,18 @@ public class Common implements CommonInterface {
 	@SerializedName("platform")
 	@Expose
 	private String platform = PLATFORM;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("schema_version")
+	@Expose
+	private String schemaVersion = SCHEMA_VERSION;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("event_id")
+	@Expose
+	private UUID eventId;
 
 	/**
 	 * No args constructor for use in serialization
@@ -53,29 +61,17 @@ public class Common implements CommonInterface {
 	/**
 	 *
 	 * @param eventId
+	 * @param schemaVersion
 	 * @param version
 	 * @param userId
 	 * @param timestamp
 	 */
-	public Common(UUID eventId, String version, String userId, Long timestamp) {
+	public Common(String version, String userId, Long timestamp, String schemaVersion, UUID eventId) {
 		super();
-		this.eventId = eventId;
 		this.version = version;
 		this.userId = userId;
 		this.timestamp = timestamp;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public UUID getEventId() {
-		return eventId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setEventId(UUID eventId) {
+		this.schemaVersion = schemaVersion;
 		this.eventId = eventId;
 	}
 
@@ -133,6 +129,34 @@ public class Common implements CommonInterface {
 	 */
 	public void setPlatform(String platform) {
 		this.platform = platform;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getSchemaVersion() {
+		return schemaVersion;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setSchemaVersion(String schemaVersion) {
+		this.schemaVersion = schemaVersion;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public UUID getEventId() {
+		return eventId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setEventId(UUID eventId) {
+		this.eventId = eventId;
 	}
 
 }

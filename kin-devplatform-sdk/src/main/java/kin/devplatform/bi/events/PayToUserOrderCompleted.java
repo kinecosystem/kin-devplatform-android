@@ -12,26 +12,25 @@ import kin.devplatform.bi.EventsStore;
 
 
 /**
- * Users starts an earn offer / Client requests OrderID for earn order
- * 
+ * Client receives the spending offer he purchased (e.g. coupon code)
  */
-public class EarnOrderCreationRequested implements Event {
+public class PayToUserOrderCompleted implements Event {
 
-	public static final String EVENT_NAME = "earn_order_creation_requested";
+	public static final String EVENT_NAME = "pay_to_user_order_completed";
 	public static final String EVENT_TYPE = "business";
 
 	// Augmented by script
-	public static EarnOrderCreationRequested create(EarnOrderCreationRequested.OfferType offerType, Double kinAmount,
-		String offerId, Boolean isNative, EarnOrderCreationRequested.Origin origin) {
-		return new EarnOrderCreationRequested(
+	public static PayToUserOrderCompleted create(String offerId, String orderId, Boolean isNative,
+		PayToUserOrderCompleted.Origin origin, Double kinAmount) {
+		return new PayToUserOrderCompleted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			offerType,
-			kinAmount,
 			offerId,
+			orderId,
 			isNative,
-			origin);
+			origin,
+			kinAmount);
 	}
 
 	/**
@@ -67,21 +66,15 @@ public class EarnOrderCreationRequested implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("offer_type")
-	@Expose
-	private EarnOrderCreationRequested.OfferType offerType;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("kin_amount")
-	@Expose
-	private Double kinAmount;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("offer_id")
 	@Expose
 	private String offerId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("order_id")
+	@Expose
+	private String orderId;
 	/**
 	 * (Required)
 	 */
@@ -93,18 +86,24 @@ public class EarnOrderCreationRequested implements Event {
 	 */
 	@SerializedName("origin")
 	@Expose
-	private EarnOrderCreationRequested.Origin origin;
+	private PayToUserOrderCompleted.Origin origin;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("kin_amount")
+	@Expose
+	private Double kinAmount;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public EarnOrderCreationRequested() {
+	public PayToUserOrderCompleted() {
 	}
 
 	/**
 	 *
-	 * @param offerType
 	 * @param common
+	 * @param orderId
 	 * @param origin
 
 	 * @param client
@@ -114,18 +113,17 @@ public class EarnOrderCreationRequested implements Event {
 	 * @param user
 	 * @param isNative
 	 */
-	public EarnOrderCreationRequested(Common common, User user, Client client,
-		EarnOrderCreationRequested.OfferType offerType, Double kinAmount, String offerId, Boolean isNative,
-		EarnOrderCreationRequested.Origin origin) {
+	public PayToUserOrderCompleted(Common common, User user, Client client, String offerId, String orderId,
+		Boolean isNative, PayToUserOrderCompleted.Origin origin, Double kinAmount) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.offerType = offerType;
-		this.kinAmount = kinAmount;
 		this.offerId = offerId;
+		this.orderId = orderId;
 		this.isNative = isNative;
 		this.origin = origin;
+		this.kinAmount = kinAmount;
 	}
 
 	/**
@@ -201,34 +199,6 @@ public class EarnOrderCreationRequested implements Event {
 	/**
 	 * (Required)
 	 */
-	public EarnOrderCreationRequested.OfferType getOfferType() {
-		return offerType;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setOfferType(EarnOrderCreationRequested.OfferType offerType) {
-		this.offerType = offerType;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Double getKinAmount() {
-		return kinAmount;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setKinAmount(Double kinAmount) {
-		this.kinAmount = kinAmount;
-	}
-
-	/**
-	 * (Required)
-	 */
 	public String getOfferId() {
 		return offerId;
 	}
@@ -238,6 +208,20 @@ public class EarnOrderCreationRequested implements Event {
 	 */
 	public void setOfferId(String offerId) {
 		this.offerId = offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOrderId() {
+		return orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 	/**
@@ -257,62 +241,29 @@ public class EarnOrderCreationRequested implements Event {
 	/**
 	 * (Required)
 	 */
-	public EarnOrderCreationRequested.Origin getOrigin() {
+	public PayToUserOrderCompleted.Origin getOrigin() {
 		return origin;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setOrigin(EarnOrderCreationRequested.Origin origin) {
+	public void setOrigin(PayToUserOrderCompleted.Origin origin) {
 		this.origin = origin;
 	}
 
-	public enum OfferType {
+	/**
+	 * (Required)
+	 */
+	public Double getKinAmount() {
+		return kinAmount;
+	}
 
-		@SerializedName("poll")
-		POLL("poll"),
-		@SerializedName("coupon")
-		COUPON("coupon"),
-		@SerializedName("quiz")
-		QUIZ("quiz"),
-		@SerializedName("tutorial")
-		TUTORIAL("tutorial"),
-		@SerializedName("external")
-		EXTERNAL("external"),
-		@SerializedName("P2P")
-		P_2_P("P2P");
-		private final String value;
-		private final static Map<String, EarnOrderCreationRequested.OfferType> CONSTANTS = new HashMap<String, EarnOrderCreationRequested.OfferType>();
-
-		static {
-			for (EarnOrderCreationRequested.OfferType c : values()) {
-				CONSTANTS.put(c.value, c);
-			}
-		}
-
-		private OfferType(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return this.value;
-		}
-
-		public String value() {
-			return this.value;
-		}
-
-		public static EarnOrderCreationRequested.OfferType fromValue(String value) {
-			EarnOrderCreationRequested.OfferType constant = CONSTANTS.get(value);
-			if (constant == null) {
-				throw new IllegalArgumentException(value);
-			} else {
-				return constant;
-			}
-		}
-
+	/**
+	 * (Required)
+	 */
+	public void setKinAmount(Double kinAmount) {
+		this.kinAmount = kinAmount;
 	}
 
 	public enum Origin {
@@ -322,10 +273,10 @@ public class EarnOrderCreationRequested implements Event {
 		@SerializedName("external")
 		EXTERNAL("external");
 		private final String value;
-		private final static Map<String, EarnOrderCreationRequested.Origin> CONSTANTS = new HashMap<String, EarnOrderCreationRequested.Origin>();
+		private final static Map<String, PayToUserOrderCompleted.Origin> CONSTANTS = new HashMap<String, PayToUserOrderCompleted.Origin>();
 
 		static {
-			for (EarnOrderCreationRequested.Origin c : values()) {
+			for (PayToUserOrderCompleted.Origin c : values()) {
 				CONSTANTS.put(c.value, c);
 			}
 		}
@@ -343,8 +294,8 @@ public class EarnOrderCreationRequested implements Event {
 			return this.value;
 		}
 
-		public static EarnOrderCreationRequested.Origin fromValue(String value) {
-			EarnOrderCreationRequested.Origin constant = CONSTANTS.get(value);
+		public static PayToUserOrderCompleted.Origin fromValue(String value) {
+			PayToUserOrderCompleted.Origin constant = CONSTANTS.get(value);
 			if (constant == null) {
 				throw new IllegalArgumentException(value);
 			} else {

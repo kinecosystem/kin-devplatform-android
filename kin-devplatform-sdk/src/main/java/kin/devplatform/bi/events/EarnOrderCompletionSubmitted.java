@@ -5,12 +5,15 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
  * Client submits completed orderID to server
+ * 
  */
 public class EarnOrderCompletionSubmitted implements Event {
 
@@ -18,13 +21,16 @@ public class EarnOrderCompletionSubmitted implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnOrderCompletionSubmitted create(String offerId, String orderId) {
+	public static EarnOrderCompletionSubmitted create(String offerId, String orderId, Boolean isNative,
+		EarnOrderCompletionSubmitted.Origin origin) {
 		return new EarnOrderCompletionSubmitted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			offerId,
-			orderId);
+			orderId,
+			isNative,
+			origin);
 	}
 
 	/**
@@ -40,22 +46,19 @@ public class EarnOrderCompletionSubmitted implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
@@ -72,6 +75,18 @@ public class EarnOrderCompletionSubmitted implements Event {
 	@SerializedName("order_id")
 	@Expose
 	private String orderId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("is_native")
+	@Expose
+	private Boolean isNative;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("origin")
+	@Expose
+	private EarnOrderCompletionSubmitted.Origin origin;
 
 	/**
 	 * No args constructor for use in serialization
@@ -83,19 +98,24 @@ public class EarnOrderCompletionSubmitted implements Event {
 	 *
 	 * @param common
 	 * @param orderId
+	 * @param origin
 
 	 * @param client
 	 * @param offerId
 
 	 * @param user
+	 * @param isNative
 	 */
-	public EarnOrderCompletionSubmitted(Common common, User user, Client client, String offerId, String orderId) {
+	public EarnOrderCompletionSubmitted(Common common, User user, Client client, String offerId, String orderId,
+		Boolean isNative, EarnOrderCompletionSubmitted.Origin origin) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.offerId = offerId;
 		this.orderId = orderId;
+		this.isNative = isNative;
+		this.origin = origin;
 	}
 
 	/**
@@ -127,48 +147,42 @@ public class EarnOrderCompletionSubmitted implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
@@ -200,6 +214,73 @@ public class EarnOrderCompletionSubmitted implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public Boolean getIsNative() {
+		return isNative;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setIsNative(Boolean isNative) {
+		this.isNative = isNative;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public EarnOrderCompletionSubmitted.Origin getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrigin(EarnOrderCompletionSubmitted.Origin origin) {
+		this.origin = origin;
+	}
+
+	public enum Origin {
+
+		@SerializedName("marketplace")
+		MARKETPLACE("marketplace"),
+		@SerializedName("external")
+		EXTERNAL("external");
+		private final String value;
+		private final static Map<String, EarnOrderCompletionSubmitted.Origin> CONSTANTS = new HashMap<String, EarnOrderCompletionSubmitted.Origin>();
+
+		static {
+			for (EarnOrderCompletionSubmitted.Origin c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private Origin(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static EarnOrderCompletionSubmitted.Origin fromValue(String value) {
+			EarnOrderCompletionSubmitted.Origin constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

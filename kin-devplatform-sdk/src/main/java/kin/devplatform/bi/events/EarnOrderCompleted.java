@@ -13,6 +13,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * Users completes earn offer successfully
+ * 
  */
 public class EarnOrderCompleted implements Event {
 
@@ -20,15 +21,17 @@ public class EarnOrderCompleted implements Event {
 	public static final String EVENT_TYPE = "business";
 
 	// Augmented by script
-	public static EarnOrderCompleted create(OfferType offerType, Double kinAmount, String offerId, String orderId) {
+	public static EarnOrderCompleted create(String offerId, String orderId, Boolean isNative,
+		EarnOrderCompleted.Origin origin, Double kinAmount) {
 		return new EarnOrderCompleted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			offerType,
-			kinAmount,
 			offerId,
-			orderId);
+			orderId,
+			isNative,
+			origin,
+			kinAmount);
 	}
 
 	/**
@@ -44,38 +47,23 @@ public class EarnOrderCompleted implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
 	private Client client;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("offer_type")
-	@Expose
-	private OfferType offerType;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("kin_amount")
-	@Expose
-	private Double kinAmount;
 	/**
 	 * (Required)
 	 */
@@ -88,6 +76,24 @@ public class EarnOrderCompleted implements Event {
 	@SerializedName("order_id")
 	@Expose
 	private String orderId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("is_native")
+	@Expose
+	private Boolean isNative;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("origin")
+	@Expose
+	private EarnOrderCompleted.Origin origin;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("kin_amount")
+	@Expose
+	private Double kinAmount;
 
 	/**
 	 * No args constructor for use in serialization
@@ -97,26 +103,28 @@ public class EarnOrderCompleted implements Event {
 
 	/**
 	 *
-	 * @param offerType
 	 * @param common
 	 * @param orderId
+	 * @param origin
 
 	 * @param client
 	 * @param offerId
 	 * @param kinAmount
 
 	 * @param user
+	 * @param isNative
 	 */
-	public EarnOrderCompleted(Common common, User user, Client client, OfferType offerType, Double kinAmount,
-		String offerId, String orderId) {
+	public EarnOrderCompleted(Common common, User user, Client client, String offerId, String orderId, Boolean isNative,
+		EarnOrderCompleted.Origin origin, Double kinAmount) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.offerType = offerType;
-		this.kinAmount = kinAmount;
 		this.offerId = offerId;
 		this.orderId = orderId;
+		this.isNative = isNative;
+		this.origin = origin;
+		this.kinAmount = kinAmount;
 	}
 
 	/**
@@ -148,79 +156,45 @@ public class EarnOrderCompleted implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public OfferType getOfferType() {
-		return offerType;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setOfferType(OfferType offerType) {
-		this.offerType = offerType;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Double getKinAmount() {
-		return kinAmount;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setKinAmount(Double kinAmount) {
-		this.kinAmount = kinAmount;
 	}
 
 	/**
@@ -251,28 +225,64 @@ public class EarnOrderCompleted implements Event {
 		this.orderId = orderId;
 	}
 
-	public enum OfferType {
+	/**
+	 * (Required)
+	 */
+	public Boolean getIsNative() {
+		return isNative;
+	}
 
-		@SerializedName("poll")
-		POLL("poll"),
-		@SerializedName("coupon")
-		COUPON("coupon"),
-		@SerializedName("quiz")
-		QUIZ("quiz"),
-		@SerializedName("tutorial")
-		TUTORIAL("tutorial"),
+	/**
+	 * (Required)
+	 */
+	public void setIsNative(Boolean isNative) {
+		this.isNative = isNative;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public EarnOrderCompleted.Origin getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrigin(EarnOrderCompleted.Origin origin) {
+		this.origin = origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public Double getKinAmount() {
+		return kinAmount;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setKinAmount(Double kinAmount) {
+		this.kinAmount = kinAmount;
+	}
+
+	public enum Origin {
+
+		@SerializedName("marketplace")
+		MARKETPLACE("marketplace"),
 		@SerializedName("external")
 		EXTERNAL("external");
 		private final String value;
-		private final static Map<String, OfferType> CONSTANTS = new HashMap<String, OfferType>();
+		private final static Map<String, EarnOrderCompleted.Origin> CONSTANTS = new HashMap<String, EarnOrderCompleted.Origin>();
 
 		static {
-			for (OfferType c : values()) {
+			for (EarnOrderCompleted.Origin c : values()) {
 				CONSTANTS.put(c.value, c);
 			}
 		}
 
-		private OfferType(String value) {
+		private Origin(String value) {
 			this.value = value;
 		}
 
@@ -285,8 +295,8 @@ public class EarnOrderCompleted implements Event {
 			return this.value;
 		}
 
-		public static OfferType fromValue(String value) {
-			OfferType constant = CONSTANTS.get(value);
+		public static EarnOrderCompleted.Origin fromValue(String value) {
+			EarnOrderCompleted.Origin constant = CONSTANTS.get(value);
 			if (constant == null) {
 				throw new IllegalArgumentException(value);
 			} else {

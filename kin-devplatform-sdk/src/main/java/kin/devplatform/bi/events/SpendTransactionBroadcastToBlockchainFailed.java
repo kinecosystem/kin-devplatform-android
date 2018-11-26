@@ -1,3 +1,4 @@
+
 package kin.devplatform.bi.events;
 
 // Augmented by script
@@ -10,6 +11,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * Client failed to submit payment to the blockchain
+ * 
  */
 public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 
@@ -17,15 +19,17 @@ public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static SpendTransactionBroadcastToBlockchainFailed create(String errorReason, String offerId,
-		String orderId) {
+	public static SpendTransactionBroadcastToBlockchainFailed create(String errorReason, String offerId, String orderId,
+		String errorCode, String errorMessage) {
 		return new SpendTransactionBroadcastToBlockchainFailed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			errorReason,
 			offerId,
-			orderId);
+			orderId,
+			errorCode,
+			errorMessage);
 	}
 
 	/**
@@ -41,22 +45,19 @@ public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
@@ -79,6 +80,18 @@ public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 	@SerializedName("order_id")
 	@Expose
 	private String orderId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_code")
+	@Expose
+	private String errorCode;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_message")
+	@Expose
+	private String errorMessage;
 
 	/**
 	 * No args constructor for use in serialization
@@ -91,14 +104,16 @@ public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 	 * @param common
 	 * @param orderId
 	 * @param errorReason
+	 * @param errorMessage
 
 	 * @param client
 	 * @param offerId
+	 * @param errorCode
 
 	 * @param user
 	 */
 	public SpendTransactionBroadcastToBlockchainFailed(Common common, User user, Client client, String errorReason,
-		String offerId, String orderId) {
+		String offerId, String orderId, String errorCode, String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
@@ -106,6 +121,8 @@ public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 		this.errorReason = errorReason;
 		this.offerId = offerId;
 		this.orderId = orderId;
+		this.errorCode = errorCode;
+		this.errorMessage = errorMessage;
 	}
 
 	/**
@@ -137,48 +154,42 @@ public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
@@ -224,6 +235,34 @@ public class SpendTransactionBroadcastToBlockchainFailed implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorCode() {
+		return errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 
 }

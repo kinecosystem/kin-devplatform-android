@@ -6,11 +6,11 @@ public interface ClientInterface extends ClientReadonly {
 
 	void setLanguage(String language);
 
+	void setDeviceManufacturer(String deviceManufacturer);
+
 	void setCarrier(String carrier);
 
 	void setDeviceId(String deviceId);
-
-	void setDeviceManufacturer(String deviceManufacturer);
 
 	void setDeviceModel(String deviceModel);
 

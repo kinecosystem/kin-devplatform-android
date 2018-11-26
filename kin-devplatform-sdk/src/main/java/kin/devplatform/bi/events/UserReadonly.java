@@ -1,9 +1,12 @@
 package kin.devplatform.bi.events;
 
 
+
 public interface UserReadonly {
 
 	String getDigitalServiceUserId();
+
+	Integer getTransactionCount();
 
 	Double getBalance();
 
@@ -12,8 +15,6 @@ public interface UserReadonly {
 	Double getTotalKinSpent();
 
 	String getDigitalServiceId();
-
-	Integer getTransactionCount();
 
 	String getEntryPointParam();
 

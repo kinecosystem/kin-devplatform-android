@@ -7,25 +7,11 @@ public class CommonProxy implements CommonInterface {
 
 	public Common snapshot() {
 		return new Common(
-			this.getEventId(),
 			this.getVersion(),
 			this.getUserId(),
-			this.getTimestamp());
-	}
-
-	private UUID eventId;
-	private EventsStore.DynamicValue<UUID> dynamicEventId;
-
-	public UUID getEventId() {
-		return this.eventId != null ? this.eventId : this.dynamicEventId.get();
-	}
-
-	public void setEventId(UUID eventId) {
-		this.eventId = eventId;
-	}
-
-	public void setEventId(EventsStore.DynamicValue<UUID> eventId) {
-		this.dynamicEventId = eventId;
+			this.getTimestamp(),
+			this.getSchemaVersion(),
+			this.getEventId());
 	}
 
 	private String version;
@@ -86,6 +72,36 @@ public class CommonProxy implements CommonInterface {
 
 	public void setPlatform(EventsStore.DynamicValue<String> platform) {
 		this.dynamicPlatform = platform;
+	}
+
+	private String schemaVersion = "1";
+	private EventsStore.DynamicValue<String> dynamicSchemaVersion;
+
+	public String getSchemaVersion() {
+		return this.schemaVersion != null ? this.schemaVersion : this.dynamicSchemaVersion.get();
+	}
+
+	public void setSchemaVersion(String schemaVersion) {
+		this.schemaVersion = schemaVersion;
+	}
+
+	public void setSchemaVersion(EventsStore.DynamicValue<String> schemaVersion) {
+		this.dynamicSchemaVersion = schemaVersion;
+	}
+
+	private UUID eventId;
+	private EventsStore.DynamicValue<UUID> dynamicEventId;
+
+	public UUID getEventId() {
+		return this.eventId != null ? this.eventId : this.dynamicEventId.get();
+	}
+
+	public void setEventId(UUID eventId) {
+		this.eventId = eventId;
+	}
+
+	public void setEventId(EventsStore.DynamicValue<UUID> eventId) {
+		this.dynamicEventId = eventId;
 	}
 
 }

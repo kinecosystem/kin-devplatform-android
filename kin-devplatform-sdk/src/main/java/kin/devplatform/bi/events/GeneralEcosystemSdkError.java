@@ -11,6 +11,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * General exception event
+ * 
  */
 public class GeneralEcosystemSdkError implements Event {
 
@@ -18,12 +19,14 @@ public class GeneralEcosystemSdkError implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static GeneralEcosystemSdkError create(String errorReason) {
+	public static GeneralEcosystemSdkError create(String errorReason, String errorCode, String errorMessage) {
 		return new GeneralEcosystemSdkError(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			errorReason);
+			errorReason,
+			errorCode,
+			errorMessage);
 	}
 
 	/**
@@ -62,6 +65,18 @@ public class GeneralEcosystemSdkError implements Event {
 	@SerializedName("error_reason")
 	@Expose
 	private String errorReason;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_code")
+	@Expose
+	private String errorCode;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_message")
+	@Expose
+	private String errorMessage;
 
 	/**
 	 * No args constructor for use in serialization
@@ -73,17 +88,22 @@ public class GeneralEcosystemSdkError implements Event {
 	 *
 	 * @param common
 	 * @param errorReason
+	 * @param errorMessage
 
 	 * @param client
+	 * @param errorCode
 
 	 * @param user
 	 */
-	public GeneralEcosystemSdkError(Common common, User user, Client client, String errorReason) {
+	public GeneralEcosystemSdkError(Common common, User user, Client client, String errorReason, String errorCode,
+		String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.errorReason = errorReason;
+		this.errorCode = errorCode;
+		this.errorMessage = errorMessage;
 	}
 
 	/**
@@ -168,6 +188,34 @@ public class GeneralEcosystemSdkError implements Event {
 	 */
 	public void setErrorReason(String errorReason) {
 		this.errorReason = errorReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorCode() {
+		return errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 
 }

@@ -5,32 +5,26 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import java.util.HashMap;
-import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * Client recieves OfferID
- * 
+ * Client cancels spend order
  */
-public class EarnOrderCreationReceived implements Event {
+public class PayToUserOrderCancelled implements Event {
 
-	public static final String EVENT_NAME = "earn_order_creation_received";
+	public static final String EVENT_NAME = "pay_to_user_order_cancelled";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnOrderCreationReceived create(String offerId, String orderId, Boolean isNative,
-		EarnOrderCreationReceived.Origin origin) {
-		return new EarnOrderCreationReceived(
+	public static PayToUserOrderCancelled create(String offerId, String orderId) {
+		return new PayToUserOrderCancelled(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			offerId,
-			orderId,
-			isNative,
-			origin);
+			orderId);
 	}
 
 	/**
@@ -75,47 +69,30 @@ public class EarnOrderCreationReceived implements Event {
 	@SerializedName("order_id")
 	@Expose
 	private String orderId;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("is_native")
-	@Expose
-	private Boolean isNative;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("origin")
-	@Expose
-	private EarnOrderCreationReceived.Origin origin;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public EarnOrderCreationReceived() {
+	public PayToUserOrderCancelled() {
 	}
 
 	/**
 	 *
 	 * @param common
 	 * @param orderId
-	 * @param origin
 
 	 * @param client
 	 * @param offerId
 
 	 * @param user
-	 * @param isNative
 	 */
-	public EarnOrderCreationReceived(Common common, User user, Client client, String offerId, String orderId,
-		Boolean isNative, EarnOrderCreationReceived.Origin origin) {
+	public PayToUserOrderCancelled(Common common, User user, Client client, String offerId, String orderId) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.offerId = offerId;
 		this.orderId = orderId;
-		this.isNative = isNative;
-		this.origin = origin;
 	}
 
 	/**
@@ -214,73 +191,6 @@ public class EarnOrderCreationReceived implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Boolean getIsNative() {
-		return isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setIsNative(Boolean isNative) {
-		this.isNative = isNative;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public EarnOrderCreationReceived.Origin getOrigin() {
-		return origin;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setOrigin(EarnOrderCreationReceived.Origin origin) {
-		this.origin = origin;
-	}
-
-	public enum Origin {
-
-		@SerializedName("marketplace")
-		MARKETPLACE("marketplace"),
-		@SerializedName("external")
-		EXTERNAL("external");
-		private final String value;
-		private final static Map<String, EarnOrderCreationReceived.Origin> CONSTANTS = new HashMap<String, EarnOrderCreationReceived.Origin>();
-
-		static {
-			for (EarnOrderCreationReceived.Origin c : values()) {
-				CONSTANTS.put(c.value, c);
-			}
-		}
-
-		private Origin(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return this.value;
-		}
-
-		public String value() {
-			return this.value;
-		}
-
-		public static EarnOrderCreationReceived.Origin fromValue(String value) {
-			EarnOrderCreationReceived.Origin constant = CONSTANTS.get(value);
-			if (constant == null) {
-				throw new IllegalArgumentException(value);
-			} else {
-				return constant;
-			}
-		}
-
 	}
 
 }

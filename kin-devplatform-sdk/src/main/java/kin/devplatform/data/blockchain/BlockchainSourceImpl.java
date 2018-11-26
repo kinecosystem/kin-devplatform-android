@@ -145,7 +145,8 @@ public class BlockchainSourceImpl implements BlockchainSource {
 				@Override
 				public void onError(Exception e) {
 					eventLogger
-						.send(SpendTransactionBroadcastToBlockchainFailed.create(e.getMessage(), offerID, orderID));
+						.send(SpendTransactionBroadcastToBlockchainFailed
+							.create(ErrorUtil.getPrintableStackTrace(e), offerID, orderID, "", e.getMessage()));
 					completedPayment.postValue(new Payment(orderID, false, e));
 					Logger.log(new Log().withTag(TAG).put("sendTransaction onError", e.getMessage()));
 				}
@@ -358,7 +359,8 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 			@Override
 			public void onFailure(final OperationFailedException e) {
-				eventLogger.send(StellarKinTrustlineSetupFailed.create(e.getMessage()));
+				eventLogger.send(
+					StellarKinTrustlineSetupFailed.create(ErrorUtil.getPrintableStackTrace(e), "", e.getMessage()));
 				mainThread.execute(new Runnable() {
 					@Override
 					public void run() {

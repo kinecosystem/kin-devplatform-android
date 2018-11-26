@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * common properties for all client events
+ * 
  */
 public class Client implements ClientInterface {
 
@@ -25,6 +26,12 @@ public class Client implements ClientInterface {
 	/**
 	 * (Required)
 	 */
+	@SerializedName("device_manufacturer")
+	@Expose
+	private String deviceManufacturer;
+	/**
+	 * (Required)
+	 */
 	@SerializedName("carrier")
 	@Expose
 	private String carrier;
@@ -34,12 +41,6 @@ public class Client implements ClientInterface {
 	@SerializedName("device_id")
 	@Expose
 	private String deviceId;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("device_manufacturer")
-	@Expose
-	private String deviceManufacturer;
 	/**
 	 * (Required)
 	 */
@@ -62,14 +63,14 @@ public class Client implements ClientInterface {
 	 * @param deviceManufacturer
 	 * @param deviceId
 	 */
-	public Client(String os, String language, String carrier, String deviceId, String deviceManufacturer,
+	public Client(String os, String language, String deviceManufacturer, String carrier, String deviceId,
 		String deviceModel) {
 		super();
 		this.os = os;
 		this.language = language;
+		this.deviceManufacturer = deviceManufacturer;
 		this.carrier = carrier;
 		this.deviceId = deviceId;
-		this.deviceManufacturer = deviceManufacturer;
 		this.deviceModel = deviceModel;
 	}
 
@@ -104,6 +105,20 @@ public class Client implements ClientInterface {
 	/**
 	 * (Required)
 	 */
+	public String getDeviceManufacturer() {
+		return deviceManufacturer;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setDeviceManufacturer(String deviceManufacturer) {
+		this.deviceManufacturer = deviceManufacturer;
+	}
+
+	/**
+	 * (Required)
+	 */
 	public String getCarrier() {
 		return carrier;
 	}
@@ -127,20 +142,6 @@ public class Client implements ClientInterface {
 	 */
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getDeviceManufacturer() {
-		return deviceManufacturer;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setDeviceManufacturer(String deviceManufacturer) {
-		this.deviceManufacturer = deviceManufacturer;
 	}
 
 	/**
