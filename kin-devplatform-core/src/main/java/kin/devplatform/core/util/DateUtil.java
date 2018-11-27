@@ -14,9 +14,9 @@ public class DateUtil {
 	private static TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
 
 	public static String getDateFormatted(String dateStr) {
-;		Date date = getDateFromUTCString(dateStr);
+		Date date = getDateFromUTCString(dateStr);
 		if (date != null) {
-			return localFormat.format(getDateFromUTCString(dateStr));
+			return localFormat.format(dateStr);
 		} else {
 			return "";
 		}
