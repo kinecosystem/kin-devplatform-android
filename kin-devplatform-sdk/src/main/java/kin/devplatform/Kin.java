@@ -184,7 +184,7 @@ public class Kin {
 		return instance == null;
 	}
 
-	private static void checkInstanceNotNull() throws ClientException {
+	private static void checkInstanceNotNull() throws ClientException { 
 		if (isInstanceNull()) {
 			throw ErrorUtil.getClientException(SDK_NOT_STARTED,
 				new IllegalStateException("Kin.start(...) should be called first"));
