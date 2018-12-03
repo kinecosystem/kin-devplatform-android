@@ -16,7 +16,7 @@ public class DateUtil {
 	public static String getDateFormatted(String dateStr) {
 		Date date = getDateFromUTCString(dateStr);
 		if (date != null) {
-			return localFormat.format(dateStr);
+			return localFormat.format(date);
 		} else {
 			return "";
 		}
