@@ -12,21 +12,25 @@ import kin.devplatform.bi.EventsStore;
 
 
 /**
- * Generic earn page loaded
+ * Client receives the spending offer he purchased (e.g. coupon code) 
  * 
  */
-public class EarnPageLoaded implements Event {
+public class PayToUserOrderCompleted implements Event {
 
-	public static final String EVENT_NAME = "earn_page_loaded";
-	public static final String EVENT_TYPE = "log";
+	public static final String EVENT_NAME = "pay_to_user_order_completed";
+	public static final String EVENT_TYPE = "business";
 
 	// Augmented by script
-	public static EarnPageLoaded create(EarnPageLoaded.OfferType offerType) {
-		return new EarnPageLoaded(
+	public static PayToUserOrderCompleted create(String offerId, String orderId, PayToUserOrderCompleted.Origin origin,
+		Double kinAmount) {
+		return new PayToUserOrderCompleted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			offerType);
+			offerId,
+			orderId,
+			origin,
+			kinAmount);
 	}
 
 	/**
@@ -62,31 +66,56 @@ public class EarnPageLoaded implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("offer_type")
+	@SerializedName("offer_id")
 	@Expose
-	private EarnPageLoaded.OfferType offerType;
+	private String offerId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("order_id")
+	@Expose
+	private String orderId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("origin")
+	@Expose
+	private PayToUserOrderCompleted.Origin origin;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("kin_amount")
+	@Expose
+	private Double kinAmount;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public EarnPageLoaded() {
+	public PayToUserOrderCompleted() {
 	}
 
 	/**
 	 *
-	 * @param offerType
 	 * @param common
+	 * @param orderId
+	 * @param origin
 
 	 * @param client
+	 * @param offerId
+	 * @param kinAmount
 
 	 * @param user
 	 */
-	public EarnPageLoaded(Common common, User user, Client client, EarnPageLoaded.OfferType offerType) {
+	public PayToUserOrderCompleted(Common common, User user, Client client, String offerId, String orderId,
+		PayToUserOrderCompleted.Origin origin, Double kinAmount) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.offerType = offerType;
+		this.offerId = offerId;
+		this.orderId = orderId;
+		this.origin = origin;
+		this.kinAmount = kinAmount;
 	}
 
 	/**
@@ -162,41 +191,75 @@ public class EarnPageLoaded implements Event {
 	/**
 	 * (Required)
 	 */
-	public EarnPageLoaded.OfferType getOfferType() {
-		return offerType;
+	public String getOfferId() {
+		return offerId;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setOfferType(EarnPageLoaded.OfferType offerType) {
-		this.offerType = offerType;
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
 	}
 
-	public enum OfferType {
+	/**
+	 * (Required)
+	 */
+	public String getOrderId() {
+		return orderId;
+	}
 
-		@SerializedName("poll")
-		POLL("poll"),
-		@SerializedName("coupon")
-		COUPON("coupon"),
-		@SerializedName("quiz")
-		QUIZ("quiz"),
-		@SerializedName("tutorial")
-		TUTORIAL("tutorial"),
+	/**
+	 * (Required)
+	 */
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public PayToUserOrderCompleted.Origin getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrigin(PayToUserOrderCompleted.Origin origin) {
+		this.origin = origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public Double getKinAmount() {
+		return kinAmount;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setKinAmount(Double kinAmount) {
+		this.kinAmount = kinAmount;
+	}
+
+	public enum Origin {
+
+		@SerializedName("marketplace")
+		MARKETPLACE("marketplace"),
 		@SerializedName("external")
-		EXTERNAL("external"),
-		@SerializedName("P2P")
-		P_2_P("P2P");
+		EXTERNAL("external");
 		private final String value;
-		private final static Map<String, EarnPageLoaded.OfferType> CONSTANTS = new HashMap<String, EarnPageLoaded.OfferType>();
+		private final static Map<String, PayToUserOrderCompleted.Origin> CONSTANTS = new HashMap<String, PayToUserOrderCompleted.Origin>();
 
 		static {
-			for (EarnPageLoaded.OfferType c : values()) {
+			for (PayToUserOrderCompleted.Origin c : values()) {
 				CONSTANTS.put(c.value, c);
 			}
 		}
 
-		private OfferType(String value) {
+		private Origin(String value) {
 			this.value = value;
 		}
 
@@ -209,8 +272,8 @@ public class EarnPageLoaded implements Event {
 			return this.value;
 		}
 
-		public static EarnPageLoaded.OfferType fromValue(String value) {
-			EarnPageLoaded.OfferType constant = CONSTANTS.get(value);
+		public static PayToUserOrderCompleted.Origin fromValue(String value) {
+			PayToUserOrderCompleted.Origin constant = CONSTANTS.get(value);
 			if (constant == null) {
 				throw new IllegalArgumentException(value);
 			} else {

@@ -29,6 +29,7 @@ import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.settings.view.ISettingsView;
 import kin.devplatform.settings.view.ISettingsView.IconColor;
 import kin.devplatform.settings.view.ISettingsView.Item;
+import kin.devplatform.util.ErrorUtil;
 
 public class SettingsPresenter extends BasePresenter<ISettingsView> implements ISettingsPresenter {
 
@@ -181,7 +182,9 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-				eventLogger.send(GeneralEcosystemSdkError.create(android.util.Log.getStackTraceString(exception)));
+				eventLogger.send(GeneralEcosystemSdkError
+					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),
+						"SettingsPresenter.switchAccount onFailure"));
 				showCouldNotImportAccountError();
 			}
 		});

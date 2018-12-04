@@ -290,8 +290,7 @@ public class Kin {
 	public static void payToUser(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
 		throws ClientException {
 		checkInstanceNotNull();
-		//pay to user has a similar flow like purchase (spend), the only different is the expected input JWT.
-		OrderRepository.getInstance().purchase(offerJwt, callback);
+		OrderRepository.getInstance().payToUser(offerJwt, callback);
 	}
 
 	/**

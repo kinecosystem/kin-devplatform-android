@@ -10,20 +10,21 @@ import kin.devplatform.bi.EventsStore;
 
 
 /**
- * DS initiated the SDK
- * 
+ * Clients submits payments to the blockchain
  */
-public class KinSdkInitiated implements Event {
+public class PayToUserTransactionBroadcastToBlockchainSubmitted implements Event {
 
-	public static final String EVENT_NAME = "kin_sdk_initiated";
+	public static final String EVENT_NAME = "pay_to_user_transaction_broadcast_to_blockchain_submitted";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static KinSdkInitiated create() {
-		return new KinSdkInitiated(
+	public static PayToUserTransactionBroadcastToBlockchainSubmitted create(String offerId, String orderId) {
+		return new PayToUserTransactionBroadcastToBlockchainSubmitted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
-			(Client) EventsStore.client());
+			(Client) EventsStore.client(),
+			offerId,
+			orderId);
 	}
 
 	/**
@@ -56,26 +57,43 @@ public class KinSdkInitiated implements Event {
 	@SerializedName("client")
 	@Expose
 	private Client client;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("offer_id")
+	@Expose
+	private String offerId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("order_id")
+	@Expose
+	private String orderId;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public KinSdkInitiated() {
+	public PayToUserTransactionBroadcastToBlockchainSubmitted() {
 	}
 
 	/**
 	 *
 	 * @param common
+	 * @param orderId
 
 	 * @param client
+	 * @param offerId
 
 	 * @param user
 	 */
-	public KinSdkInitiated(Common common, User user, Client client) {
+	public PayToUserTransactionBroadcastToBlockchainSubmitted(Common common, User user, Client client, String offerId,
+		String orderId) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
+		this.offerId = offerId;
+		this.orderId = orderId;
 	}
 
 	/**
@@ -146,6 +164,34 @@ public class KinSdkInitiated implements Event {
 	 */
 	public void setClient(Client client) {
 		this.client = client;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOfferId() {
+		return offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOrderId() {
+		return orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 }

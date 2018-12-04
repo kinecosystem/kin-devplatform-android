@@ -13,6 +13,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * User views the redeem code page. Source is either "spend flow" or "transaction history" page
+ * 
  */
 public class SpendRedeemPageViewed implements Event {
 
@@ -20,8 +21,8 @@ public class SpendRedeemPageViewed implements Event {
 	public static final String EVENT_TYPE = "analytics";
 
 	// Augmented by script
-	public static SpendRedeemPageViewed create(RedeemTrigger redeemTrigger, Double kinAmount, String offerId,
-		String orderId) {
+	public static SpendRedeemPageViewed create(SpendRedeemPageViewed.RedeemTrigger redeemTrigger, Double kinAmount,
+		String offerId, String orderId) {
 		return new SpendRedeemPageViewed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
@@ -45,22 +46,19 @@ public class SpendRedeemPageViewed implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
@@ -70,7 +68,7 @@ public class SpendRedeemPageViewed implements Event {
 	 */
 	@SerializedName("redeem_trigger")
 	@Expose
-	private RedeemTrigger redeemTrigger;
+	private SpendRedeemPageViewed.RedeemTrigger redeemTrigger;
 	/**
 	 * (Required)
 	 */
@@ -108,8 +106,8 @@ public class SpendRedeemPageViewed implements Event {
 
 	 * @param user
 	 */
-	public SpendRedeemPageViewed(Common common, User user, Client client, RedeemTrigger redeemTrigger, Double kinAmount,
-		String offerId, String orderId) {
+	public SpendRedeemPageViewed(Common common, User user, Client client,
+		SpendRedeemPageViewed.RedeemTrigger redeemTrigger, Double kinAmount, String offerId, String orderId) {
 		super();
 		this.common = common;
 		this.user = user;
@@ -149,48 +147,42 @@ public class SpendRedeemPageViewed implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
@@ -199,14 +191,14 @@ public class SpendRedeemPageViewed implements Event {
 	/**
 	 * (Required)
 	 */
-	public RedeemTrigger getRedeemTrigger() {
+	public SpendRedeemPageViewed.RedeemTrigger getRedeemTrigger() {
 		return redeemTrigger;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setRedeemTrigger(RedeemTrigger redeemTrigger) {
+	public void setRedeemTrigger(SpendRedeemPageViewed.RedeemTrigger redeemTrigger) {
 		this.redeemTrigger = redeemTrigger;
 	}
 
@@ -259,10 +251,10 @@ public class SpendRedeemPageViewed implements Event {
 		@SerializedName("system_init")
 		SYSTEM_INIT("system_init");
 		private final String value;
-		private final static Map<String, RedeemTrigger> CONSTANTS = new HashMap<String, RedeemTrigger>();
+		private final static Map<String, SpendRedeemPageViewed.RedeemTrigger> CONSTANTS = new HashMap<String, SpendRedeemPageViewed.RedeemTrigger>();
 
 		static {
-			for (RedeemTrigger c : values()) {
+			for (SpendRedeemPageViewed.RedeemTrigger c : values()) {
 				CONSTANTS.put(c.value, c);
 			}
 		}
@@ -280,8 +272,8 @@ public class SpendRedeemPageViewed implements Event {
 			return this.value;
 		}
 
-		public static RedeemTrigger fromValue(String value) {
-			RedeemTrigger constant = CONSTANTS.get(value);
+		public static SpendRedeemPageViewed.RedeemTrigger fromValue(String value) {
+			SpendRedeemPageViewed.RedeemTrigger constant = CONSTANTS.get(value);
 			if (constant == null) {
 				throw new IllegalArgumentException(value);
 			} else {

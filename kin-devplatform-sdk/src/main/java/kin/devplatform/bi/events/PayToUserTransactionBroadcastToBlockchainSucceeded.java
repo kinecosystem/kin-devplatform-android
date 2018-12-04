@@ -10,20 +10,23 @@ import kin.devplatform.bi.EventsStore;
 
 
 /**
- * DS initiated the SDK
- * 
+ * Clients submits payments to the blockchain and get confirmation
  */
-public class KinSdkInitiated implements Event {
+public class PayToUserTransactionBroadcastToBlockchainSucceeded implements Event {
 
-	public static final String EVENT_NAME = "kin_sdk_initiated";
+	public static final String EVENT_NAME = "pay_to_user_transaction_broadcast_to_blockchain_succeeded";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static KinSdkInitiated create() {
-		return new KinSdkInitiated(
+	public static PayToUserTransactionBroadcastToBlockchainSucceeded create(String transactionId, String offerId,
+		String orderId) {
+		return new PayToUserTransactionBroadcastToBlockchainSucceeded(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
-			(Client) EventsStore.client());
+			(Client) EventsStore.client(),
+			transactionId,
+			offerId,
+			orderId);
 	}
 
 	/**
@@ -56,26 +59,51 @@ public class KinSdkInitiated implements Event {
 	@SerializedName("client")
 	@Expose
 	private Client client;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("transaction_id")
+	@Expose
+	private String transactionId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("offer_id")
+	@Expose
+	private String offerId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("order_id")
+	@Expose
+	private String orderId;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public KinSdkInitiated() {
+	public PayToUserTransactionBroadcastToBlockchainSucceeded() {
 	}
 
 	/**
 	 *
 	 * @param common
+	 * @param orderId
 
 	 * @param client
+	 * @param offerId
 
 	 * @param user
+	 * @param transactionId
 	 */
-	public KinSdkInitiated(Common common, User user, Client client) {
+	public PayToUserTransactionBroadcastToBlockchainSucceeded(Common common, User user, Client client,
+		String transactionId, String offerId, String orderId) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
+		this.transactionId = transactionId;
+		this.offerId = offerId;
+		this.orderId = orderId;
 	}
 
 	/**
@@ -146,6 +174,48 @@ public class KinSdkInitiated implements Event {
 	 */
 	public void setClient(Client client) {
 		this.client = client;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOfferId() {
+		return offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOrderId() {
+		return orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 }

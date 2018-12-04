@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * common user properties
+ * 
  */
 public class User implements UserInterface {
 
@@ -16,6 +17,12 @@ public class User implements UserInterface {
 	@SerializedName("digital_service_user_id")
 	@Expose
 	private String digitalServiceUserId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("transaction_count")
+	@Expose
+	private Integer transactionCount;
 	/**
 	 * (Required)
 	 */
@@ -40,12 +47,6 @@ public class User implements UserInterface {
 	@SerializedName("digital_service_id")
 	@Expose
 	private String digitalServiceId;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("transaction_count")
-	@Expose
-	private Integer transactionCount;
 	/**
 	 * (Required)
 	 */
@@ -83,16 +84,16 @@ public class User implements UserInterface {
 	 * @param digitalServiceId
 	 * @param entryPointParam
 	 */
-	public User(String digitalServiceUserId, Double balance, Integer earnCount, Double totalKinSpent,
-		String digitalServiceId, Integer transactionCount, String entryPointParam, Integer spendCount,
+	public User(String digitalServiceUserId, Integer transactionCount, Double balance, Integer earnCount,
+		Double totalKinSpent, String digitalServiceId, String entryPointParam, Integer spendCount,
 		Double totalKinEarned) {
 		super();
 		this.digitalServiceUserId = digitalServiceUserId;
+		this.transactionCount = transactionCount;
 		this.balance = balance;
 		this.earnCount = earnCount;
 		this.totalKinSpent = totalKinSpent;
 		this.digitalServiceId = digitalServiceId;
-		this.transactionCount = transactionCount;
 		this.entryPointParam = entryPointParam;
 		this.spendCount = spendCount;
 		this.totalKinEarned = totalKinEarned;
@@ -110,6 +111,20 @@ public class User implements UserInterface {
 	 */
 	public void setDigitalServiceUserId(String digitalServiceUserId) {
 		this.digitalServiceUserId = digitalServiceUserId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public Integer getTransactionCount() {
+		return transactionCount;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setTransactionCount(Integer transactionCount) {
+		this.transactionCount = transactionCount;
 	}
 
 	/**
@@ -166,20 +181,6 @@ public class User implements UserInterface {
 	 */
 	public void setDigitalServiceId(String digitalServiceId) {
 		this.digitalServiceId = digitalServiceId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public Integer getTransactionCount() {
-		return transactionCount;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setTransactionCount(Integer transactionCount) {
-		this.transactionCount = transactionCount;
 	}
 
 	/**

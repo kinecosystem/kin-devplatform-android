@@ -10,20 +10,22 @@ import kin.devplatform.bi.EventsStore;
 
 
 /**
- * DS initiated the SDK
+ * Client cancels spend order
  * 
  */
-public class KinSdkInitiated implements Event {
+public class PayToUserOrderCancelled implements Event {
 
-	public static final String EVENT_NAME = "kin_sdk_initiated";
+	public static final String EVENT_NAME = "pay_to_user_order_cancelled";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static KinSdkInitiated create() {
-		return new KinSdkInitiated(
+	public static PayToUserOrderCancelled create(String offerId, String orderId) {
+		return new PayToUserOrderCancelled(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
-			(Client) EventsStore.client());
+			(Client) EventsStore.client(),
+			offerId,
+			orderId);
 	}
 
 	/**
@@ -56,26 +58,42 @@ public class KinSdkInitiated implements Event {
 	@SerializedName("client")
 	@Expose
 	private Client client;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("offer_id")
+	@Expose
+	private String offerId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("order_id")
+	@Expose
+	private String orderId;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public KinSdkInitiated() {
+	public PayToUserOrderCancelled() {
 	}
 
 	/**
 	 *
 	 * @param common
+	 * @param orderId
 
 	 * @param client
+	 * @param offerId
 
 	 * @param user
 	 */
-	public KinSdkInitiated(Common common, User user, Client client) {
+	public PayToUserOrderCancelled(Common common, User user, Client client, String offerId, String orderId) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
+		this.offerId = offerId;
+		this.orderId = orderId;
 	}
 
 	/**
@@ -146,6 +164,34 @@ public class KinSdkInitiated implements Event {
 	 */
 	public void setClient(Client client) {
 		this.client = client;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOfferId() {
+		return offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOrderId() {
+		return orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 }

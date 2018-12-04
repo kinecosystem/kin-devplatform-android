@@ -13,6 +13,7 @@ import kin.devplatform.bi.EventsStore;
 
 /**
  * User taps on earn offer in marketplace page
+ * 
  */
 public class EarnOfferTapped implements Event {
 
@@ -20,7 +21,7 @@ public class EarnOfferTapped implements Event {
 	public static final String EVENT_TYPE = "analytics";
 
 	// Augmented by script
-	public static EarnOfferTapped create(OfferType offerType, Double kinAmount, String offerId) {
+	public static EarnOfferTapped create(EarnOfferTapped.OfferType offerType, Double kinAmount, String offerId) {
 		return new EarnOfferTapped(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
@@ -43,22 +44,19 @@ public class EarnOfferTapped implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
@@ -68,7 +66,7 @@ public class EarnOfferTapped implements Event {
 	 */
 	@SerializedName("offer_type")
 	@Expose
-	private OfferType offerType;
+	private EarnOfferTapped.OfferType offerType;
 	/**
 	 * (Required)
 	 */
@@ -99,8 +97,8 @@ public class EarnOfferTapped implements Event {
 
 	 * @param user
 	 */
-	public EarnOfferTapped(Common common, User user, Client client, OfferType offerType, Double kinAmount,
-		String offerId) {
+	public EarnOfferTapped(Common common, User user, Client client, EarnOfferTapped.OfferType offerType,
+		Double kinAmount, String offerId) {
 		super();
 		this.common = common;
 		this.user = user;
@@ -139,48 +137,42 @@ public class EarnOfferTapped implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
@@ -189,14 +181,14 @@ public class EarnOfferTapped implements Event {
 	/**
 	 * (Required)
 	 */
-	public OfferType getOfferType() {
+	public EarnOfferTapped.OfferType getOfferType() {
 		return offerType;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setOfferType(OfferType offerType) {
+	public void setOfferType(EarnOfferTapped.OfferType offerType) {
 		this.offerType = offerType;
 	}
 
@@ -239,12 +231,14 @@ public class EarnOfferTapped implements Event {
 		@SerializedName("tutorial")
 		TUTORIAL("tutorial"),
 		@SerializedName("external")
-		EXTERNAL("external");
+		EXTERNAL("external"),
+		@SerializedName("P2P")
+		P_2_P("P2P");
 		private final String value;
-		private final static Map<String, OfferType> CONSTANTS = new HashMap<String, OfferType>();
+		private final static Map<String, EarnOfferTapped.OfferType> CONSTANTS = new HashMap<String, EarnOfferTapped.OfferType>();
 
 		static {
-			for (OfferType c : values()) {
+			for (EarnOfferTapped.OfferType c : values()) {
 				CONSTANTS.put(c.value, c);
 			}
 		}
@@ -262,8 +256,8 @@ public class EarnOfferTapped implements Event {
 			return this.value;
 		}
 
-		public static OfferType fromValue(String value) {
-			OfferType constant = CONSTANTS.get(value);
+		public static EarnOfferTapped.OfferType fromValue(String value) {
+			EarnOfferTapped.OfferType constant = CONSTANTS.get(value);
 			if (constant == null) {
 				throw new IllegalArgumentException(value);
 			} else {

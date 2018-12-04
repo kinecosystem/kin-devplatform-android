@@ -10,21 +10,23 @@ import kin.devplatform.bi.EventsStore;
 
 
 /**
- * General exception event
- * 
+ * Client failed to submit payment to the blockchain
  */
-public class GeneralEcosystemSdkError implements Event {
+public class PayToUserTransactionBroadcastToBlockchainFailed implements Event {
 
-	public static final String EVENT_NAME = "general_ecosystem_sdk_error";
+	public static final String EVENT_NAME = "pay_to_user_transaction_broadcast_to_blockchain_failed";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static GeneralEcosystemSdkError create(String errorReason, String errorCode, String errorMessage) {
-		return new GeneralEcosystemSdkError(
+	public static PayToUserTransactionBroadcastToBlockchainFailed create(String errorReason, String offerId,
+		String orderId, String errorCode, String errorMessage) {
+		return new PayToUserTransactionBroadcastToBlockchainFailed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			errorReason,
+			offerId,
+			orderId,
 			errorCode,
 			errorMessage);
 	}
@@ -68,6 +70,18 @@ public class GeneralEcosystemSdkError implements Event {
 	/**
 	 * (Required)
 	 */
+	@SerializedName("offer_id")
+	@Expose
+	private String offerId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("order_id")
+	@Expose
+	private String orderId;
+	/**
+	 * (Required)
+	 */
 	@SerializedName("error_code")
 	@Expose
 	private String errorCode;
@@ -81,27 +95,31 @@ public class GeneralEcosystemSdkError implements Event {
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public GeneralEcosystemSdkError() {
+	public PayToUserTransactionBroadcastToBlockchainFailed() {
 	}
 
 	/**
 	 *
 	 * @param common
+	 * @param orderId
 	 * @param errorReason
 	 * @param errorMessage
 
 	 * @param client
+	 * @param offerId
 	 * @param errorCode
 
 	 * @param user
 	 */
-	public GeneralEcosystemSdkError(Common common, User user, Client client, String errorReason, String errorCode,
-		String errorMessage) {
+	public PayToUserTransactionBroadcastToBlockchainFailed(Common common, User user, Client client, String errorReason,
+		String offerId, String orderId, String errorCode, String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.errorReason = errorReason;
+		this.offerId = offerId;
+		this.orderId = orderId;
 		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
 	}
@@ -188,6 +206,34 @@ public class GeneralEcosystemSdkError implements Event {
 	 */
 	public void setErrorReason(String errorReason) {
 		this.errorReason = errorReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOfferId() {
+		return offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOrderId() {
+		return orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 	/**

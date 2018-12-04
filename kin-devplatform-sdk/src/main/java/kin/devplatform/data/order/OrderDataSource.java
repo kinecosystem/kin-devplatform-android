@@ -20,12 +20,14 @@ public interface OrderDataSource {
 
 	void createOrder(@NonNull final String offerID, final KinCallback<OpenOrder> callback);
 
-	void submitOrder(@NonNull final String offerID, @Nullable String content, @NonNull String orderID,
-		final KinCallback<Order> callback);
+	void submitOrder(@NonNull String offerID, @Nullable String content, @NonNull String orderID,
+		kin.devplatform.network.model.Origin origin, @Nullable KinCallback<Order> callback);
 
 	void cancelOrder(@NonNull final String offerID, @NonNull final String orderID, final KinCallback<Void> callback);
 
 	ObservableData<OpenOrder> getOpenOrder();
+
+	void payToUser(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback);
 
 	void purchase(String offerJwt, @Nullable final KinCallback<OrderConfirmation> callback);
 

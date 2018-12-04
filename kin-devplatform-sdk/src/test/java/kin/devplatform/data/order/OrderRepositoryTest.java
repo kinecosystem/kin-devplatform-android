@@ -196,7 +196,9 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertEquals(openOrder, orderRepository.getOpenOrder().getValue());
 
 		// Submit Order
-		orderRepository.submitOrder(order.getOfferId(), "", order.getOrderId(), orderCallback);
+		orderRepository
+			.submitOrder(order.getOfferId(), "", order.getOrderId(), kin.devplatform.network.model.Origin.MARKETPLACE,
+				orderCallback);
 		verify(remote).submitOrder(anyString(), anyString(), submitOrderCapture.capture());
 		verify(blockchainSource).addPaymentObservable(paymentCapture.capture());
 
@@ -238,7 +240,9 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertEquals(openOrder, orderRepository.getOpenOrder().getValue());
 
 		// Submit Order
-		orderRepository.submitOrder(order.getOfferId(), "", order.getOrderId(), orderCallback);
+		orderRepository
+			.submitOrder(order.getOfferId(), "", order.getOrderId(), kin.devplatform.network.model.Origin.MARKETPLACE,
+				orderCallback);
 		verify(remote).submitOrder(anyString(), anyString(), submitOrderCapture.capture());
 		verify(blockchainSource).addPaymentObservable(paymentCapture.capture());
 
@@ -279,7 +283,9 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertEquals(openOrder, orderRepository.getOpenOrder().getValue());
 
 		// Submit Order
-		orderRepository.submitOrder(order.getOfferId(), "", order.getOrderId(), orderCallback);
+		orderRepository
+			.submitOrder(order.getOfferId(), "", order.getOrderId(), kin.devplatform.network.model.Origin.MARKETPLACE,
+				orderCallback);
 		verify(remote).submitOrder(anyString(), anyString(), submitOrderCapture.capture());
 		verify(blockchainSource).addPaymentObservable(paymentCapture.capture());
 
@@ -313,7 +319,9 @@ public class OrderRepositoryTest extends BaseTestClass {
 		assertEquals(openOrder, orderRepository.getOpenOrder().getValue());
 
 		// Submit Order
-		orderRepository.submitOrder(order.getOfferId(), "", order.getOrderId(), orderCallback);
+		orderRepository
+			.submitOrder(order.getOfferId(), "", order.getOrderId(), kin.devplatform.network.model.Origin.MARKETPLACE,
+				orderCallback);
 		verify(remote).submitOrder(anyString(), anyString(), submitOrderCapture.capture());
 
 		submitOrderCapture.getValue().onFailure(getApiException());
@@ -413,7 +421,7 @@ public class OrderRepositoryTest extends BaseTestClass {
 	public void purchase_Conflict_GetOrderConfirmation() throws Exception {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-		Order confirmedOrder = new Order().orderId(orderID).offerId(offerID).status(Status.COMPLETED);
+		Order confirmedOrder = new Order().orderId(orderID).offerId(offerID).status(Status.COMPLETED).amount(15);
 		confirmedOrder.setResult(
 			new JWTBodyPaymentConfirmationResult().jwt("A JWT CONFIRMATION").type(TypeEnum.PAYMENT_CONFIRMATION));
 

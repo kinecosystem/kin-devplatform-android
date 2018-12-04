@@ -4,8 +4,6 @@ import java.util.UUID;
 
 public interface CommonInterface extends CommonReadonly {
 
-	void setEventId(UUID eventId);
-
 	void setVersion(String version);
 
 	void setUserId(String userId);
@@ -13,5 +11,9 @@ public interface CommonInterface extends CommonReadonly {
 	void setTimestamp(Long timestamp);
 
 	void setPlatform(String platform);
+
+	void setSchemaVersion(String schemaVersion);
+
+	void setEventId(UUID eventId);
 
 }

@@ -5,28 +5,31 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * General exception event
+ * Client submits completed orderID to server
  * 
  */
-public class GeneralEcosystemSdkError implements Event {
+public class PayToUserOrderCompletionSubmitted implements Event {
 
-	public static final String EVENT_NAME = "general_ecosystem_sdk_error";
+	public static final String EVENT_NAME = "pay_to_user_order_completion_submitted";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static GeneralEcosystemSdkError create(String errorReason, String errorCode, String errorMessage) {
-		return new GeneralEcosystemSdkError(
+	public static PayToUserOrderCompletionSubmitted create(String offerId, String orderId,
+		PayToUserOrderCompletionSubmitted.Origin origin) {
+		return new PayToUserOrderCompletionSubmitted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			errorReason,
-			errorCode,
-			errorMessage);
+			offerId,
+			orderId,
+			origin);
 	}
 
 	/**
@@ -62,48 +65,48 @@ public class GeneralEcosystemSdkError implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("error_reason")
+	@SerializedName("offer_id")
 	@Expose
-	private String errorReason;
+	private String offerId;
 	/**
 	 * (Required)
 	 */
-	@SerializedName("error_code")
+	@SerializedName("order_id")
 	@Expose
-	private String errorCode;
+	private String orderId;
 	/**
 	 * (Required)
 	 */
-	@SerializedName("error_message")
+	@SerializedName("origin")
 	@Expose
-	private String errorMessage;
+	private PayToUserOrderCompletionSubmitted.Origin origin;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public GeneralEcosystemSdkError() {
+	public PayToUserOrderCompletionSubmitted() {
 	}
 
 	/**
 	 *
 	 * @param common
-	 * @param errorReason
-	 * @param errorMessage
+	 * @param orderId
+	 * @param origin
 
 	 * @param client
-	 * @param errorCode
+	 * @param offerId
 
 	 * @param user
 	 */
-	public GeneralEcosystemSdkError(Common common, User user, Client client, String errorReason, String errorCode,
-		String errorMessage) {
+	public PayToUserOrderCompletionSubmitted(Common common, User user, Client client, String offerId, String orderId,
+		PayToUserOrderCompletionSubmitted.Origin origin) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.errorReason = errorReason;
-		this.errorCode = errorCode;
-		this.errorMessage = errorMessage;
+		this.offerId = offerId;
+		this.orderId = orderId;
+		this.origin = origin;
 	}
 
 	/**
@@ -179,43 +182,82 @@ public class GeneralEcosystemSdkError implements Event {
 	/**
 	 * (Required)
 	 */
-	public String getErrorReason() {
-		return errorReason;
+	public String getOfferId() {
+		return offerId;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setErrorReason(String errorReason) {
-		this.errorReason = errorReason;
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public String getErrorCode() {
-		return errorCode;
+	public String getOrderId() {
+		return orderId;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public String getErrorMessage() {
-		return errorMessage;
+	public PayToUserOrderCompletionSubmitted.Origin getOrigin() {
+		return origin;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public void setOrigin(PayToUserOrderCompletionSubmitted.Origin origin) {
+		this.origin = origin;
+	}
+
+	public enum Origin {
+
+		@SerializedName("marketplace")
+		MARKETPLACE("marketplace"),
+		@SerializedName("external")
+		EXTERNAL("external");
+		private final String value;
+		private final static Map<String, PayToUserOrderCompletionSubmitted.Origin> CONSTANTS = new HashMap<String, PayToUserOrderCompletionSubmitted.Origin>();
+
+		static {
+			for (PayToUserOrderCompletionSubmitted.Origin c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private Origin(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static PayToUserOrderCompletionSubmitted.Origin fromValue(String value) {
+			PayToUserOrderCompletionSubmitted.Origin constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

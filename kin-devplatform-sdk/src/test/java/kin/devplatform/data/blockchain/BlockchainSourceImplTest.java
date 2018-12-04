@@ -28,6 +28,7 @@ import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainFailed;
 import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSucceeded;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
+import kin.devplatform.network.model.Offer.OfferType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,7 +89,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		when(balanceObj.value()).thenReturn(new BigDecimal(20));
 		when(kinAccount.getPublicAddress()).thenReturn(PUBLIC_ADDRESS);
 		doNothing().when(kinAccount).activateSync();
-
 
 		resetInstance();
 
@@ -157,7 +157,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 			.thenReturn(transactionRequest);
 
 		blockchainSource.setAppID(APP_ID);
-		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID");
+		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID", OfferType.SPEND);
 		verify(transactionRequest).run(resultCallbackArgumentCaptor.capture());
 		resultCallbackArgumentCaptor.getValue().onResult(new TransactionId() {
 			@Override
@@ -181,7 +181,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 			.thenReturn(transactionRequest);
 
 		blockchainSource.setAppID(APP_ID);
-		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID");
+		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID", OfferType.SPEND);
 		verify(transactionRequest).run(resultCallbackArgumentCaptor.capture());
 
 		final Exception exception = new Exception("failed");

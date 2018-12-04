@@ -1,5 +1,9 @@
 package kin.devplatform.poll.presenter;
 
+
+import static kin.devplatform.poll.view.IPollWebView.ORDER_SUBMISSION_FAILED;
+import static kin.devplatform.poll.view.IPollWebView.SOMETHING_WENT_WRONG;
+
 import android.support.annotation.NonNull;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.BasePresenter;
@@ -7,12 +11,11 @@ import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.events.CloseButtonOnOfferPageTapped;
 import kin.devplatform.bi.events.EarnOrderCancelled;
-import kin.devplatform.bi.events.EarnOrderCompleted;
-import kin.devplatform.bi.events.EarnOrderCompleted.OfferType;
 import kin.devplatform.bi.events.EarnOrderCompletionSubmitted;
 import kin.devplatform.bi.events.EarnOrderCreationFailed;
 import kin.devplatform.bi.events.EarnOrderCreationReceived;
 import kin.devplatform.bi.events.EarnOrderCreationRequested;
+import kin.devplatform.bi.events.EarnOrderCreationRequested.Origin;
 import kin.devplatform.bi.events.EarnOrderFailed;
 import kin.devplatform.bi.events.EarnPageLoaded;
 import kin.devplatform.data.order.OrderDataSource;
@@ -20,6 +23,8 @@ import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.poll.view.IPollWebView;
+import kin.devplatform.poll.view.IPollWebView.Message;
+import kin.devplatform.util.ErrorUtil;
 
 
 public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements IPollWebViewPresenter {
@@ -73,23 +78,27 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 	private void createOrder() {
 		try {
 			eventLogger.send(EarnOrderCreationRequested
-				.create(EarnOrderCreationRequested.OfferType.fromValue(contentType), (double) amount, offerID));
+				.create(EarnOrderCreationRequested.OfferType.fromValue(contentType), (double) amount, offerID,
+					Origin.MARKETPLACE));
 		} catch (IllegalArgumentException ex) {
 			//TODO: add general error event
 		}
 		orderRepository.createOrder(offerID, new KinCallback<OpenOrder>() {
 			@Override
 			public void onResponse(OpenOrder response) {
-				eventLogger.send(EarnOrderCreationReceived.create(offerID, response != null ? response.getId() : null));
+				eventLogger.send(EarnOrderCreationReceived
+					.create(offerID, response != null ? response.getId() : null,
+						EarnOrderCreationReceived.Origin.MARKETPLACE));
 				// we are listening to open orders.
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-				eventLogger.send(EarnOrderCreationFailed.create(exception.getCause().getMessage(), offerID));
-				if (view != null) {
-					showToast(exception.getMessage());
-				}
+				showToast(SOMETHING_WENT_WRONG);
+				eventLogger
+					.send(EarnOrderCreationFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerID,
+						EarnOrderCreationFailed.Origin.MARKETPLACE, String.valueOf(exception.getCode()),
+						exception.getMessage()));
 				closeView();
 			}
 		});
@@ -143,32 +152,26 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 
 	@Override
 	public void onPageResult(String result) {
-		sendEarnOrderCompleted();
 		if (openOrder != null) {
 			isOrderSubmitted = true;
 			final String orderId = openOrder.getId();
-			eventLogger.send(EarnOrderCompletionSubmitted.create(offerID, orderId));
-			orderRepository.submitOrder(offerID, result, orderId, new KinCallback<Order>() {
-				@Override
-				public void onResponse(Order response) {
+			eventLogger.send(EarnOrderCompletionSubmitted
+				.create(offerID, orderId, EarnOrderCompletionSubmitted.Origin.MARKETPLACE));
+			orderRepository.submitOrder(offerID, result, orderId, kin.devplatform.network.model.Origin.MARKETPLACE,
+				new KinCallback<Order>() {
+					@Override
+					public void onResponse(Order response) {
 
-				}
+					}
 
-				@Override
-				public void onFailure(KinEcosystemException exception) {
-					EarnOrderFailed.create(exception.getCause().getMessage(), offerID, orderId);
-					showToast("Order submission failed");
-				}
-			});
-		}
-	}
-
-	private void sendEarnOrderCompleted() {
-		try {
-			eventLogger.send(
-				EarnOrderCompleted.create(OfferType.fromValue(contentType), (double) amount, offerID, getOrderId()));
-		} catch (IllegalArgumentException e) {
-			//TODO: add general error event
+					@Override
+					public void onFailure(KinEcosystemException exception) {
+						EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerID, orderId,
+							EarnOrderFailed.Origin.MARKETPLACE, String.valueOf(exception.getCode()),
+							exception.getMessage());
+						showToast(ORDER_SUBMISSION_FAILED);
+					}
+				});
 		}
 	}
 
@@ -191,7 +194,7 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 		orderRepository.getOpenOrder().addObserver(openOrderObserver);
 	}
 
-	private void showToast(final String msg) {
+	private void showToast(@Message final int msg) {
 		if (view != null) {
 			view.showToast(msg);
 		}

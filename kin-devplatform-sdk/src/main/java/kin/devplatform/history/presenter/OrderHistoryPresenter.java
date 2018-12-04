@@ -2,7 +2,6 @@ package kin.devplatform.history.presenter;
 
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +22,7 @@ import kin.devplatform.network.model.CouponCodeResult;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
 import kin.devplatform.network.model.OrderList;
+import kin.devplatform.util.ErrorUtil;
 
 public class OrderHistoryPresenter extends BasePresenter<IOrderHistoryView> implements IOrderHistoryPresenter {
 
@@ -70,8 +70,8 @@ public class OrderHistoryPresenter extends BasePresenter<IOrderHistoryView> impl
 			@Override
 			public void onFailure(KinEcosystemException exception) {
 				eventLogger.send(GeneralEcosystemSdkError
-					.create("OrderHistoryPresenter.getOrderHistoryList onFailure. exception = " + Log
-						.getStackTraceString(exception)));
+					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),
+						"OrderHistoryPresenter.getOrderHistoryList onFailure."));
 			}
 		});
 	}

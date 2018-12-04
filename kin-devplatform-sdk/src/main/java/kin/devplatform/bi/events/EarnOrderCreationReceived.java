@@ -5,12 +5,15 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
  * Client recieves OfferID
+ * 
  */
 public class EarnOrderCreationReceived implements Event {
 
@@ -18,13 +21,15 @@ public class EarnOrderCreationReceived implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnOrderCreationReceived create(String offerId, String orderId) {
+	public static EarnOrderCreationReceived create(String offerId, String orderId,
+		EarnOrderCreationReceived.Origin origin) {
 		return new EarnOrderCreationReceived(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			offerId,
-			orderId);
+			orderId,
+			origin);
 	}
 
 	/**
@@ -40,22 +45,19 @@ public class EarnOrderCreationReceived implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
@@ -72,6 +74,12 @@ public class EarnOrderCreationReceived implements Event {
 	@SerializedName("order_id")
 	@Expose
 	private String orderId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("origin")
+	@Expose
+	private EarnOrderCreationReceived.Origin origin;
 
 	/**
 	 * No args constructor for use in serialization
@@ -83,19 +91,22 @@ public class EarnOrderCreationReceived implements Event {
 	 *
 	 * @param common
 	 * @param orderId
+	 * @param origin
 
 	 * @param client
 	 * @param offerId
 
 	 * @param user
 	 */
-	public EarnOrderCreationReceived(Common common, User user, Client client, String offerId, String orderId) {
+	public EarnOrderCreationReceived(Common common, User user, Client client, String offerId, String orderId,
+		EarnOrderCreationReceived.Origin origin) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.offerId = offerId;
 		this.orderId = orderId;
+		this.origin = origin;
 	}
 
 	/**
@@ -127,48 +138,42 @@ public class EarnOrderCreationReceived implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
@@ -200,6 +205,59 @@ public class EarnOrderCreationReceived implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public EarnOrderCreationReceived.Origin getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrigin(EarnOrderCreationReceived.Origin origin) {
+		this.origin = origin;
+	}
+
+	public enum Origin {
+
+		@SerializedName("marketplace")
+		MARKETPLACE("marketplace"),
+		@SerializedName("external")
+		EXTERNAL("external");
+		private final String value;
+		private final static Map<String, EarnOrderCreationReceived.Origin> CONSTANTS = new HashMap<String, EarnOrderCreationReceived.Origin>();
+
+		static {
+			for (EarnOrderCreationReceived.Origin c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private Origin(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static EarnOrderCreationReceived.Origin fromValue(String value) {
+			EarnOrderCreationReceived.Origin constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

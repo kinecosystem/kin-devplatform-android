@@ -5,26 +5,31 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * General exception event
+ * Client fails to create spend order
  * 
  */
-public class GeneralEcosystemSdkError implements Event {
+public class PayToUserOrderCreationFailed implements Event {
 
-	public static final String EVENT_NAME = "general_ecosystem_sdk_error";
+	public static final String EVENT_NAME = "pay_to_user_order_creation_failed";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static GeneralEcosystemSdkError create(String errorReason, String errorCode, String errorMessage) {
-		return new GeneralEcosystemSdkError(
+	public static PayToUserOrderCreationFailed create(String errorReason, String offerId,
+		PayToUserOrderCreationFailed.Origin origin, String errorCode, String errorMessage) {
+		return new PayToUserOrderCreationFailed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			errorReason,
+			offerId,
+			origin,
 			errorCode,
 			errorMessage);
 	}
@@ -68,6 +73,18 @@ public class GeneralEcosystemSdkError implements Event {
 	/**
 	 * (Required)
 	 */
+	@SerializedName("offer_id")
+	@Expose
+	private String offerId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("origin")
+	@Expose
+	private PayToUserOrderCreationFailed.Origin origin;
+	/**
+	 * (Required)
+	 */
 	@SerializedName("error_code")
 	@Expose
 	private String errorCode;
@@ -81,27 +98,31 @@ public class GeneralEcosystemSdkError implements Event {
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public GeneralEcosystemSdkError() {
+	public PayToUserOrderCreationFailed() {
 	}
 
 	/**
 	 *
 	 * @param common
 	 * @param errorReason
+	 * @param origin
 	 * @param errorMessage
 
 	 * @param client
+	 * @param offerId
 	 * @param errorCode
 
 	 * @param user
 	 */
-	public GeneralEcosystemSdkError(Common common, User user, Client client, String errorReason, String errorCode,
-		String errorMessage) {
+	public PayToUserOrderCreationFailed(Common common, User user, Client client, String errorReason, String offerId,
+		PayToUserOrderCreationFailed.Origin origin, String errorCode, String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.errorReason = errorReason;
+		this.offerId = offerId;
+		this.origin = origin;
 		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
 	}
@@ -193,6 +214,34 @@ public class GeneralEcosystemSdkError implements Event {
 	/**
 	 * (Required)
 	 */
+	public String getOfferId() {
+		return offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOfferId(String offerId) {
+		this.offerId = offerId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public PayToUserOrderCreationFailed.Origin getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrigin(PayToUserOrderCreationFailed.Origin origin) {
+		this.origin = origin;
+	}
+
+	/**
+	 * (Required)
+	 */
 	public String getErrorCode() {
 		return errorCode;
 	}
@@ -216,6 +265,45 @@ public class GeneralEcosystemSdkError implements Event {
 	 */
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+
+	public enum Origin {
+
+		@SerializedName("marketplace")
+		MARKETPLACE("marketplace"),
+		@SerializedName("external")
+		EXTERNAL("external");
+		private final String value;
+		private final static Map<String, PayToUserOrderCreationFailed.Origin> CONSTANTS = new HashMap<String, PayToUserOrderCreationFailed.Origin>();
+
+		static {
+			for (PayToUserOrderCreationFailed.Origin c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private Origin(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static PayToUserOrderCreationFailed.Origin fromValue(String value) {
+			PayToUserOrderCreationFailed.Origin constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

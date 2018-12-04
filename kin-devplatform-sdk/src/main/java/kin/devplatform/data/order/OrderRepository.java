@@ -12,7 +12,15 @@ import kin.devplatform.KinCallback;
 import kin.devplatform.base.ObservableData;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
+import kin.devplatform.bi.events.EarnOrderCompleted;
+import kin.devplatform.bi.events.EarnOrderCompletionSubmitted;
+import kin.devplatform.bi.events.EarnOrderCreationRequested;
+import kin.devplatform.bi.events.EarnOrderFailed;
 import kin.devplatform.bi.events.EarnOrderPaymentConfirmed;
+import kin.devplatform.bi.events.PayToUserOrderCompleted;
+import kin.devplatform.bi.events.PayToUserOrderCompletionSubmitted;
+import kin.devplatform.bi.events.PayToUserOrderCreationRequested;
+import kin.devplatform.bi.events.PayToUserOrderFailed;
 import kin.devplatform.bi.events.SpendOrderCompleted;
 import kin.devplatform.bi.events.SpendOrderCompletionSubmitted;
 import kin.devplatform.bi.events.SpendOrderCreationRequested;
@@ -129,8 +137,8 @@ public class OrderRepository implements OrderDataSource {
 
 	@Override
 	public void submitOrder(@NonNull final String offerID, @Nullable String content, @NonNull final String orderID,
-		@Nullable final KinCallback<Order> callback) {
-		listenForCompletedPayment();
+		kin.devplatform.network.model.Origin origin, @Nullable final KinCallback<Order> callback) {
+		listenForCompletedPayment(origin);
 		remoteData.submitOrder(content, orderID, new Callback<Order, ApiException>() {
 			@Override
 			public void onResponse(Order response) {
@@ -153,13 +161,13 @@ public class OrderRepository implements OrderDataSource {
 		});
 	}
 
-	private void listenForCompletedPayment() {
+	private void listenForCompletedPayment(final kin.devplatform.network.model.Origin origin) {
 		synchronized (paymentObserversLock) {
 			if (paymentObserverCount == 0) {
 				paymentObserver = new Observer<Payment>() {
 					@Override
 					public void onChanged(Payment payment) {
-						sendEarnPaymentConfirmed(payment);
+						sendEarnPaymentConfirmed(payment, origin);
 						decrementPaymentObserverCount();
 						getOrder(payment.getOrderID());
 					}
@@ -170,9 +178,13 @@ public class OrderRepository implements OrderDataSource {
 		}
 	}
 
-	private void sendEarnPaymentConfirmed(Payment payment) {
+	private void sendEarnPaymentConfirmed(Payment payment, kin.devplatform.network.model.Origin origin) {
 		if (payment.isSucceed() && payment.getAmount() != null && payment.getType() == Payment.EARN) {
-			eventLogger.send(EarnOrderPaymentConfirmed.create(payment.getTransactionID(), null, payment.getOrderID()));
+			eventLogger
+				.send(EarnOrderPaymentConfirmed.create(payment.getTransactionID(), payment.getOrderID(),
+					origin == kin.devplatform.network.model.Origin.EXTERNAL ? EarnOrderPaymentConfirmed.Origin.EXTERNAL
+						: EarnOrderPaymentConfirmed.Origin.MARKETPLACE,
+					""));
 		}
 	}
 
@@ -195,7 +207,9 @@ public class OrderRepository implements OrderDataSource {
 			public void onResponse(Order order) {
 				decrementPendingOrdersCount();
 				getOrderWatcher().postValue(order);
-				sendSpendOrderCompleted(order);
+				//in case of marketplace orders, this is the point where we verify order completion,
+				//in case of native/external orders, we will verify on onOrderConfirmed callback at CreateExternalOrder class
+				sendMarketplaceOrderCompleted(order);
 				if (!hasMorePendingOffers()) {
 					removeCachedOpenOrderByID(order.getOrderId());
 				}
@@ -219,16 +233,32 @@ public class OrderRepository implements OrderDataSource {
 		return orderWatcher;
 	}
 
-	private void sendSpendOrderCompleted(Order order) {
-		if (order.getOfferType() == OfferType.SPEND) {
+	private void sendMarketplaceOrderCompleted(Order order) {
+		if (order.getOrigin() == Origin.MARKETPLACE) {
 			if (order.getStatus() == Status.COMPLETED) {
-				eventLogger.send(SpendOrderCompleted.create(order.getOfferId(), order.getOrderId(), false));
+				if (order.getOfferType() == OfferType.SPEND) {
+					eventLogger.send(SpendOrderCompleted.create(order.getOfferId(), order.getOrderId(),
+						SpendOrderCompleted.Origin.MARKETPLACE, Double.valueOf(order.getAmount())));
+				} else if (order.getOfferType() == OfferType.EARN) {
+					eventLogger.send(EarnOrderCompleted.create(order.getOfferId(), order.getOrderId(),
+						EarnOrderCompleted.Origin.MARKETPLACE, Double.valueOf(order.getAmount())));
+				}
 			} else {
-				String reason = "Timed out";
+				String reason = "";
+				String errorCode = "";
+				String message = "";
 				if (order.getError() != null) {
 					reason = order.getError().getMessage();
+					errorCode = String.valueOf(order.getError().getCode());
+					message = order.getError().getError();
 				}
-				eventLogger.send(SpendOrderFailed.create(reason, order.getOfferId(), order.getOrderId(), false));
+				if (order.getOfferType() == OfferType.SPEND) {
+					eventLogger.send(SpendOrderFailed.create(reason, order.getOfferId(), order.getOrderId(),
+						SpendOrderFailed.Origin.MARKETPLACE, errorCode, message));
+				} else if (order.getOfferType() == OfferType.EARN) {
+					eventLogger.send(EarnOrderFailed.create(reason, order.getOfferId(), order.getOrderId(),
+						EarnOrderFailed.Origin.MARKETPLACE, errorCode, message));
+				}
 			}
 		}
 	}
@@ -275,8 +305,24 @@ public class OrderRepository implements OrderDataSource {
 	}
 
 	@Override
+	public void payToUser(String offerJwt, @Nullable final KinCallback<OrderConfirmation> callback) {
+		//pay to user has a similar flow like purchase (spend), the only different is the expected input JWT and the corresponding events
+		spendFlow(offerJwt, true, callback);
+	}
+
+	@Override
 	public void purchase(String offerJwt, @Nullable final KinCallback<OrderConfirmation> callback) {
-		eventLogger.send(SpendOrderCreationRequested.create("", true));
+		spendFlow(offerJwt, false, callback);
+	}
+
+	private void spendFlow(String offerJwt, final boolean isPayToUser,
+		@Nullable final KinCallback<OrderConfirmation> callback) {
+		if (isPayToUser) {
+			eventLogger.send(
+				PayToUserOrderCreationRequested.create("", PayToUserOrderCreationRequested.Origin.EXTERNAL));
+		} else {
+			eventLogger.send(SpendOrderCreationRequested.create("", SpendOrderCreationRequested.Origin.EXTERNAL));
+		}
 		new ExternalSpendOrderCall(remoteData, blockchainSource, offerJwt, eventLogger,
 			new ExternalSpendOrderCallbacks() {
 				@Override
@@ -286,14 +332,22 @@ public class OrderRepository implements OrderDataSource {
 
 				@Override
 				public void onTransactionSent(final OpenOrder openOrder) {
-					submitOrder(openOrder.getOfferId(), null, openOrder.getId(), new KinCallbackAdapter<Order>() {
-						@Override
-						public void onFailure(KinEcosystemException exception) {
-							handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
-						}
-					});
-					eventLogger
-						.send(SpendOrderCompletionSubmitted.create(openOrder.getOfferId(), openOrder.getId(), true));
+					submitOrder(openOrder.getOfferId(), null, openOrder.getId(),
+						kin.devplatform.network.model.Origin.EXTERNAL, new KinCallbackAdapter<Order>() {
+							@Override
+							public void onFailure(KinEcosystemException exception) {
+								handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
+							}
+						});
+					if (isPayToUser) {
+						eventLogger.send(PayToUserOrderCompletionSubmitted
+							.create(openOrder.getOfferId(), openOrder.getId(),
+								PayToUserOrderCompletionSubmitted.Origin.EXTERNAL));
+					} else {
+						eventLogger.send(SpendOrderCompletionSubmitted
+							.create(openOrder.getOfferId(), openOrder.getId(),
+								SpendOrderCompletionSubmitted.Origin.EXTERNAL));
+					}
 				}
 
 				@Override
@@ -321,7 +375,15 @@ public class OrderRepository implements OrderDataSource {
 						offerID = order.getOfferId();
 						orderId = order.getOrderId();
 					}
-					eventLogger.send(SpendOrderCompleted.create(offerID, orderId, true));
+					if (isPayToUser) {
+						eventLogger.send(PayToUserOrderCompleted
+							.create(offerID, orderId, PayToUserOrderCompleted.Origin.EXTERNAL,
+								Double.valueOf(order.getAmount())));
+					} else {
+						eventLogger.send(SpendOrderCompleted
+							.create(offerID, orderId, SpendOrderCompleted.Origin.EXTERNAL,
+								Double.valueOf(order.getAmount())));
+					}
 
 					if (callback != null) {
 						callback.onResponse(createOrderConfirmation(confirmationJwt));
@@ -338,15 +400,17 @@ public class OrderRepository implements OrderDataSource {
 				}
 
 				private void handleOnFailure(KinEcosystemException exception, String offerId, String orderId) {
-					String reason = "";
-					if (exception != null) {
-						if (exception.getCause() != null) {
-							reason = exception.getCause().getMessage();
-						} else {
-							reason = exception.getMessage();
-						}
+					if (isPayToUser) {
+						eventLogger.send(PayToUserOrderFailed
+							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
+								PayToUserOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+								exception.getMessage()));
+					} else {
+						eventLogger.send(SpendOrderFailed
+							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
+								SpendOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+								exception.getMessage()));
 					}
-					eventLogger.send(SpendOrderFailed.create(reason, offerId, orderId, true));
 
 					if (callback != null) {
 						callback.onFailure(exception);
@@ -358,23 +422,39 @@ public class OrderRepository implements OrderDataSource {
 
 	@Override
 	public void requestPayment(String offerJwt, final KinCallback<OrderConfirmation> callback) {
+		eventLogger
+			.send(EarnOrderCreationRequested.create(null, 0.0, "", EarnOrderCreationRequested.Origin.EXTERNAL));
 		new ExternalEarnOrderCall(remoteData, blockchainSource, offerJwt, eventLogger, new ExternalOrderCallbacks() {
 			@Override
-			public void onOrderCreated(OpenOrder openOrder) {
+			public void onOrderCreated(final OpenOrder openOrder) {
 				cachedOpenOrder.postValue(openOrder);
-				submitOrder(openOrder.getOfferId(), null, openOrder.getId(), new KinCallbackAdapter<Order>() {
-					@Override
-					public void onFailure(KinEcosystemException exception) {
-						handleOnFailure(exception);
-					}
-				});
+				submitOrder(openOrder.getOfferId(), null, openOrder.getId(),
+					kin.devplatform.network.model.Origin.EXTERNAL, new KinCallbackAdapter<Order>() {
+						@Override
+						public void onFailure(KinEcosystemException exception) {
+							handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
+						}
+					});
+				eventLogger
+					.send(EarnOrderCompletionSubmitted.create(openOrder.getOfferId(), openOrder.getId(),
+						EarnOrderCompletionSubmitted.Origin.EXTERNAL));
 			}
 
 			@Override
 			public void onOrderConfirmed(String confirmationJwt, Order order) {
+				String offerID = "null";
+				String orderId = "null";
+				if (order != null) {
+					offerID = order.getOfferId();
+					orderId = order.getOrderId();
+				}
+				eventLogger.send(EarnOrderCompleted
+					.create(offerID, orderId, EarnOrderCompleted.Origin.EXTERNAL, Double.valueOf(order.getAmount())));
+
 				if (callback != null) {
 					callback.onResponse(createOrderConfirmation(confirmationJwt));
 				}
+
 			}
 
 			@Override
@@ -382,14 +462,20 @@ public class OrderRepository implements OrderDataSource {
 				if (openOrder != null) { // did not fail before submit
 					decrementCount();
 				}
-				handleOnFailure(exception);
+				handleOnFailure(exception, openOrder != null ? openOrder.getOfferId() : "null",
+					openOrder != null ? openOrder.getId() : "null");
 			}
 
-			private void handleOnFailure(KinEcosystemException exception) {
+			private void handleOnFailure(KinEcosystemException exception, String offerId, String orderId) {
+				eventLogger
+					.send(EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
+						EarnOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), exception.getMessage()));
+
 				if (callback != null) {
 					callback.onFailure(exception);
 				}
 			}
+
 		}).start();
 	}
 

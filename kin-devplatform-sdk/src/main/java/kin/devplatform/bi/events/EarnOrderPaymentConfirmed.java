@@ -5,12 +5,15 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * Clients tracks the OrderID on the blockchain
+ * Clients tracks the OrderID on the blockchain 
+ * 
  */
 public class EarnOrderPaymentConfirmed implements Event {
 
@@ -18,14 +21,16 @@ public class EarnOrderPaymentConfirmed implements Event {
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static EarnOrderPaymentConfirmed create(String transactionId, String offerId, String orderId) {
+	public static EarnOrderPaymentConfirmed create(String transactionId, String orderId,
+		EarnOrderPaymentConfirmed.Origin origin, String operationId) {
 		return new EarnOrderPaymentConfirmed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
 			transactionId,
-			offerId,
-			orderId);
+			orderId,
+			origin,
+			operationId);
 	}
 
 	/**
@@ -41,22 +46,19 @@ public class EarnOrderPaymentConfirmed implements Event {
 	@Expose
 	private String eventType = EVENT_TYPE;
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	@SerializedName("common")
 	@Expose
 	private Common common;
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	@SerializedName("user")
 	@Expose
 	private User user;
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	@SerializedName("client")
 	@Expose
@@ -70,15 +72,21 @@ public class EarnOrderPaymentConfirmed implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("offer_id")
-	@Expose
-	private String offerId;
-	/**
-	 * (Required)
-	 */
 	@SerializedName("order_id")
 	@Expose
 	private String orderId;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("origin")
+	@Expose
+	private EarnOrderPaymentConfirmed.Origin origin;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("operation_id")
+	@Expose
+	private String operationId;
 
 	/**
 	 * No args constructor for use in serialization
@@ -90,22 +98,24 @@ public class EarnOrderPaymentConfirmed implements Event {
 	 *
 	 * @param common
 	 * @param orderId
+	 * @param origin
 
 	 * @param client
-	 * @param offerId
+	 * @param operationId
 
 	 * @param user
 	 * @param transactionId
 	 */
-	public EarnOrderPaymentConfirmed(Common common, User user, Client client, String transactionId, String offerId,
-		String orderId) {
+	public EarnOrderPaymentConfirmed(Common common, User user, Client client, String transactionId, String orderId,
+		EarnOrderPaymentConfirmed.Origin origin, String operationId) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
 		this.transactionId = transactionId;
-		this.offerId = offerId;
 		this.orderId = orderId;
+		this.origin = origin;
+		this.operationId = operationId;
 	}
 
 	/**
@@ -137,48 +147,42 @@ public class EarnOrderPaymentConfirmed implements Event {
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public Common getCommon() {
 		return common;
 	}
 
 	/**
-	 * common properties for all events
-	 * (Required)
+	 * common properties for all events (Required)
 	 */
 	public void setCommon(Common common) {
 		this.common = common;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public User getUser() {
 		return user;
 	}
 
 	/**
-	 * common user properties
-	 * (Required)
+	 * common user properties (Required)
 	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public Client getClient() {
 		return client;
 	}
 
 	/**
-	 * common properties for all client events
-	 * (Required)
+	 * common properties for all client events (Required)
 	 */
 	public void setClient(Client client) {
 		this.client = client;
@@ -201,20 +205,6 @@ public class EarnOrderPaymentConfirmed implements Event {
 	/**
 	 * (Required)
 	 */
-	public String getOfferId() {
-		return offerId;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setOfferId(String offerId) {
-		this.offerId = offerId;
-	}
-
-	/**
-	 * (Required)
-	 */
 	public String getOrderId() {
 		return orderId;
 	}
@@ -224,6 +214,73 @@ public class EarnOrderPaymentConfirmed implements Event {
 	 */
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public EarnOrderPaymentConfirmed.Origin getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOrigin(EarnOrderPaymentConfirmed.Origin origin) {
+		this.origin = origin;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getOperationId() {
+		return operationId;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setOperationId(String operationId) {
+		this.operationId = operationId;
+	}
+
+	public enum Origin {
+
+		@SerializedName("marketplace")
+		MARKETPLACE("marketplace"),
+		@SerializedName("external")
+		EXTERNAL("external");
+		private final String value;
+		private final static Map<String, EarnOrderPaymentConfirmed.Origin> CONSTANTS = new HashMap<String, EarnOrderPaymentConfirmed.Origin>();
+
+		static {
+			for (EarnOrderPaymentConfirmed.Origin c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private Origin(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static EarnOrderPaymentConfirmed.Origin fromValue(String value) {
+			EarnOrderPaymentConfirmed.Origin constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

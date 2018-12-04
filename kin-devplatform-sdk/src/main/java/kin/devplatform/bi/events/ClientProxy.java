@@ -8,9 +8,9 @@ public class ClientProxy implements ClientInterface {
 		return new Client(
 			this.getOs(),
 			this.getLanguage(),
+			this.getDeviceManufacturer(),
 			this.getCarrier(),
 			this.getDeviceId(),
-			this.getDeviceManufacturer(),
 			this.getDeviceModel());
 	}
 
@@ -44,6 +44,21 @@ public class ClientProxy implements ClientInterface {
 		this.dynamicLanguage = language;
 	}
 
+	private String deviceManufacturer;
+	private EventsStore.DynamicValue<String> dynamicDeviceManufacturer;
+
+	public String getDeviceManufacturer() {
+		return this.deviceManufacturer != null ? this.deviceManufacturer : this.dynamicDeviceManufacturer.get();
+	}
+
+	public void setDeviceManufacturer(String deviceManufacturer) {
+		this.deviceManufacturer = deviceManufacturer;
+	}
+
+	public void setDeviceManufacturer(EventsStore.DynamicValue<String> deviceManufacturer) {
+		this.dynamicDeviceManufacturer = deviceManufacturer;
+	}
+
 	private String carrier;
 	private EventsStore.DynamicValue<String> dynamicCarrier;
 
@@ -72,21 +87,6 @@ public class ClientProxy implements ClientInterface {
 
 	public void setDeviceId(EventsStore.DynamicValue<String> deviceId) {
 		this.dynamicDeviceId = deviceId;
-	}
-
-	private String deviceManufacturer;
-	private EventsStore.DynamicValue<String> dynamicDeviceManufacturer;
-
-	public String getDeviceManufacturer() {
-		return this.deviceManufacturer != null ? this.deviceManufacturer : this.dynamicDeviceManufacturer.get();
-	}
-
-	public void setDeviceManufacturer(String deviceManufacturer) {
-		this.deviceManufacturer = deviceManufacturer;
-	}
-
-	public void setDeviceManufacturer(EventsStore.DynamicValue<String> deviceManufacturer) {
-		this.dynamicDeviceManufacturer = deviceManufacturer;
 	}
 
 	private String deviceModel;

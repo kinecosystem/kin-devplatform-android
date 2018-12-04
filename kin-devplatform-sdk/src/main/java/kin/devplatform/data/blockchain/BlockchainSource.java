@@ -10,6 +10,7 @@ import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
+import kin.devplatform.network.model.Offer.OfferType;
 
 public interface BlockchainSource {
 
@@ -31,8 +32,8 @@ public interface BlockchainSource {
 	 * @param amount the amount to send
 	 * @param orderID the orderID to be included in the memo of the transaction
 	 */
-	void sendTransaction(@NonNull String publicAddress, @NonNull BigDecimal amount, @NonNull String orderID,
-		@NonNull String offerID);
+	void sendTransaction(@NonNull String publicAddress, @NonNull BigDecimal amount,
+		@NonNull String orderID, @NonNull String offerID, OfferType offerType);
 
 	/**
 	 * @return the cached balance.
