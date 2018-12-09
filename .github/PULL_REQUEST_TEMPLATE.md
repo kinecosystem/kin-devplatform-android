@@ -1,9 +1,9 @@
-* Main purpose:
+#### Main purpose:
  
-* Technical description:
+#### Technical description:
 
-* Dilemmas you faced with?
+#### Dilemmas you faced with?
 
-* Tests
+#### Tests
 
-* Documentation (Source/readme.md)
+#### Documentation (Source/readme.md)
