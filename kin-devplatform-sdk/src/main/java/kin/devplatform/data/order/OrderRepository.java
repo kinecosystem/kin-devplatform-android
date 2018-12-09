@@ -1,6 +1,7 @@
 package kin.devplatform.data.order;
 
 import static kin.devplatform.exception.ClientException.INTERNAL_INCONSISTENCY;
+import static kin.devplatform.exception.ClientException.ORDER_NOT_FOUND;
 import static kin.devplatform.util.ErrorUtil.getClientException;
 
 import android.support.annotation.NonNull;
@@ -546,7 +547,7 @@ public class OrderRepository implements OrderDataSource {
 							callback.onResponse(orderConfirmation);
 						} else {
 							callback.onFailure(
-								getClientException(INTERNAL_INCONSISTENCY, new DataNotAvailableException()));
+								getClientException(ORDER_NOT_FOUND, null));
 						}
 					}
 				}

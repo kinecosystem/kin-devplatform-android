@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 	private Button nativeEarnButton;
 	private Button showPublicAddressButton;
 	private Button payToUserButton;
+	private Button getOrderConfirmationButton;
 
 	private TextView publicAddressTextArea;
 	private KinCallback<OrderConfirmation> nativeSpendOrderConfirmationCallback;
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
 		payToUserButton = findViewById(R.id.pay_to_user_button);
 		showPublicAddressButton = findViewById(R.id.show_public_address);
 		publicAddressTextArea = findViewById(R.id.public_text_area);
+		getOrderConfirmationButton = findViewById(R.id.order_confirmation_button);
 		showPublicAddressButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -101,6 +103,13 @@ public class MainActivity extends AppCompatActivity {
 				showToast("Native earn flow started");
 				enableView(v, false);
 				createNativeEarnOffer();
+			}
+		});
+		getOrderConfirmationButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				enableView(v, false);
+				getOrderConfirmation(JwtUtil.lastId);
 			}
 		});
 		payToUserButton.setOnClickListener(new OnClickListener() {
@@ -261,7 +270,6 @@ public class MainActivity extends AppCompatActivity {
 		} catch (ClientException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private void copyToClipboard(CharSequence textToCopy) {
@@ -366,17 +374,27 @@ public class MainActivity extends AppCompatActivity {
 				Kin.getOrderConfirmation(offerID, new KinCallback<OrderConfirmation>() {
 					@Override
 					public void onResponse(OrderConfirmation orderConfirmation) {
-						showToast("Offer: " + offerID + " Status is: " + orderConfirmation.getStatus());
+						String msg = "Offer: " + offerID + " Status is: " + orderConfirmation.getStatus() + " jwt = "
+							+ orderConfirmation.getJwtConfirmation();
+						showToast(msg);
+						Log.d(TAG, msg);
+						enableView(getOrderConfirmationButton, true);
 					}
 
 					@Override
-					public void onFailure(KinEcosystemException exception) {
+					public void onFailure(KinEcosystemException e) {
+						Log.d(TAG, "getOrderConfirmation failure = " + Log.getStackTraceString(e));
 						showToast("Failed to get OfferId: " + offerID + " status");
+						enableView(getOrderConfirmationButton, true);
 					}
 				});
 			} catch (ClientException e) {
+				enableView(getOrderConfirmationButton, true);
 				e.printStackTrace();
 			}
+		} else {
+			showToast("No Order was sent in this session yet.");
+			enableView(getOrderConfirmationButton, true);
 		}
 	}
 
