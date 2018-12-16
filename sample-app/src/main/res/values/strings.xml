@@ -12,4 +12,5 @@
     <string name="native_earn">Native Earn</string>
     <string name="kin_marketplace_title">Kin Marketplace</string>
     <string name="pay_to_user">Pay to User</string>
+    <string name="get_order_confirmation">Get Last Order Confirmation</string>
 </resources>

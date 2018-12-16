@@ -37,8 +37,9 @@ public class JwtUtil {
 	private static final String JWT_HEADER_TYP = "typ";
 	private static final String JWT = "jwt";
 
-	public static String generateSignInExampleJWT(@NonNull String appID, @NonNull String userId) {
+	public static String lastId;
 
+	public static String generateSignInExampleJWT(@NonNull String appID, @NonNull String userId) {
 		String jwt = getBasicJWT(appID)
 			.setSubject(JWT_SUBJECT_REGISTER)
 			.claim(JWT_KEY_USER_ID, userId)
@@ -105,6 +106,7 @@ public class JwtUtil {
 
 	private static JWTOfferPart createOfferPartExampleObject() {
 		int randomID = new Random().nextInt((9999 - 1) + 1) + 1;
+		lastId = String.valueOf(randomID);
 		return new JWTOfferPart(String.valueOf(randomID), 10);
 	}
 

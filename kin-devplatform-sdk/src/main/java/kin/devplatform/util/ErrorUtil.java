@@ -45,6 +45,7 @@ public class ErrorUtil {
 	private static final String ECOSYSTEM_SDK_IS_NOT_STARTED = "Operation not permitted: Ecosystem SDK is not started";
 	private static final String BAD_OR_MISSING_PARAMETERS = "Bad or missing parameters";
 	private static final String FAILED_TO_LOAD_ACCOUNT_ON_INDEX = "Failed to load blockchain wallet on index %d";
+	private static final String ORDER_NOT_FOUND = "Cannot found a order";
 
 
 	private static final int REQUEST_TIMEOUT_CODE = 408;
@@ -140,6 +141,9 @@ public class ErrorUtil {
 				break;
 			case BAD_CONFIGURATION:
 				exception = new ClientException(BAD_CONFIGURATION, BAD_OR_MISSING_PARAMETERS, e);
+				break;
+			case ClientException.ORDER_NOT_FOUND:
+				exception = new ClientException(ClientException.ORDER_NOT_FOUND, ORDER_NOT_FOUND, e);
 				break;
 			case INTERNAL_INCONSISTENCY:
 			default:
