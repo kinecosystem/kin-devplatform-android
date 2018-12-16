@@ -4,7 +4,6 @@ import android.app.Application;
 import android.support.annotation.NonNull;
 import com.crashlytics.android.Crashlytics;
 import com.squareup.leakcanary.LeakCanary;
-
 import io.fabric.sdk.android.Fabric;
 import kin.devplatform.Environment;
 import kin.devplatform.Kin;
@@ -21,6 +20,12 @@ public class App extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		if (LeakCanary.isInAnalyzerProcess(this)) {
+			// This process is dedicated to LeakCanary for heap analysis.
+			// You should not init your app in this process.
+			return;
+		}
+		LeakCanary.install(this);
 
 		Fabric.with(this, new Crashlytics());
 
@@ -50,13 +55,6 @@ public class App extends Application {
 		}
 
 		Kin.enableLogs(true);
-
-		if (LeakCanary.isInAnalyzerProcess(this)) {
-			// This process is dedicated to LeakCanary for heap analysis.
-			// You should not init your app in this process.
-			return;
-		}
-		LeakCanary.install(this);
 	}
 
 	@NonNull
