@@ -1,5 +1,6 @@
 package kin.devplatform.main.presenter;
 
+import android.os.Bundle;
 import kin.devplatform.base.IBasePresenter;
 import kin.devplatform.main.ScreenId;
 import kin.devplatform.main.view.IEcosystemView;
@@ -17,4 +18,6 @@ public interface IEcosystemPresenter extends IBasePresenter<IEcosystemView> {
 	void onMenuInitialized();
 
 	void onStart();
+
+	void onSaveInstanceState(Bundle outState);
 }

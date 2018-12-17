@@ -7,6 +7,7 @@ import static kin.devplatform.main.ScreenId.ORDER_HISTORY;
 import static kin.devplatform.main.Title.MARKETPLACE_TITLE;
 import static kin.devplatform.main.Title.ORDER_HISTORY_TITLE;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import java.math.BigDecimal;
 import kin.devplatform.base.BasePresenter;
@@ -21,9 +22,10 @@ import kin.devplatform.main.view.IEcosystemView;
 
 public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements IEcosystemPresenter {
 
+	private static final String KEY_SCREEN_ID = "screen_id";
 	private @ScreenId
 	int visibleScreen = NONE;
-	private final INavigator navigator;
+	private INavigator navigator;
 	private final SettingsDataSource settingsDataSource;
 	private final BlockchainSource blockchainSource;
 
@@ -32,21 +34,44 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 
 	public EcosystemPresenter(@NonNull IEcosystemView view, @NonNull SettingsDataSource settingsDataSource,
 		@NonNull final BlockchainSource blockchainSource,
-		@NonNull INavigator navigator) {
+		@NonNull INavigator navigator, Bundle savedInstanceState) {
 		this.view = view;
 		this.settingsDataSource = settingsDataSource;
 		this.blockchainSource = blockchainSource;
 		this.navigator = navigator;
 		this.currentBalance = blockchainSource.getBalance();
+		this.visibleScreen = getVisibleScreen(savedInstanceState);
 
 		this.view.attachPresenter(this);
+	}
+
+	private int getVisibleScreen(Bundle savedInstanceState) {
+		return savedInstanceState != null ? savedInstanceState.getInt(KEY_SCREEN_ID, NONE) : NONE;
 	}
 
 	@Override
 	public void onAttach(IEcosystemView view) {
 		super.onAttach(view);
-		if (this.view != null && visibleScreen != MARKETPLACE) {
-			navigator.navigateToMarketplace();
+		navigateToVisibleScreen(visibleScreen);
+	}
+
+	private void navigateToVisibleScreen(int visibleScreen) {
+		if (view != null) {
+			switch (visibleScreen) {
+				case ORDER_HISTORY:
+					if (navigator != null) {
+						navigator.navigateToOrderHistory(false);
+					}
+					break;
+				case MARKETPLACE:
+				case NONE:
+				default:
+					if (navigator != null) {
+						navigator.navigateToMarketplace();
+					}
+					break;
+
+			}
 		}
 	}
 
@@ -56,9 +81,16 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putInt(KEY_SCREEN_ID, visibleScreen);
+	}
+
+	@Override
 	public void onDetach() {
 		super.onDetach();
 		removeBalanceObserver();
+		navigator = null;
+
 	}
 
 	private void addBalanceObserver() {
@@ -102,7 +134,7 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 
 	@Override
 	public void balanceItemClicked() {
-		if (view != null && visibleScreen != ORDER_HISTORY) {
+		if (view != null && visibleScreen != ORDER_HISTORY && navigator != null) {
 			navigator.navigateToOrderHistory(false);
 		}
 	}
@@ -141,7 +173,9 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 
 	@Override
 	public void settingsMenuClicked() {
-		navigator.navigateToSettings();
+		if (navigator != null) {
+			navigator.navigateToSettings();
+		}
 	}
 
 	@Override
@@ -149,3 +183,4 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 		updateMenuSettingsIcon();
 	}
 }
+
