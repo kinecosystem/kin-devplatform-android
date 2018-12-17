@@ -18,7 +18,6 @@ import kin.devplatform.base.BaseRecyclerAdapter.OnItemClickListener;
 import kin.devplatform.exception.ClientException;
 import kin.devplatform.marketplace.presenter.IMarketplacePresenter;
 import kin.devplatform.marketplace.presenter.ISpendDialogPresenter;
-import kin.devplatform.marketplace.presenter.MarketplacePresenter;
 import kin.devplatform.network.model.Offer;
 import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.poll.view.PollWebViewActivity;
@@ -55,7 +54,7 @@ public class MarketplaceFragment extends Fragment implements IMarketplaceView {
 	}
 
 	@Override
-	public void attachPresenter(MarketplacePresenter presenter) {
+	public void attachPresenter(IMarketplacePresenter presenter) {
 		marketplacePresenter = presenter;
 	}
 
