@@ -156,7 +156,7 @@ public final class KinEcosystemInitiator {
 			public void onResponse(AuthToken response) {
 				final AccountManager accountManager = AccountManagerImpl.getInstance();
 				if (accountManager.isAccountCreated()) {
-					fireStartCompleted(loginCallback);
+					activateAccount(loginCallback);
 				} else {
 					handleAccountNotCreatedState(accountManager, loginCallback);
 				}
@@ -177,12 +177,12 @@ public final class KinEcosystemInitiator {
 			public void onChanged(@AccountState Integer value) {
 				if (value == AccountManager.ERROR) {
 					handler.removeCallbacksAndMessages(null);
-					fireStartError(accountManager.getError(), loginCallback);
 					accountManager.removeAccountStateObserver(this);
+					fireStartError(accountManager.getError(), loginCallback);
 				} else if (value == AccountManager.CREATION_COMPLETED) {
 					handler.removeCallbacksAndMessages(null);
-					fireStartCompleted(loginCallback);
 					accountManager.removeAccountStateObserver(this);
+					activateAccount(loginCallback);
 				}
 			}
 		};
@@ -198,6 +198,23 @@ public final class KinEcosystemInitiator {
 		accountManager.start();
 	}
 
+	private void activateAccount(final KinCallback<Void> callback) {
+		if (AuthRepository.getInstance().isActivated()) {
+			fireStartCompleted(callback);
+		} else {
+			AuthRepository.getInstance().activateAccount(new KinCallback<Void>() {
+				@Override
+				public void onResponse(Void response) {
+					fireStartCompleted(callback);
+				}
+
+				@Override
+				public void onFailure(KinEcosystemException error) {
+					fireStartError(error, callback);
+				}
+			});
+		}
+	}
 
 	private void fireStartCompleted(final KinCallback<Void> loginCallback) {
 		isAccountLoggedIn = true;
