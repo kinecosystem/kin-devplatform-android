@@ -20,7 +20,7 @@ public interface BlockchainSource {
 	 *
 	 * @throws BlockchainException could not load the account, or could not create a new account.
 	 */
-	void createAccount() throws BlockchainException;
+	void loadOrCreateAccount() throws BlockchainException;
 
 	/**
 	 * Getting the current account.

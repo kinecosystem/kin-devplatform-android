@@ -17,6 +17,7 @@ import kin.devplatform.base.ObservableData;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.EventLoggerImpl;
+import kin.devplatform.bi.events.GeneralEcosystemSdkError;
 import kin.devplatform.bi.events.KinSdkInitiated;
 import kin.devplatform.core.util.DeviceUtils;
 import kin.devplatform.core.util.ExecutorsUtil;
@@ -48,7 +49,21 @@ public final class KinEcosystemInitiator {
 	}
 
 	public void init(Context context) {
-		init(context, null);
+		if (!isInitialized) {
+			init(context, null);
+			//when init is called after process restart, account must be loaded,
+			//login part of start is not needed as any ecosystem activity can be displayed only after login was done successfully
+
+			try {
+				BlockchainSourceImpl.getInstance().loadOrCreateAccount();
+			} catch (BlockchainException e) {
+				EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
+					ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
+					"KinEcosystemInitiator init failed"
+				));
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void init(Context context, KinEnvironment environment) {
@@ -108,7 +123,7 @@ public final class KinEcosystemInitiator {
 
 		String publicAddress = null;
 		try {
-			BlockchainSourceImpl.getInstance().createAccount();
+			BlockchainSourceImpl.getInstance().loadOrCreateAccount();
 			publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
 		} catch (final BlockchainException exception) {
 			fireStartError(exception, loginCallback);

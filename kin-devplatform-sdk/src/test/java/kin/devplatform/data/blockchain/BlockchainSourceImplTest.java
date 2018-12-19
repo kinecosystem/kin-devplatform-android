@@ -114,7 +114,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		when(local.getAccountIndex()).thenReturn(11);
 		when(kinClient.hasAccount()).thenReturn(true);
 		resetInstance();
-		blockchainSource.createAccount();
+		blockchainSource.loadOrCreateAccount();
 		verify(kinClient).getAccount(11);
 	}
 
@@ -135,7 +135,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	@Test
 	public void get_public_address() throws BlockchainException {
 		String address = null;
-		blockchainSource.createAccount();
+		blockchainSource.loadOrCreateAccount();
 		try {
 			address = blockchainSource.getPublicAddress();
 		} catch (BlockchainException e) {
@@ -162,7 +162,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	@Test
 	public void send_transaction_succeeded() throws BlockchainException {
-		blockchainSource.createAccount();
+		blockchainSource.loadOrCreateAccount();
 		String toAddress = "some_pub_address";
 		final BigDecimal amount = new BigDecimal(10);
 		final String orderID = "someID";
@@ -188,7 +188,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	@Test
 	public void send_transaction_failed() throws BlockchainException {
-		blockchainSource.createAccount();
+		blockchainSource.loadOrCreateAccount();
 		String toAddress = "some_pub_address";
 		BigDecimal amount = new BigDecimal(10);
 		final String orderID = "someID";
@@ -222,7 +222,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	@Test
 	public void add_balance_observer_get_onChanged() throws BlockchainException {
 		when(local.getBalance()).thenReturn(20);
-		blockchainSource.createAccount();
+		blockchainSource.loadOrCreateAccount();
 		kin.core.Balance innerBalance = mock(kin.core.Balance.class);
 		blockchainSource.addBalanceObserver(new Observer<Balance>() {
 			@Override
@@ -255,7 +255,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	@Test
 	public void add_balance_observer_and_start_listen() throws Exception {
-		blockchainSource.createAccount();
+		blockchainSource.loadOrCreateAccount();
 		ArgumentCaptor<EventListener<kin.core.Balance>> balanceEventListener = forClass(EventListener.class);
 
 		blockchainSource.addBalanceObserverAndStartListen(new Observer<Balance>() {

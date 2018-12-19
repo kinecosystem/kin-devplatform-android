@@ -103,7 +103,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
-	public void createAccount() throws BlockchainException {
+	public void loadOrCreateAccount() throws BlockchainException {
 		createKinAccountIfNeeded();
 		initBalance();
 	}
