@@ -405,8 +405,8 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 				@Override
 				public void onFailure(final OperationFailedException e) {
-				eventLogger.send(
-					StellarKinTrustlineSetupFailed.create(ErrorUtil.getPrintableStackTrace(e), "", e.getMessage()));
+					eventLogger.send(
+						StellarKinTrustlineSetupFailed.create(ErrorUtil.getPrintableStackTrace(e), "", e.getMessage()));
 					mainThread.execute(new Runnable() {
 						@Override
 						public void run() {
@@ -424,17 +424,21 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
-	public void updateActiveAccount(int accountIndex) throws BlockchainException {
+	public boolean updateActiveAccount(int accountIndex) {
 		if (activeAccountIndex != accountIndex && accountIndex != -1) {
 			activeAccountIndex = accountIndex;
 			local.setAccountIndex(accountIndex);
-			createKinAccountIfNeeded();
+			account = kinClient.getAccount(activeAccountIndex);
 
-			balanceRegistration.remove();
+			if (balanceRegistration != null) {
+				balanceRegistration.remove();
+			}
 			startBalanceListener();
 			//trigger balance update
 			getBalance(null);
+			return true;
 		}
+		return false;
 	}
 
 	private void decrementPaymentCount() {

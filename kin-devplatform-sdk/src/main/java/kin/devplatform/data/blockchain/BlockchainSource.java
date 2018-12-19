@@ -105,7 +105,7 @@ public interface BlockchainSource {
 	 */
 	KeyStoreProvider getKeyStoreProvider();
 
-	void updateActiveAccount(int accountIndex) throws BlockchainException;
+	boolean updateActiveAccount(int accountIndex) throws BlockchainException;
 
 	interface Local {
 

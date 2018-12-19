@@ -182,4 +182,10 @@ public class ErrorUtil {
 		}
 		return stackTrace;
 	}
+
+	@SuppressLint("DefaultLocale")
+	public static BlockchainException createAccountCannotLoadedException(int accountIndex) {
+		return new BlockchainException(BlockchainException.ACCOUNT_LOADING_FAILED,
+			String.format(FAILED_TO_LOAD_ACCOUNT_ON_INDEX, accountIndex), null);
+	}
 }
