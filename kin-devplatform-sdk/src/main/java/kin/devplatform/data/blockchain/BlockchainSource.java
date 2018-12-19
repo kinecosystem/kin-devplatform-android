@@ -10,9 +10,17 @@ import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
+import kin.devplatform.exception.ClientException;
 import kin.devplatform.network.model.Offer.OfferType;
 
 public interface BlockchainSource {
+
+	/**
+	 * Create account if there is no accounts in local
+	 *
+	 * @throws BlockchainException could not load the account, or could not create a new account.
+	 */
+	void createAccount() throws BlockchainException;
 
 	/**
 	 * Getting the current account.
@@ -68,7 +76,7 @@ public interface BlockchainSource {
 	/**
 	 * @return the public address of the initiated account
 	 */
-	String getPublicAddress();
+	String getPublicAddress() throws ClientException, BlockchainException;
 
 	/**
 	 * @return the public address of the account with {@param accountIndex}

@@ -19,6 +19,7 @@ import kin.devplatform.R;
 import kin.devplatform.base.AbstractBaseViewHolder;
 import kin.devplatform.base.BaseRecyclerAdapter;
 import kin.devplatform.data.blockchain.BlockchainSourceImpl;
+import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.history.view.OrderHistoryRecyclerAdapter.ViewHolder;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
@@ -125,8 +126,12 @@ public class OrderHistoryRecyclerAdapter extends BaseRecyclerAdapter<Order, View
 				case SPEND:
 					return false;
 				case PAY_TO_USER:
-					String publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
-					return item.getBlockchainData().getRecipientAddress().equals(publicAddress);
+					try {
+						String publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
+						return item.getBlockchainData().getRecipientAddress().equals(publicAddress);
+					} catch (BlockchainException e) {
+						e.printStackTrace();
+					}
 			}
 			return false;
 		}

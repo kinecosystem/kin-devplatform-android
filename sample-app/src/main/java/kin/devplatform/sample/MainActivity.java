@@ -31,6 +31,7 @@ import kin.devplatform.exception.ClientException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.marketplace.model.NativeSpendOffer;
 import kin.devplatform.sample.model.SignInRepo;
+import kin.devplatform.util.ErrorUtil;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,8 +126,31 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		addNativeSpendOffer(nativeSpendOffer);
-		addNativeOfferClickedObserver();
+		startSdk();
+	}
+
+	private void startSdk() {
+		/**
+		 * SignInData should be created with registration JWT {see https://jwt.io/} created securely by server side
+		 * In the the this example {@link SignInRepo#getJWT} generate the JWT locally.
+		 * DO NOT!!!! use this approach in your real app.
+		 * */
+		String jwt = SignInRepo.getJWT(this);
+		Kin.start(jwt, new KinCallback<Void>() {
+			@Override
+			public void onResponse(Void response) {
+				Toast.makeText(MainActivity.this, "Starting SDK succeeded", Toast.LENGTH_LONG).show();
+				addNativeSpendOffer(nativeSpendOffer);
+				addNativeOfferClickedObserver();
+
+			}
+
+			@Override
+			public void onFailure(KinEcosystemException error) {
+				Toast.makeText(MainActivity.this, "Starting SDK failed", Toast.LENGTH_LONG).show();
+				Log.d(TAG, "Kin.start() failed with =  " + ErrorUtil.getPrintableStackTrace(error));
+			}
+		});
 	}
 
 	private void showPayToUserDialog(final View v) {
@@ -181,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		addBalanceObserver();
+		//addBalanceObserver();
 	}
 
 	@Override
@@ -330,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
 			Kin.launchMarketplace(MainActivity.this);
 		} catch (ClientException e) {
 			e.printStackTrace();
+			showToast("Failed - " + e.getMessage());
 		}
 	}
 
@@ -341,6 +366,8 @@ public class MainActivity extends AppCompatActivity {
 			Kin.purchase(offerJwt, getNativeSpendOrderConfirmationCallback());
 		} catch (ClientException e) {
 			e.printStackTrace();
+			showToast("Failed - " + e.getMessage());
+			enableView(nativeSpendButton, true);
 		}
 	}
 
@@ -351,6 +378,8 @@ public class MainActivity extends AppCompatActivity {
 			Kin.requestPayment(offerJwt, getNativeEarnOrderConfirmationCallback());
 		} catch (ClientException e) {
 			e.printStackTrace();
+			showToast("Failed - " + e.getMessage());
+			enableView(nativeEarnButton, true);
 		}
 	}
 
@@ -362,6 +391,8 @@ public class MainActivity extends AppCompatActivity {
 			Kin.payToUser(offerJwt, getNativePayToUserOrderConfirmationCallback());
 		} catch (ClientException e) {
 			e.printStackTrace();
+			showToast("Failed - " + e.getMessage());
+			enableView(payToUserButton, true);
 		}
 	}
 
@@ -390,6 +421,7 @@ public class MainActivity extends AppCompatActivity {
 				});
 			} catch (ClientException e) {
 				enableView(getOrderConfirmationButton, true);
+				showToast("Failed - " + e.getMessage());
 				e.printStackTrace();
 			}
 		} else {

@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import kin.devplatform.Configuration;
+import kin.devplatform.ConfigurationImpl;
 import kin.devplatform.core.network.ApiCallback;
 import kin.devplatform.core.network.ApiClient;
 import kin.devplatform.core.network.ApiException;
@@ -44,7 +44,7 @@ public class AuthApi {
 	private ApiClient apiClient;
 
 	public AuthApi() {
-		this(Configuration.getDefaultApiClient());
+		this(ConfigurationImpl.getInstance().getDefaultApiClient());
 	}
 
 	public AuthApi(ApiClient apiClient) {

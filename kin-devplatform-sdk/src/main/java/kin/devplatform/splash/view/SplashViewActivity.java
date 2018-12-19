@@ -3,7 +3,6 @@ package kin.devplatform.splash.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AlphaAnimation;
@@ -13,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import kin.devplatform.R;
+import kin.devplatform.base.KinEcosystemBaseActivity;
 import kin.devplatform.bi.EventLoggerImpl;
 import kin.devplatform.data.auth.AuthRepository;
 import kin.devplatform.main.view.EcosystemActivity;
@@ -20,7 +20,7 @@ import kin.devplatform.splash.presenter.ISplashPresenter;
 import kin.devplatform.splash.presenter.SplashPresenter;
 import kin.devplatform.splash.view.SplashScreenButton.LoadAnimationListener;
 
-public class SplashViewActivity extends AppCompatActivity implements ISplashView {
+public class SplashViewActivity extends KinEcosystemBaseActivity implements ISplashView {
 
 	private ISplashPresenter splashPresenter;
 
@@ -36,10 +36,14 @@ public class SplashViewActivity extends AppCompatActivity implements ISplashView
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.kinecosystem_activity_splash);
 		attachPresenter(new SplashPresenter(AuthRepository.getInstance(), EventLoggerImpl.getInstance()));
 		initViews();
 		initAnimations();
+	}
+
+	@Override
+	protected int getLayoutRes() {
+		return R.layout.kinecosystem_activity_splash;
 	}
 
 	private void initAnimations() {
