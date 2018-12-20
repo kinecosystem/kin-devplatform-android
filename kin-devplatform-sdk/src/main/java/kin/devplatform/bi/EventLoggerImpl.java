@@ -40,16 +40,6 @@ public class EventLoggerImpl implements EventLogger {
 				public void onSuccess(String result, int statusCode, Map<String, List<String>> responseHeaders) {
 
 				}
-
-				@Override
-				public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
-
-				}
-
-				@Override
-				public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
-
-				}
 			});
 		} catch (ApiException e) {
 			e.printStackTrace();
