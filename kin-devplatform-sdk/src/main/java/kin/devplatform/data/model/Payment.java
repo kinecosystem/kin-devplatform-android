@@ -45,7 +45,7 @@ public class Payment {
 	private boolean isSucceed;
 
 	/**
-	 * Exception from kin-core:
+	 * Exception from sdk
 	 */
 	private Exception exception;
 

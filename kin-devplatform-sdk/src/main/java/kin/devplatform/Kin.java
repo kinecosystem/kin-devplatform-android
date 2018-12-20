@@ -7,9 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import java.util.UUID;
-import kin.core.KinClient;
-import kin.core.ServiceProvider;
+
+import java.util.UUID;9
+
 import kin.devplatform.accountmanager.AccountManagerImpl;
 import kin.devplatform.accountmanager.AccountManagerLocal;
 import kin.devplatform.base.ObservableData;
@@ -39,8 +39,12 @@ import kin.devplatform.main.view.EcosystemActivity;
 import kin.devplatform.marketplace.model.NativeSpendOffer;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.SignInData.SignInTypeEnum;
+import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.splash.view.SplashViewActivity;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.IKinClient;
+import kin.sdk.migration.KinVersionProvider;
+import kin.sdk.migration.MigrationManager;
 
 
 public class Kin {
@@ -150,12 +154,21 @@ public class Kin {
 	private static void initBlockchain(Context context) throws BlockchainException {
 		final String networkUrl = Configuration.getEnvironment().getBlockchainNetworkUrl();
 		final String networkId = Configuration.getEnvironment().getBlockchainPassphrase();
-		KinClient kinClient = new KinClient(context, new ServiceProvider(networkUrl, networkId) {
-			@Override
-			protected String getIssuerAccountId() {
-				return Configuration.getEnvironment().getIssuer();
-			}
-		}, KIN_ECOSYSTEM_STORE_PREFIX_KEY);
+		IKinClient kinClient = new MigrationManager(context, appId, networkUrl, networkId, Configuration.getEnvironment().getIssuer(
+				new KinVersionProvider() {
+					@Override
+					public boolean isKinSdkVersion() {
+						return false;
+					}
+				},
+				new WhitelistService(),
+				KIN_ECOSYSTEM_STORE_PREFIX_KEY) {
+				@Override
+				protected String getIssuerAccountId() {
+					return Configuration.getEnvironment().getIssuer();
+				}
+
+
 		BlockchainSourceImpl.init(instance.eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
 	}
 

@@ -1,4 +1,4 @@
-package kin.sdk.migration.sample;
+package kin.devplatform.network.model;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -10,9 +10,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import kin.sdk.migration.IWhitelistableTransaction;
 import kin.sdk.migration.IWhitelistService;
 import kin.sdk.migration.IWhitelistServiceCallbacks;
+import kin.sdk.migration.IWhitelistableTransaction;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -22,16 +22,21 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-class WhitelistService implements IWhitelistService {
+public class WhitelistService implements IWhitelistService {
 
-    private static final String URL_WHITELISTING_SERVICE = "http://18.206.35.110:3000/whitelist";
+    private static final String URL_WHITELISTING_SERVICE = "http://18.206.35.110:3000/whitelist"; // TODO: 18/12/2018 need the correct url
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private final OkHttpClient okHttpClient;
     private final Handler handler;
     private WhitelistServiceListener whitelistServiceListener;
 
-    WhitelistService() {
+    public WhitelistService() {
+        this(null);
+    }
+
+    public WhitelistService(WhitelistServiceListener whitelistServiceListener) {
+        this.whitelistServiceListener = whitelistServiceListener;
         handler = new Handler(Looper.getMainLooper());
         okHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(20, TimeUnit.SECONDS)
@@ -117,22 +122,28 @@ class WhitelistService implements IWhitelistService {
         return jo.toString();
     }
 
-    private void fireOnFailure(WhitelistServiceListener whitelistServiceListener, Exception e) {
-        handler.post(() -> {
-            if (whitelistServiceListener != null) {
-                whitelistServiceListener.onFailure(e);
+    private void fireOnFailure(final WhitelistServiceListener whitelistServiceListener, final Exception e) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (whitelistServiceListener != null) {
+                    whitelistServiceListener.onFailure(e);
+                }
             }
+
         });
     }
 
-    private void fireOnSuccess(WhitelistServiceListener whitelistServiceListener, String response) {
-        handler.post(() -> {
-            if (whitelistServiceListener != null) {
-                whitelistServiceListener.onSuccess(response);
+    private void fireOnSuccess(final WhitelistServiceListener whitelistServiceListener, final String response) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (whitelistServiceListener != null) {
+                    whitelistServiceListener.onSuccess(response);
+                }
             }
         });
     }
-
 }
 
 

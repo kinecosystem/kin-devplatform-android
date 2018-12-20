@@ -1,4 +1,4 @@
-package kin.sdk.migration.sample;
+package kin.devplatform.network.model;
 
 public interface WhitelistServiceListener {
     void onSuccess(String whitelistTransaction);

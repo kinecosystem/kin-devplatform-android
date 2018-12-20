@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import kin.core.exception.InsufficientKinException;
+import exception.InsufficientKinException;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.events.EarnOrderCreationFailed;

@@ -14,13 +14,13 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import kin.core.BlockchainEvents;
-import kin.core.EventListener;
-import kin.core.KinAccount;
-import kin.core.KinClient;
-import kin.core.Request;
-import kin.core.ResultCallback;
-import kin.core.TransactionId;
+import BlockchainEvents;
+import EventListener;
+import KinAccount;
+import KinClient;
+import Request;
+import ResultCallback;
+import TransactionId;
 import kin.devplatform.BaseTestClass;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
@@ -67,13 +67,13 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	private BlockchainEvents blockchainEvents;
 
 	@Mock
-	private Request<kin.core.Balance> getBalanceReq;
+	private Request<Balance> getBalanceReq;
 
 	@Captor
-	private ArgumentCaptor<ResultCallback<kin.core.Balance>> getBalanceCaptor;
+	private ArgumentCaptor<ResultCallback<Balance>> getBalanceCaptor;
 
 	@Mock
-	private kin.core.Balance balanceObj;
+	private Balance balanceObj;
 
 
 	private BlockchainSourceImpl blockchainSource;
@@ -202,7 +202,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	@Test
 	public void add_balance_observer_get_onChanged() {
-		kin.core.Balance innerBalance = mock(kin.core.Balance.class);
+		Balance innerBalance = mock(Balance.class);
 		blockchainSource.addBalanceObserver(new Observer<Balance>() {
 			@Override
 			public void onChanged(Balance value) {
@@ -234,7 +234,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	@Test
 	public void add_balance_observer_and_start_listen() throws Exception {
-		ArgumentCaptor<EventListener<kin.core.Balance>> balanceEventListener = forClass(EventListener.class);
+		ArgumentCaptor<EventListener<Balance>> balanceEventListener = forClass(EventListener.class);
 
 		blockchainSource.addBalanceObserverAndStartListen(new Observer<Balance>() {
 			@Override

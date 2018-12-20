@@ -1,9 +1,6 @@
 package kin.devplatform.accountmanager;
 
 import android.support.annotation.NonNull;
-import kin.core.EventListener;
-import kin.core.KinAccount;
-import kin.core.ListenerRegistration;
 import kin.devplatform.KinCallback;
 import kin.devplatform.Log;
 import kin.devplatform.Logger;
@@ -18,6 +15,9 @@ import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.IEventListener;
+import kin.sdk.migration.IKinAccount;
+import kin.sdk.migration.IListenerRegistration;
 
 public class AccountManagerImpl implements AccountManager {
 
@@ -31,7 +31,7 @@ public class AccountManagerImpl implements AccountManager {
 	private BlockchainSource blockchainSource;
 	private final ObservableData<Integer> accountState;
 
-	private ListenerRegistration accountCreationRegistration;
+	private IListenerRegistration accountCreationRegistration;
 
 	private AccountManagerImpl(@NonNull final AccountManager.Local local,
 		@NonNull final EventLogger eventLogger,
@@ -129,8 +129,8 @@ public class AccountManagerImpl implements AccountManager {
 					if (accountCreationRegistration != null) {
 						removeAccountCreationRegistration();
 					}
-					accountCreationRegistration = getKinAccount().blockchainEvents()
-						.addAccountCreationListener(new EventListener<Void>() {
+					accountCreationRegistration = getKinAccount()
+						.addAccountCreationListener(new IEventListener<Void>() {
 							@Override
 							public void onEvent(Void data) {
 								removeAccountCreationRegistration();
@@ -195,7 +195,7 @@ public class AccountManagerImpl implements AccountManager {
 		});
 	}
 
-	private KinAccount getKinAccount() {
+	private IKinAccount getKinAccount() {
 		return blockchainSource.getKinAccount();
 	}
 
