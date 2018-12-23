@@ -5,7 +5,6 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import kin.devplatform.KinEcosystemInitiator;
-import kin.devplatform.core.util.ExecutorsUtil;
 
 public abstract class KinEcosystemBaseActivity extends AppCompatActivity {
 
@@ -17,7 +16,6 @@ public abstract class KinEcosystemBaseActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(getLayoutRes());
 
-		KinEcosystemInitiator initiator = new KinEcosystemInitiator(new ExecutorsUtil());
-		initiator.init(this);
+		KinEcosystemInitiator.getInstance().internalInit(this);
 	}
 }

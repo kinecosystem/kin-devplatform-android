@@ -1,7 +1,5 @@
 package kin.devplatform;
 
-import static kin.devplatform.exception.ClientException.SDK_NOT_STARTED;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -40,33 +38,62 @@ import kin.devplatform.util.ErrorUtil;
 public final class KinEcosystemInitiator {
 
 	private static final String KIN_ECOSYSTEM_STORE_PREFIX_KEY = "kinecosystem_store";
+	private static final int ACCOUNT_CREATION_TIME_OUT_MILLIS = 30000;
+	private static KinEcosystemInitiator instance;
+
 	private final ExecutorsUtil executorsUtil;
 	private volatile boolean isInitialized = false;
-	private volatile boolean isAccountLoggedIn = false;
+	private volatile boolean isLoggedIn = false;
 
-	public KinEcosystemInitiator(ExecutorsUtil executorsUtil) {
-		this.executorsUtil = executorsUtil;
+	public static KinEcosystemInitiator getInstance() {
+		if (instance == null) {
+			synchronized (KinEcosystemInitiator.class) {
+				if (instance == null) {
+					instance = new KinEcosystemInitiator();
+				}
+			}
+		}
+		return instance;
 	}
 
-	public void init(Context context) {
-		if (!isInitialized) {
-			init(context, null);
-			//when init is called after process restart, account must be loaded,
-			//login part of start is not needed as any ecosystem activity can be displayed only after login was done successfully
+	private KinEcosystemInitiator() {
+		this.executorsUtil = new ExecutorsUtil();
+	}
 
-			try {
-				BlockchainSourceImpl.getInstance().loadOrCreateAccount();
-			} catch (BlockchainException e) {
-				EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
-					ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
-					"KinEcosystemInitiator init failed"
-				));
-				e.printStackTrace();
-			}
+	/**
+	 * Uses for internal initialization after process restart
+	 */
+	public void internalInit(Context context) {
+		try {
+			init(context, null);
+		} catch (BlockchainException e) {
+			EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
+				ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
+				"KinEcosystemInitiator internalInit failed"
+			));
+			e.printStackTrace();
 		}
 	}
 
-	public void init(Context context, KinEnvironment environment) {
+	/**
+	 * Uses for external (public API) initialization and jwt login.
+	 */
+	public void externalInit(Context context, KinEnvironment environment, @NonNull SignInData signInData,
+		final KinCallback<Void> loginCallback) {
+		if (isInitialized && isLoggedIn) {
+			fireStartCompleted(loginCallback);
+			return;
+		}
+
+		try {
+			init(context, environment);
+		} catch (BlockchainException e) {
+			fireStartError(e, loginCallback);
+		}
+		login(signInData, loginCallback);
+	}
+
+	private void init(Context context, KinEnvironment environment) throws BlockchainException {
 		if (!isInitialized) {
 			ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
 			if (environment != null) {
@@ -112,23 +139,13 @@ public final class KinEcosystemInitiator {
 		}
 	}
 
-	public void start(@NonNull SignInData signInData, final KinCallback<Void> loginCallback) {
-		if (!isInitialized) {
-			fireStartError(ErrorUtil.getClientException(SDK_NOT_STARTED, null), loginCallback);
-		}
-		if (isAccountLoggedIn) {
-			fireStartCompleted(loginCallback);
-			return;
-		}
+	private void login(@NonNull SignInData signInData, final KinCallback<Void> loginCallback) {
+		setAuthRepositoryData(signInData);
+		performLogin(loginCallback);
+	}
 
-		String publicAddress = null;
-		try {
-			BlockchainSourceImpl.getInstance().loadOrCreateAccount();
-			publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
-		} catch (final BlockchainException exception) {
-			fireStartError(exception, loginCallback);
-		}
-
+	private void setAuthRepositoryData(@NonNull SignInData signInData) {
+		String publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
 		String deviceID = AuthRepository.getInstance().getDeviceID();
 		signInData.setDeviceId(deviceID != null ? deviceID : UUID.randomUUID().toString());
 		signInData.setWalletAddress(publicAddress);
@@ -146,11 +163,9 @@ public final class KinEcosystemInitiator {
 			});
 		}
 		BlockchainSourceImpl.getInstance().setAppID(appID);
-
-		login(loginCallback);
 	}
 
-	private void login(final KinCallback<Void> loginCallback) {
+	private void performLogin(final KinCallback<Void> loginCallback) {
 		AuthRepository.getInstance().getAuthToken(new KinCallback<AuthToken>() {
 			@Override
 			public void onResponse(AuthToken response) {
@@ -193,7 +208,7 @@ public final class KinEcosystemInitiator {
 				accountManager.removeAccountStateObserver(accountStateObserver);
 				fireStartError(ErrorUtil.createCreateAccountTimeoutException(), loginCallback);
 			}
-		}, 30000);
+		}, ACCOUNT_CREATION_TIME_OUT_MILLIS);
 		accountManager.addAccountStateObserver(accountStateObserver);
 		accountManager.start();
 	}
@@ -217,7 +232,7 @@ public final class KinEcosystemInitiator {
 	}
 
 	private void fireStartCompleted(final KinCallback<Void> loginCallback) {
-		isAccountLoggedIn = true;
+		isLoggedIn = true;
 		executorsUtil.mainThread().execute(new Runnable() {
 			@Override
 			public void run() {
@@ -227,7 +242,7 @@ public final class KinEcosystemInitiator {
 	}
 
 	private void fireStartError(final KinEcosystemException exception, final KinCallback<Void> loginCallback) {
-		isAccountLoggedIn = false;
+		isLoggedIn = false;
 		executorsUtil.mainThread().execute(new Runnable() {
 			@Override
 			public void run() {
@@ -237,10 +252,7 @@ public final class KinEcosystemInitiator {
 	}
 
 	public boolean isInitialized() {
-		return isInitialized;
+		return isInitialized && isLoggedIn;
 	}
 
-	public boolean isAccountLoggedIn() {
-		return isAccountLoggedIn;
-	}
 }

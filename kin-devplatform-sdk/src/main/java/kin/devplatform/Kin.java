@@ -1,6 +1,5 @@
 package kin.devplatform;
 
-import static kin.devplatform.exception.ClientException.ACCOUNT_NOT_LOGGED_IN;
 import static kin.devplatform.exception.ClientException.SDK_NOT_STARTED;
 
 import android.app.Activity;
@@ -11,7 +10,6 @@ import android.support.annotation.Nullable;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLoggerImpl;
 import kin.devplatform.bi.events.EntrypointButtonTapped;
-import kin.devplatform.core.util.ExecutorsUtil;
 import kin.devplatform.data.auth.AuthRepository;
 import kin.devplatform.data.blockchain.BlockchainSourceImpl;
 import kin.devplatform.data.model.Balance;
@@ -32,35 +30,17 @@ import kin.devplatform.util.ErrorUtil;
 
 public class Kin {
 
-	private static KinEcosystemInitiator initiator;
-
-	static {
-		ExecutorsUtil executorsUtil = new ExecutorsUtil();
-		initiator = new KinEcosystemInitiator(executorsUtil);
-	}
-
-	/**
-	 * Initialize the sdk with all the resources to start, this function isn't doing a network calls at all. In order to
-	 * recover from process restart all the activities in our side should call this method in onCreate.
-	 *
-	 * @param appContext application context.
-	 */
-	public static void initialize(Context appContext, @NonNull KinEnvironment environment) {
-		initiator.init(appContext, environment);
-	}
-
 	public static void enableLogs(final boolean enableLogs) {
 		Logger.enableLogs(enableLogs);
 	}
 
 	/**
-	 * @deprecated use {@link #initialize(Context, KinEnvironment)} and {@link #start(String, KinCallback)} instead.
+	 * @deprecated use {@link #start(Context, String, KinEnvironment, KinCallback)} instead.
 	 */
 	@Deprecated
 	public static void start(@NonNull Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment)
 		throws ClientException, BlockchainException {
-		initialize(appContext, environment);
-		start(jwt, new KinCallback<Void>() {
+		start(appContext, jwt, environment, new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
 			}
@@ -72,14 +52,21 @@ public class Kin {
 	}
 
 	/**
-	 * In order to use all the other features in Kin Ecosystem, you should start the SDK and login the user first.
+	 * Initialize, login and starts the SDK. Provide a callback to be notified when SDK is ready for use or some error
+	 * happened in initialization process. This method can be called again (retry) in case of an error.
+	 * <p></p>
+	 * <p><b>Note:</b> SDK cannot be used before calling this method.</p>
+	 * <b>Note:</b> The first call to this session will create Kin wallet account for the user on KinBlockchain, this
+	 * process can take sometime (dozen of seconds), callback will called only after account setup and creation will be
+	 * completed.
 	 *
 	 * @param jwt 'register' jwt token required for authorized the user.
 	 * @param callback success/failure callback
 	 */
-	public static void start(@NonNull String jwt, KinCallback<Void> callback) {
+	public static void start(Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment,
+		KinCallback<Void> callback) {
 		SignInData signInData = getJwtSignInData(jwt);
-		initiator.start(signInData, callback);
+		KinEcosystemInitiator.getInstance().externalInit(appContext, environment, signInData, callback);
 	}
 
 	private static SignInData getJwtSignInData(@NonNull final String jwt) {
@@ -88,21 +75,10 @@ public class Kin {
 			.jwt(jwt);
 	}
 
-	private static void checkAccountIsLoggedIn() throws ClientException {
-		if (!initiator.isAccountLoggedIn()) {
-			throw ErrorUtil.getClientException(ACCOUNT_NOT_LOGGED_IN, null);
-		}
-	}
-
 	private static void checkInitialized() throws ClientException {
-		if (!initiator.isInitialized()) {
+		if (!KinEcosystemInitiator.getInstance().isInitialized()) {
 			throw ErrorUtil.getClientException(SDK_NOT_STARTED, null);
 		}
-	}
-
-	private static void checkInitAndLoggedIn() throws ClientException {
-		checkInitialized();
-		checkAccountIsLoggedIn();
 	}
 
 	/**
@@ -111,7 +87,7 @@ public class Kin {
 	 * @param activity the activity user can go back to.
 	 */
 	public static void launchMarketplace(@NonNull final Activity activity) throws ClientException {
-		checkInitAndLoggedIn();
+		checkInitialized();
 		EventLoggerImpl.getInstance().send(EntrypointButtonTapped.create());
 		boolean isActivated = AuthRepository.getInstance().isActivated();
 		if (isActivated) {
@@ -136,12 +112,8 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized or account not logged in.
 	 */
 	public static String getPublicAddress() throws ClientException {
-		checkInitAndLoggedIn();
-		try {
-			return BlockchainSourceImpl.getInstance().getPublicAddress();
-		} catch (BlockchainException e) {
-			throw ErrorUtil.getClientException(ACCOUNT_NOT_LOGGED_IN, e);
-		}
+		checkInitialized();
+		return BlockchainSourceImpl.getInstance().getPublicAddress();
 	}
 
 	/**
@@ -151,7 +123,7 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized or account not logged in.
 	 */
 	public static Balance getCachedBalance() throws ClientException {
-		checkInitAndLoggedIn();
+		checkInitialized();
 		return BlockchainSourceImpl.getInstance().getBalance();
 	}
 
@@ -162,7 +134,7 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized or account not logged in.
 	 */
 	public static void getBalance(@NonNull final KinCallback<Balance> callback) throws ClientException {
-		checkInitAndLoggedIn();
+		checkInitialized();
 		BlockchainSourceImpl.getInstance().getBalance(callback);
 	}
 
@@ -200,7 +172,7 @@ public class Kin {
 	 */
 	public static void purchase(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
 		throws ClientException {
-		checkInitAndLoggedIn();
+		checkInitialized();
 		OrderRepository.getInstance().purchase(offerJwt, callback);
 	}
 
@@ -215,7 +187,7 @@ public class Kin {
 	 */
 	public static void payToUser(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
 		throws ClientException {
-		checkInitAndLoggedIn();
+		checkInitialized();
 		OrderRepository.getInstance().payToUser(offerJwt, callback);
 	}
 
@@ -229,7 +201,7 @@ public class Kin {
 	 */
 	public static void requestPayment(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
 		throws ClientException {
-		checkInitAndLoggedIn();
+		checkInitialized();
 		OrderRepository.getInstance().requestPayment(offerJwt, callback);
 	}
 
@@ -241,7 +213,7 @@ public class Kin {
 	 */
 	public static void getOrderConfirmation(@NonNull String offerID, @NonNull KinCallback<OrderConfirmation> callback)
 		throws ClientException {
-		checkInitAndLoggedIn();
+		checkInitialized();
 		OrderRepository.getInstance().getExternalOrderStatus(offerID, callback);
 	}
 

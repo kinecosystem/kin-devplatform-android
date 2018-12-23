@@ -180,15 +180,13 @@ public class AccountManagerImpl implements AccountManager {
 			public void onResponse(Boolean response) {
 				try {
 					//switch to the new KinAccount
-					if (blockchainSource.updateActiveAccount(accountIndex)) {
-						Logger.log(new Log().withTag(TAG).put("switchAccount", "ended successfully"));
-						callback.onResponse(response);
-					} else {
-						callback.onFailure(ErrorUtil.createAccountCannotLoadedException(accountIndex));
-					}
+					blockchainSource.updateActiveAccount(accountIndex);
 				} catch (BlockchainException e) {
 					callback.onFailure(ErrorUtil.getBlockchainException(e));
+					return;
 				}
+				Logger.log(new Log().withTag(TAG).put("switchAccount", "ended successfully"));
+				callback.onResponse(response);
 			}
 
 			@Override

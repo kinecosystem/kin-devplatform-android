@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.Random;
+import kin.devplatform.Environment;
 import kin.devplatform.Kin;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.Observer;
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 		 * DO NOT!!!! use this approach in your real app.
 		 * */
 		String jwt = SignInRepo.getJWT(this);
-		Kin.start(jwt, new KinCallback<Void>() {
+		Kin.start(getApplicationContext(), jwt, Environment.getPlayground(), new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
 				Toast.makeText(MainActivity.this, "Starting SDK succeeded", Toast.LENGTH_LONG).show();
