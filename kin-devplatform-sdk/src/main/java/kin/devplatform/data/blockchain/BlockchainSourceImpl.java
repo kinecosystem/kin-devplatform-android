@@ -182,9 +182,6 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 
 	private void initBalance() {
-		if (balanceObserversCount > 0) {
-			startBalanceListener();
-		}
 		balance.postValue(getBalance());
 		getBalance(new KinCallbackAdapter<Balance>() {
 		});

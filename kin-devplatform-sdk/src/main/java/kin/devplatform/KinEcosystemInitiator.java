@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import java.util.UUID;
 import kin.core.KinClient;
 import kin.core.ServiceProvider;
@@ -134,9 +135,28 @@ public final class KinEcosystemInitiator {
 
 			DeviceUtils.init(context);
 
+			setAppID();
+
 			eventLogger.send(KinSdkInitiated.create());
 			isInitialized = true;
 		}
+	}
+
+	private void setAppID() {
+		ObservableData<String> observableData = AuthRepository.getInstance().getAppID();
+		String appID = observableData.getValue();
+		if (appID == null) {
+			observableData.addObserver(new Observer<String>() {
+				@Override
+				public void onChanged(String appID) {
+					if (!TextUtils.isEmpty(appID)) {
+						BlockchainSourceImpl.getInstance().setAppID(appID);
+						AuthRepository.getInstance().getAppID().removeObserver(this);
+					}
+				}
+			});
+		}
+		BlockchainSourceImpl.getInstance().setAppID(appID);
 	}
 
 	private void login(@NonNull SignInData signInData, final KinCallback<Void> loginCallback) {
@@ -150,19 +170,6 @@ public final class KinEcosystemInitiator {
 		signInData.setDeviceId(deviceID != null ? deviceID : UUID.randomUUID().toString());
 		signInData.setWalletAddress(publicAddress);
 		AuthRepository.getInstance().setSignInData(signInData);
-
-		ObservableData<String> observableData = AuthRepository.getInstance().getAppID();
-		String appID = observableData.getValue();
-		if (appID == null) {
-			observableData.addObserver(new Observer<String>() {
-				@Override
-				public void onChanged(String appID) {
-					BlockchainSourceImpl.getInstance().setAppID(appID);
-					AuthRepository.getInstance().getAppID().removeObserver(this);
-				}
-			});
-		}
-		BlockchainSourceImpl.getInstance().setAppID(appID);
 	}
 
 	private void performLogin(final KinCallback<Void> loginCallback) {
