@@ -140,6 +140,12 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	}
 
 	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		settingsPresenter.onDetach();
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		settingsPresenter.onActivityResult(requestCode, resultCode, data);

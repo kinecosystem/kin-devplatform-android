@@ -58,7 +58,7 @@ class EventsApi {
 
 		return apiClient
 			.buildCall(localVarPath, POST, localVarQueryParams, localVarCollectionQueryParams, localVarPostBody,
-				localVarHeaderParams, localVarFormParams, null, null);
+				localVarHeaderParams, localVarFormParams, null);
 	}
 
 	@SuppressWarnings("rawtypes")

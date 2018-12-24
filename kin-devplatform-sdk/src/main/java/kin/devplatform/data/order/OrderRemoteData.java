@@ -75,15 +75,6 @@ public class OrderRemoteData implements OrderDataSource.Remote {
 					});
 				}
 
-				@Override
-				public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
-
-				}
-
-				@Override
-				public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
-
-				}
 			});
 		} catch (final ApiException e) {
 			executorsUtil.mainThread().execute(new Runnable() {
@@ -120,15 +111,6 @@ public class OrderRemoteData implements OrderDataSource.Remote {
 					});
 				}
 
-				@Override
-				public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
-
-				}
-
-				@Override
-				public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
-
-				}
 			});
 		} catch (final ApiException e) {
 			executorsUtil.mainThread().execute(new Runnable() {
@@ -168,15 +150,6 @@ public class OrderRemoteData implements OrderDataSource.Remote {
 					});
 				}
 
-				@Override
-				public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
-
-				}
-
-				@Override
-				public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
-
-				}
 			});
 		} catch (final ApiException e) {
 			executorsUtil.mainThread().execute(new Runnable() {
@@ -270,15 +243,6 @@ public class OrderRemoteData implements OrderDataSource.Remote {
 					});
 				}
 
-				@Override
-				public void onUploadProgress(long bytesWritten, long contentLength, boolean done) {
-
-				}
-
-				@Override
-				public void onDownloadProgress(long bytesRead, long contentLength, boolean done) {
-
-				}
 			});
 		} catch (final ApiException e) {
 			executorsUtil.mainThread().execute(new Runnable() {
