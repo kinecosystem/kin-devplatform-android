@@ -77,7 +77,13 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 
 	@Override
 	public void onStart() {
+		blockchainSource.reconnectBalanceConnection();
 		updateMenuSettingsIcon();
+	}
+
+	@Override
+	public void onStop() {
+		removeBalanceObserver();
 	}
 
 	@Override
@@ -88,7 +94,6 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		removeBalanceObserver();
 		navigator = null;
 
 	}
@@ -104,7 +109,7 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 				}
 			}
 		};
-		blockchainSource.addBalanceObserver(balanceObserver);
+		blockchainSource.addBalanceObserver(balanceObserver, false);
 	}
 
 	private boolean isGreaterThenZero(Balance value) {
@@ -127,7 +132,7 @@ public class EcosystemPresenter extends BasePresenter<IEcosystemView> implements
 
 	private void removeBalanceObserver() {
 		if (balanceObserver != null) {
-			blockchainSource.removeBalanceObserver(balanceObserver);
+			blockchainSource.removeBalanceObserver(balanceObserver, false);
 			balanceObserver = null;
 		}
 	}

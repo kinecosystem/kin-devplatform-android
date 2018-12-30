@@ -100,6 +100,14 @@ public class EcosystemActivity extends BaseToolbarActivity implements IEcosystem
 	protected void onStart() {
 		super.onStart();
 		ecosystemPresenter.onStart();
+		balancePresenter.onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		ecosystemPresenter.onStop();
+		balancePresenter.onStop();
 	}
 
 	@Override
