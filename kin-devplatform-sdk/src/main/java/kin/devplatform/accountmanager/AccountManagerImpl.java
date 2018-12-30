@@ -30,6 +30,7 @@ public class AccountManagerImpl implements AccountManager {
 	private AuthDataSource authRepository;
 	private BlockchainSource blockchainSource;
 	private final ObservableData<Integer> accountState;
+	private KinEcosystemException error;
 
 	private ListenerRegistration accountCreationRegistration;
 
@@ -119,6 +120,7 @@ public class AccountManagerImpl implements AccountManager {
 
 						@Override
 						public void onFailure(KinEcosystemException error) {
+							instance.error = error;
 							setAccountState(ERROR);
 						}
 					});
@@ -149,6 +151,7 @@ public class AccountManagerImpl implements AccountManager {
 
 						@Override
 						public void onFailure(KinEcosystemException error) {
+							instance.error = error;
 							setAccountState(ERROR);
 						}
 					});
@@ -208,6 +211,11 @@ public class AccountManagerImpl implements AccountManager {
 		return newState == ERROR || currentState == ERROR || newState >= currentState
 			//allow recreating an account in case of switching account after restore
 			|| (currentState == CREATION_COMPLETED && newState == REQUIRE_CREATION);
+	}
+
+	@Override
+	public KinEcosystemException getError() {
+		return error;
 	}
 
 }

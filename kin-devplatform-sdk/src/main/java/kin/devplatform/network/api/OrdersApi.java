@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import kin.devplatform.Configuration;
+import kin.devplatform.ConfigurationImpl;
 import kin.devplatform.core.network.ApiCallback;
 import kin.devplatform.core.network.ApiClient;
 import kin.devplatform.core.network.ApiException;
@@ -40,7 +40,7 @@ public class OrdersApi {
 	private ApiClient apiClient;
 
 	public OrdersApi() {
-		this(Configuration.getDefaultApiClient());
+		this(ConfigurationImpl.getInstance().getDefaultApiClient());
 	}
 
 	public OrdersApi(ApiClient apiClient) {

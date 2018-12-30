@@ -110,6 +110,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		} else {
 			try {
 				account = kinClient.addAccount();
+				local.setAccountIndex(0);
 			} catch (CreateAccountException e) {
 				throw ErrorUtil.getBlockchainException(e);
 			}
@@ -401,7 +402,9 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		local.setAccountIndex(accountIndex);
 		createKinAccountIfNeeded();
 
-		balanceRegistration.remove();
+		if (balanceRegistration != null) {
+			balanceRegistration.remove();
+		}
 		startBalanceListener();
 		//trigger balance update
 		getBalance(null);

@@ -6,13 +6,12 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import kin.devplatform.R;
 
 
-public abstract class BaseToolbarActivity extends AppCompatActivity {
+public abstract class BaseToolbarActivity extends KinEcosystemBaseActivity {
 
 	protected static final int EMPTY_TITLE = -1;
 
