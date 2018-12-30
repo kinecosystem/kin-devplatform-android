@@ -90,6 +90,7 @@ public final class KinEcosystemInitiator {
 			init(context, environment);
 		} catch (BlockchainException e) {
 			fireStartError(e, loginCallback);
+			return;
 		}
 		login(signInData, loginCallback);
 	}

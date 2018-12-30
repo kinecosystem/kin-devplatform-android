@@ -125,8 +125,8 @@ public class OrderHistoryRecyclerAdapter extends BaseRecyclerAdapter<Order, View
 				case SPEND:
 					return false;
 				case PAY_TO_USER:
-						String publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
-						return item.getBlockchainData().getRecipientAddress().equals(publicAddress);
+					String publicAddress = BlockchainSourceImpl.getInstance().getPublicAddress();
+					return item.getBlockchainData().getRecipientAddress().equals(publicAddress);
 			}
 			return false;
 		}

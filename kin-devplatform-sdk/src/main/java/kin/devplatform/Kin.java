@@ -56,8 +56,10 @@ public class Kin {
 	 * happened in initialization process. This method can be called again (retry) in case of an error.
 	 * <p></p>
 	 * <p><b>Note:</b> SDK cannot be used before calling this method.</p>
-	 * <b>Note:</b> The first call to this session will create Kin wallet account for the user on KinBlockchain, this
-	 * process can take sometime (dozen of seconds), callback will called only after account setup and creation will be
+	 * <p><b>Note:</b> This method is not thread safe, and shouldn't be called multiple times in parallel. callbacks will be fired on
+	 * the main thread.</p>
+	 * <b>Note:</b> The first call to this method will create Kin wallet account for the user on Kin blockchain, this
+	 * process can take some time (couple of seconds), callback will be called only after account setup and creation will be
 	 * completed.
 	 *
 	 * @param jwt 'register' jwt token required for authorized the user.
