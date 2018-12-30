@@ -39,7 +39,6 @@ android {
         buildConfigField "String", "SAMPLE_API_KEY", credentialProperties.getProperty("API_KEY")
         buildConfigField "String", "ES256_PRIVATE_KEY", credentialProperties.getProperty("ES256_PRIVATE_KEY")
         buildConfigField "String", "ES256_PRIVATE_KEY_ID", credentialProperties.getProperty("ES256_PRIVATE_KEY_ID")
-        buildConfigField "boolean", "IS_JWT_REGISTRATION", credentialProperties.getProperty("IS_JWT_REGISTRATION")
 
         manifestPlaceholders = [crashlytics_api_key: credentialProperties.getProperty("CRASHLYTICS_API_KEY")]
     }

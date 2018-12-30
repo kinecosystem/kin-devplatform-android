@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.Observer;
+import kin.devplatform.exception.KinEcosystemException;
 
 public interface AccountManager {
 
@@ -14,6 +15,8 @@ public interface AccountManager {
 	int REQUIRE_TRUSTLINE = 0x00000003;
 	int CREATION_COMPLETED = 0x00000004;
 	int ERROR = 0x00000005;
+
+	KinEcosystemException getError();
 
 	@IntDef({REQUIRE_CREATION,
 		PENDING_CREATION,

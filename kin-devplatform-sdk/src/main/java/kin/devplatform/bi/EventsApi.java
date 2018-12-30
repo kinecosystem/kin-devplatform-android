@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import kin.devplatform.Configuration;
+import kin.devplatform.ConfigurationImpl;
 import kin.devplatform.core.network.ApiCallback;
 import kin.devplatform.core.network.ApiClient;
 import kin.devplatform.core.network.ApiException;
@@ -24,7 +24,7 @@ class EventsApi {
 	 * Constructor for EventsApi
 	 */
 	EventsApi() {
-		apiClient = new ApiClient(Configuration.getEnvironment().getBiUrl());
+		apiClient = new ApiClient(ConfigurationImpl.getInstance().getEnvironment().getBiUrl());
 	}
 
 	/**

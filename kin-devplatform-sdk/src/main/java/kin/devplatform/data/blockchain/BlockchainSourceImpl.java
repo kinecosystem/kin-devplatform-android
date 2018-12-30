@@ -109,6 +109,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		} else {
 			try {
 				account = kinClient.addAccount();
+				local.setAccountIndex(0);
 			} catch (CreateAccountException e) {
 				throw ErrorUtil.getBlockchainException(e);
 			}
