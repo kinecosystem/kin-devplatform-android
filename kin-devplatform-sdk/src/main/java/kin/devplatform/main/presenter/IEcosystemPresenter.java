@@ -19,5 +19,7 @@ public interface IEcosystemPresenter extends IBasePresenter<IEcosystemView> {
 
 	void onStart();
 
+	void onStop();
+
 	void onSaveInstanceState(Bundle outState);
 }

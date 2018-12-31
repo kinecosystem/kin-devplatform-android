@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import exception.InsufficientKinException;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.events.EarnOrderCreationFailed;
@@ -26,6 +25,7 @@ import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.exception.InsufficientKinException;
 
 class CreateExternalOrderCall extends Thread {
 

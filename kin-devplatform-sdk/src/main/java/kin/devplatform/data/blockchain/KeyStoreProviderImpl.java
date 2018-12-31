@@ -12,8 +12,8 @@ import com.kin.ecosystem.recovery.Validator;
 import com.kin.ecosystem.recovery.exception.BackupException;
 import java.util.regex.Pattern;
 
-import kin.sdk.migration.IKinAccount;
-import kin.sdk.migration.IKinClient;
+import kin.sdk.migration.interfaces.IKinAccount;
+import kin.sdk.migration.interfaces.IKinClient;
 import kin.sdk.migration.exception.CorruptedDataException;
 import kin.sdk.migration.exception.CreateAccountException;
 import kin.sdk.migration.exception.CryptoException;

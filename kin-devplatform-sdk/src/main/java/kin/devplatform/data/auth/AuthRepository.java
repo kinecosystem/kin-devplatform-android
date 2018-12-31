@@ -25,12 +25,14 @@ public class AuthRepository implements AuthDataSource {
 
 	private SignInData cachedSignInData;
 	private AuthToken cachedAuthToken;
-	private ObservableData<String> appId = ObservableData.create(null);
+	private ObservableData<String> appId = ObservableData.create(null); // TODO: 31/12/2018 check if still relevant or can remove
 
 	private AuthRepository(@NonNull AuthDataSource.Local local,
 		@NonNull AuthDataSource.Remote remote) {
 		this.localData = local;
 		this.remoteData = remote;
+		this.cachedSignInData = local.getSignInData();
+		this.cachedAuthToken = local.getAuthTokenSync();
 	}
 
 	public static void init(@NonNull AuthDataSource.Local localData,
@@ -155,6 +157,9 @@ public class AuthRepository implements AuthDataSource {
 	public void setAuthToken(@NonNull AuthToken authToken) {
 		cachedAuthToken = authToken;
 		localData.setAuthToken(authToken);
+		if (currentAppId.equals(authToken.getAppID()) {
+
+		}
 		postAppID(authToken.getAppID());
 	}
 

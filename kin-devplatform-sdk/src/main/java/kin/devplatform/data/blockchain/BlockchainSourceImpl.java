@@ -23,23 +23,22 @@ import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSucceeded;
 import kin.devplatform.bi.events.StellarKinTrustlineSetupFailed;
 import kin.devplatform.bi.events.StellarKinTrustlineSetupSucceeded;
 import kin.devplatform.core.util.ExecutorsUtil.MainThreadExecutor;
-import kin.devplatform.data.KinCallbackAdapter;
 import kin.devplatform.data.blockchain.CreateTrustLineCall.TrustlineCallback;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.IBalance;
-import kin.sdk.migration.IEventListener;
-import kin.sdk.migration.IKinAccount;
-import kin.sdk.migration.IKinClient;
-import kin.sdk.migration.IListenerRegistration;
-import kin.sdk.migration.IPaymentInfo;
-import kin.sdk.migration.IResultCallback;
-import kin.sdk.migration.ITransactionId;
 import kin.sdk.migration.exception.CreateAccountException;
 import kin.sdk.migration.exception.OperationFailedException;
+import kin.sdk.migration.interfaces.IBalance;
+import kin.sdk.migration.interfaces.IEventListener;
+import kin.sdk.migration.interfaces.IKinAccount;
+import kin.sdk.migration.interfaces.IKinClient;
+import kin.sdk.migration.interfaces.IListenerRegistration;
+import kin.sdk.migration.interfaces.IPaymentInfo;
+import kin.sdk.migration.interfaces.ITransactionId;
+import kin.utils.ResultCallback;
 
 public class BlockchainSourceImpl implements BlockchainSource {
 
@@ -72,15 +71,15 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	private static final int MEMO_FORMAT_VERSION = 1;
 	private static final String MEMO_DELIMITER = "-";
 	private static final String MEMO_FORMAT =
-		"%d" + MEMO_DELIMITER + "%s" + MEMO_DELIMITER + "%s"; // version-appID-orderID
+			"%d" + MEMO_DELIMITER + "%s" + MEMO_DELIMITER + "%s"; // version-appID-orderID
 
 	private static final int APP_ID_INDEX = 1;
 	private static final int ORDER_ID_INDEX = 2;
 	private static final int MEMO_SPLIT_LENGTH = 3;
 
 	private BlockchainSourceImpl(@NonNull EventLogger eventLogger, @NonNull final IKinClient kinClient,
-		@NonNull BlockchainSource.Local local)
-		throws BlockchainException {
+								 @NonNull BlockchainSource.Local local)
+			throws BlockchainException {
 		this.eventLogger = eventLogger;
 		this.kinClient = kinClient;
 		this.local = local;
@@ -89,8 +88,8 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	public static void init(@NonNull EventLogger eventLogger, @NonNull final IKinClient kinClient,
-		@NonNull BlockchainSource.Local local)
-		throws BlockchainException {
+							@NonNull BlockchainSource.Local local)
+			throws BlockchainException {
 		if (instance == null) {
 			synchronized (BlockchainSourceImpl.class) {
 				if (instance == null) {
@@ -111,6 +110,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		} else {
 			try {
 				account = kinClient.addAccount();
+				local.setAccountIndex(0);
 			} catch (CreateAccountException e) {
 				throw ErrorUtil.getBlockchainException(e);
 			}
@@ -135,49 +135,43 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
-	@Nullable
-	public String getAppId() {
-		return appID;
-	}
-
-	@Override
 	public void sendTransaction(@NonNull final String publicAddress, @NonNull final BigDecimal amount,
-		@NonNull final String orderID, @NonNull final String offerID, final OfferType offerType) {
+								@NonNull final String orderID, @NonNull final String offerID, final OfferType offerType) {
 		if (offerType == OfferType.SPEND) {
 			eventLogger.send(SpendTransactionBroadcastToBlockchainSubmitted.create(offerID, orderID));
 		} else if (offerType == OfferType.PAY_TO_USER) {
 			eventLogger.send(PayToUserTransactionBroadcastToBlockchainSubmitted.create(offerID, orderID));
 		}
 		account.sendTransaction(publicAddress, amount, generateMemo(orderID)).run(
-			new IResultCallback<ITransactionId>() {
-				@Override
-				public void onResult(ITransactionId result) {
-					if (offerType == OfferType.SPEND) {
-						eventLogger
-							.send(SpendTransactionBroadcastToBlockchainSucceeded.create(result.id(), offerID, orderID));
-					} else if (offerType == OfferType.PAY_TO_USER) {
-						eventLogger
-							.send(PayToUserTransactionBroadcastToBlockchainSucceeded
-								.create(result.id(), offerID, orderID));
+				new ResultCallback<ITransactionId>() {
+					@Override
+					public void onResult(ITransactionId result) {
+						if (offerType == OfferType.SPEND) {
+							eventLogger
+									.send(SpendTransactionBroadcastToBlockchainSucceeded.create(result.id(), offerID, orderID));
+						} else if (offerType == OfferType.PAY_TO_USER) {
+							eventLogger
+									.send(PayToUserTransactionBroadcastToBlockchainSucceeded
+											.create(result.id(), offerID, orderID));
+						}
+						Logger.log(new Log().withTag(TAG).put("sendTransaction onResult", result.id()));
 					}
-					Logger.log(new Log().withTag(TAG).put("sendTransaction onResult", result.id()));
-				}
 
-				@Override
-				public void onError(Exception e) {
-					if (offerType == OfferType.SPEND) {
-						eventLogger
-							.send(SpendTransactionBroadcastToBlockchainFailed
-								.create(ErrorUtil.getPrintableStackTrace(e), offerID, orderID, "", e.getMessage()));
-					} else if (offerType == OfferType.PAY_TO_USER) {
-						eventLogger
-							.send(PayToUserTransactionBroadcastToBlockchainFailed
-								.create(ErrorUtil.getPrintableStackTrace(e), offerID, orderID, "", e.getMessage()));
+					@Override
+					public void onError(Exception e) {
+						if (offerType == OfferType.SPEND) {
+							eventLogger
+									.send(SpendTransactionBroadcastToBlockchainFailed
+											.create(ErrorUtil.getPrintableStackTrace(e), offerID, orderID, "", e.getMessage()));
+						} else if (offerType == OfferType.PAY_TO_USER) {
+							eventLogger
+									.send(PayToUserTransactionBroadcastToBlockchainFailed
+											.create(ErrorUtil.getPrintableStackTrace(e), offerID, orderID, "", e.getMessage()));
+						}
+						completedPayment.postValue(new Payment(orderID, false, e));
+						Logger.log(new Log().withTag(TAG).put("sendTransaction onError", e.getMessage()));
 					}
-					completedPayment.postValue(new Payment(orderID, false, e));
-					Logger.log(new Log().withTag(TAG).put("sendTransaction onError", e.getMessage()));
-				}
-			});
+				});
 	}
 
 	@SuppressLint("DefaultLocale")
@@ -189,8 +183,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	private void initBalance() {
 		balance.postValue(getBalance());
-		getBalance(new KinCallbackAdapter<Balance>() {
-		});
+		getBalance(null);
 	}
 
 	@Override
@@ -202,7 +195,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	@Override
 	public void getBalance(@Nullable final KinCallback<Balance> callback) {
-		account.getBalance().run(new IResultCallback<IBalance>() {
+		account.getBalance().run(new ResultCallback<IBalance>() {
 			@Override
 			public void onResult(final IBalance balanceObj) {
 				setBalance(balanceObj);
@@ -232,12 +225,25 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		});
 	}
 
+	@Override
+	public void reconnectBalanceConnection() {
+		synchronized (balanceObserversLock) {
+			if (balanceObserversCount > 0) {
+				if (balanceRegistration != null) {
+					balanceRegistration.remove();
+				}
+				startBalanceListener();
+			}
+		}
+	}
+
 	@VisibleForTesting
 	void setBalance(final IBalance balanceObj) {
 		Balance balanceTemp = balance.getValue();
 		// if the values are not equals so we need to update,
 		// no need to update for equal values.
 		if (balanceTemp.getAmount().compareTo(balanceObj.value()) != 0) {
+			eventLogger.send(KinBalanceUpdated.create(balanceTemp.getAmount().doubleValue()));
 			Logger.log(new Log().withTag(TAG).text("setBalance: Balance changed, should get update"));
 			balanceTemp.setAmount(balanceObj.value());
 			balance.postValue(balanceTemp);
@@ -246,52 +252,47 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
-	public void addBalanceObserver(@NonNull Observer<Balance> observer) {
+	public void addBalanceObserver(@NonNull Observer<Balance> observer, boolean startSSE) {
 		balance.addObserver(observer);
 		observer.onChanged(balance.getValue());
+
+		if (startSSE) {
+			incrementBalanceSSECount();
+		}
 	}
 
-	@Override
-	public void addBalanceObserverAndStartListen(@NonNull Observer<Balance> observer) {
-		addBalanceObserver(observer);
-		Logger.log(new Log().withTag(TAG).put("addBalanceObserverAndStartListen count", balanceObserversCount));
-		incrementBalanceCount();
-	}
-
-	private void incrementBalanceCount() {
+	private void incrementBalanceSSECount() {
 		synchronized (balanceObserversLock) {
 			if (balanceObserversCount == 0) {
 				startBalanceListener();
 			}
 			balanceObserversCount++;
+			Logger.log(new Log().withTag(TAG).put("incrementBalanceSSECount count", balanceObserversCount));
 		}
 	}
 
 	private void startBalanceListener() {
 		Logger.log(new Log().withTag(TAG).text("startBalanceListener"));
 		balanceRegistration = account.addBalanceListener(new IEventListener<IBalance>() {
-				@Override
-				public void onEvent(IBalance data) {
-					final double prevBalance = balance.getValue().getAmount().doubleValue();
-					setBalance(data);
-					eventLogger.send(KinBalanceUpdated.create(prevBalance));
-				}
-			});
+					@Override
+					public void onEvent(IBalance data) {
+						final double prevBalance = balance.getValue().getAmount().doubleValue();
+						setBalance(data);
+						eventLogger.send(KinBalanceUpdated.create(prevBalance));
+					}
+				});
 	}
 
 	@Override
-	public void removeBalanceObserver(@NonNull Observer<Balance> observer) {
+	public void removeBalanceObserver(@NonNull Observer<Balance> observer, boolean stopSSE) {
 		Logger.log(new Log().withTag(TAG).text("removeBalanceObserver"));
 		balance.removeObserver(observer);
+		if (stopSSE) {
+			decrementBalanceSSECount();
+		}
 	}
 
-
-	public void removeBalanceObserverAndStopListen(@NonNull Observer<Balance> observer) {
-		removeBalanceObserver(observer);
-		decrementBalanceCount();
-	}
-
-	private void decrementBalanceCount() {
+	private void decrementBalanceSSECount() {
 		synchronized (balanceObserversLock) {
 			if (balanceObserversCount > 0) {
 				balanceObserversCount--;
@@ -338,28 +339,20 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	private void startPaymentListener() {
 		paymentRegistration = account.addPaymentListener(new IEventListener<IPaymentInfo>() {
-				@Override
-				public void onEvent(IPaymentInfo data) {
-					final String orderID = extractOrderId(data.memo());
-					Logger.log(new Log().withTag(TAG).put("startPaymentListener onEvent: the orderId", orderID)
-						.put("with memo", data.memo()));
-					final String accountPublicAddress = getPublicAddress();
-					if (orderID != null && accountPublicAddress != null) {
-						completedPayment.postValue(PaymentConverter.toPayment(data, orderID, accountPublicAddress));
-						Logger.log(new Log().withTag(TAG).put("completedPayment order id", orderID));
+					@Override
+					public void onEvent(IPaymentInfo data) {
+						final String orderID = extractOrderId(data.memo());
+						Logger.log(new Log().withTag(TAG).put("startPaymentListener onEvent: the orderId", orderID)
+								.put("with memo", data.memo()));
+						final String accountPublicAddress = getPublicAddress();
+						if (orderID != null && accountPublicAddress != null) {
+							completedPayment.postValue(PaymentConverter.toPayment(data, orderID, accountPublicAddress));
+							Logger.log(new Log().withTag(TAG).put("completedPayment order id", orderID));
+						}
+						// UpdateBalance
+						getBalance(null);
 					}
-					// UpdateBalance if there is no balance sse open connection.
-					if (balanceObserversCount == 0) {
-						final double prevBalance = balance.getValue().getAmount().doubleValue();
-						getBalance(new KinCallbackAdapter<Balance>() {
-							@Override
-							public void onResponse(Balance response) {
-								eventLogger.send(KinBalanceUpdated.create(prevBalance));
-							}
-						});
-					}
-				}
-			});
+				});
 	}
 
 	@Override
@@ -385,7 +378,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 			@Override
 			public void onFailure(final OperationFailedException e) {
 				eventLogger.send(
-					StellarKinTrustlineSetupFailed.create(ErrorUtil.getPrintableStackTrace(e), "", e.getMessage()));
+						StellarKinTrustlineSetupFailed.create(ErrorUtil.getPrintableStackTrace(e), "", e.getMessage()));
 				mainThread.execute(new Runnable() {
 					@Override
 					public void run() {
@@ -406,8 +399,12 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		local.setAccountIndex(accountIndex);
 		createKinAccountIfNeeded();
 
-		balanceRegistration.remove();
-		startBalanceListener();
+		synchronized (balanceObserversLock) {
+			removeRegistration(balanceRegistration);
+			if (balanceObserversCount > 0) {
+				startBalanceListener();
+			}
+		}
 		//trigger balance update
 		getBalance(null);
 	}
@@ -425,6 +422,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	private void removeRegistration(IListenerRegistration listenerRegistration) {
+		Logger.log(new Log().withTag(TAG).text("removeRegistration"));
 		if (listenerRegistration != null) {
 			listenerRegistration.remove();
 		}

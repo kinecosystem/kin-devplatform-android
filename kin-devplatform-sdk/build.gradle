@@ -19,17 +19,15 @@ android {
 dependencies {
 
     implementation project(':kin-devplatform-core')
-
-    testImplementation testingDependencies.junit
-    testImplementation testingDependencies.mockito
-    testImplementation testingDependencies.robolectric
-
-    implementation 'com.github.kinecosystem.kin-ecosystem-android-sdk:recovery:0.2.7'
-    implementation 'com.github.kinecosystem:kin-migration-module-android:abstract_sdk_and_core_and_test_it-SNAPSHOT'
+    implementation 'com.github.kinecosystem:kin-migration-module-android:86cc29bd31'
+    implementation 'com.github.kinecosystem.kin-ecosystem-android-sdk:recovery:d73ef56'
+    api 'com.github.kinecosystem:kin-utils-android:1.1'
     implementation devDependencies.appCompat_v7
     implementation devDependencies.recyclerView_v7
     implementation devDependencies.constraintLayout
     implementation devDependencies.picasso
 
-
+    testImplementation testingDependencies.junit
+    testImplementation testingDependencies.mockito
+    testImplementation testingDependencies.robolectric
 }

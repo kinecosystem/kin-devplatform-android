@@ -172,9 +172,8 @@ public class ApiClient {
 	}
 
 	/**
-	 * Configure whether to verify certificate and hostname when making https requests.
-	 * Default to true.
-	 * NOTE: Do NOT set to false in production code, otherwise you would face multiple types of cryptographic attacks.
+	 * Configure whether to verify certificate and hostname when making https requests. Default to true. NOTE: Do NOT
+	 * set to false in production code, otherwise you would face multiple types of cryptographic attacks.
 	 *
 	 * @param verifyingSsl True to verify TLS/SSL connection
 	 * @return ApiClient
@@ -195,8 +194,7 @@ public class ApiClient {
 	}
 
 	/**
-	 * Configure the CA certificate to be trusted when making https requests.
-	 * Use null to reset to default.
+	 * Configure the CA certificate to be trusted when making https requests. Use null to reset to default.
 	 *
 	 * @param sslCaCert input stream for SSL CA cert
 	 * @return ApiClient
@@ -212,8 +210,7 @@ public class ApiClient {
 	}
 
 	/**
-	 * Configure client keys to use for authorization in an SSL session.
-	 * Use null to reset to default.
+	 * Configure client keys to use for authorization in an SSL session. Use null to reset to default.
 	 *
 	 * @param managers The KeyManagers to use
 	 * @return ApiClient
@@ -293,9 +290,8 @@ public class ApiClient {
 	}
 
 	/**
-	 * The path of temporary folder used to store downloaded files from endpoints
-	 * with file response. The default value is <code>null</code>, i.e. using
-	 * the system's default tempopary folder.
+	 * The path of temporary folder used to store downloaded files from endpoints with file response. The default value
+	 * is <code>null</code>, i.e. using the system's default tempopary folder.
 	 *
 	 * @return Temporary folder path
 	 * @see <a href="https://docs.oracle.com/javase/7/docs/api/java/io/File.html#createTempFile">createTempFile</a>
@@ -316,8 +312,8 @@ public class ApiClient {
 	}
 
 	/**
-	 * Sets the connect timeout (in milliseconds).
-	 * A value of 0 means no timeout, otherwise values must be between 1 and
+	 * Sets the connect timeout (in milliseconds). A value of 0 means no timeout, otherwise values must be between 1
+	 * and
 	 *
 	 * @param connectionTimeout connection timeout in milliseconds
 	 * @return Api client
@@ -426,8 +422,7 @@ public class ApiClient {
 	}
 
 	/**
-	 * Sanitize filename by removing path.
-	 * e.g. ../../sun.gif becomes sun.gif
+	 * Sanitize filename by removing path. e.g. ../../sun.gif becomes sun.gif
 	 *
 	 * @param filename The filename to be sanitized
 	 * @return The sanitized filename
@@ -437,13 +432,8 @@ public class ApiClient {
 	}
 
 	/**
-	 * Check if the given MIME is a JSON MIME.
-	 * JSON MIME examples:
-	 * application/json
-	 * application/json; charset=UTF8
-	 * APPLICATION/JSON
-	 * application/vnd.company+json
-	 * "* / *" is also default to JSON
+	 * Check if the given MIME is a JSON MIME. JSON MIME examples: application/json application/json; charset=UTF8
+	 * APPLICATION/JSON application/vnd.company+json "* / *" is also default to JSON
 	 *
 	 * @param mime MIME (Multipurpose Internet Mail Extensions)
 	 * @return True if the given MIME is JSON, false otherwise.
@@ -454,8 +444,7 @@ public class ApiClient {
 	}
 
 	/**
-	 * Select the Accept header's value from the given accepts array:
-	 * if JSON exists in the given array, use it;
+	 * Select the Accept header's value from the given accepts array: if JSON exists in the given array, use it;
 	 * otherwise use all of them (joining into a string)
 	 *
 	 * @param accepts The accepts array to select from
@@ -475,9 +464,8 @@ public class ApiClient {
 	}
 
 	/**
-	 * Select the Content-Type header's value from the given array:
-	 * if JSON exists in the given array, use it;
-	 * otherwise use the first one of the array.
+	 * Select the Content-Type header's value from the given array: if JSON exists in the given array, use it; otherwise
+	 * use the first one of the array.
 	 *
 	 * @param contentTypes The Content-Type array to select from
 	 * @return The Content-Type header to use. If the given array is empty, or matches "any", JSON will be used.
@@ -509,8 +497,7 @@ public class ApiClient {
 	}
 
 	/**
-	 * Deserialize response body to Java object, according to the return type and
-	 * the Content-Type response header.
+	 * Deserialize response body to Java object, according to the return type and the Content-Type response header.
 	 *
 	 * @param <T> Type
 	 * @param response HTTP response
@@ -581,8 +568,7 @@ public class ApiClient {
 	}
 
 	/**
-	 * Serialize the given Java object into request body according to the object's
-	 * class and the request Content-Type.
+	 * Serialize the given Java object into request body according to the object's class and the request Content-Type.
 	 *
 	 * @param obj The Java object
 	 * @param contentType The request Content-Type
@@ -793,15 +779,14 @@ public class ApiClient {
 	 * @param headerParams The header parameters
 	 * @param formParams The form parameters
 	 * @param authNames The authentications to apply
-	 * @param progressRequestListener Progress request listener
 	 * @return The HTTP call
 	 * @throws ApiException If fail to serialize the request body object
 	 */
 	public Call buildCall(String path, @Methods String method, List<Pair> queryParams, List<Pair> collectionQueryParams,
-		Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames,
-		ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+		Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames)
+		throws ApiException {
 		Request request = buildRequest(path, method, queryParams, collectionQueryParams, body, headerParams, formParams,
-			authNames, progressRequestListener);
+			authNames);
 
 		return getHttpClient().newCall(request);
 	}
@@ -817,14 +802,13 @@ public class ApiClient {
 	 * @param headerParams The header parameters
 	 * @param formParams The form parameters
 	 * @param authNames The authentications to apply
-	 * @param progressRequestListener Progress request listener
 	 * @return The HTTP request
 	 * @throws ApiException If fail to serialize the request body object
 	 */
 	public Request buildRequest(String path, @Methods String method, List<Pair> queryParams,
 		List<Pair> collectionQueryParams,
-		Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames,
-		ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
+		Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames)
+		throws ApiException {
 		updateParamsForAuth(authNames, queryParams, headerParams);
 
 		final String url = buildUrl(path, queryParams, collectionQueryParams);
@@ -856,14 +840,7 @@ public class ApiClient {
 			reqBody = serialize(body, contentType);
 		}
 
-		Request request = null;
-
-		if (progressRequestListener != null && reqBody != null) {
-			ProgressRequestBody progressRequestBody = new ProgressRequestBody(reqBody, progressRequestListener);
-			request = reqBuilder.method(method, progressRequestBody).build();
-		} else {
-			request = reqBuilder.method(method, reqBody).build();
-		}
+		Request request = reqBuilder.method(method, reqBody).build();
 
 		return request;
 	}
@@ -968,8 +945,8 @@ public class ApiClient {
 	}
 
 	/**
-	 * Build a multipart (file uploading) request body with the given form parameters,
-	 * which could contain text fields and file fields.
+	 * Build a multipart (file uploading) request body with the given form parameters, which could contain text fields
+	 * and file fields.
 	 *
 	 * @param formParams Form parameters in the form of Map
 	 * @return RequestBody
@@ -1007,8 +984,7 @@ public class ApiClient {
 	}
 
 	/**
-	 * Apply SSL related settings to httpClient according to the current values of
-	 * verifyingSsl and sslCaCert.
+	 * Apply SSL related settings to httpClient according to the current values of verifyingSsl and sslCaCert.
 	 */
 	private void applySslSettings() {
 		try {

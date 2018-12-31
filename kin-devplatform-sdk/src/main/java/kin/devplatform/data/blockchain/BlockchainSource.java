@@ -10,7 +10,7 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.network.model.Offer.OfferType;
-import kin.sdk.migration.IKinAccount;
+import kin.sdk.migration.interfaces.IKinAccount;
 
 public interface BlockchainSource {
 
@@ -25,10 +25,10 @@ public interface BlockchainSource {
 	 */
 	void setAppID(String appID);
 
-	/**
-	 * @return the app id
-	 */
-	String getAppId();
+//	/**
+//	 * @return the app id
+//	 */
+//	String getAppId();
 
 	/**
 	 * Send transaction to the network
@@ -51,24 +51,22 @@ public interface BlockchainSource {
 	void getBalance(@Nullable final KinCallback<Balance> callback);
 
 	/**
-	 * Add balance observer in order to start receive balance updates
+	 * Reconnect the balance connection, due to connection lose.
 	 */
-	void addBalanceObserver(@NonNull final Observer<Balance> observer);
+	void reconnectBalanceConnection();
 
 	/**
-	 * Add balance observer that will keep a connection on account balance updates from the blockchain network.
+	 * Add balance observer in order to start receive balance updates
+	 *
+	 * @param startSSE true will keep a connection on account balance updates from the blockchain network
 	 */
-	void addBalanceObserverAndStartListen(@NonNull final Observer<Balance> observer);
+	void addBalanceObserver(@NonNull final Observer<Balance> observer, boolean startSSE);
 
 	/**
 	 * Remove the balance observer in order to stop receiving balance updates.
+	 * @param stopSSE true will close the connection if no other observers
 	 */
-	void removeBalanceObserver(@NonNull final Observer<Balance> observer);
-
-	/**
-	 * Remove the balance observer, and close the connection if no other observers.
-	 */
-	void removeBalanceObserverAndStopListen(@NonNull final Observer<Balance> observer);
+	void removeBalanceObserver(@NonNull final Observer<Balance> observer, boolean stopSSE);
 
 	/**
 	 * @return the public address of the initiated account

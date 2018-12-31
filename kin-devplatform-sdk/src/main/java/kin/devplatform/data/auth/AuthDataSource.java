@@ -38,6 +38,8 @@ public interface AuthDataSource {
 
 		void setSignInData(@NonNull final SignInData signInData);
 
+		SignInData getSignInData();
+
 		void setAuthToken(@NonNull final AuthToken authToken);
 
 		void getAppId(@NonNull final Callback<String, Void> callback);
