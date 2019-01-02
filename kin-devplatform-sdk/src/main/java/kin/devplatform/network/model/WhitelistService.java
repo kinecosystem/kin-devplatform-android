@@ -14,8 +14,6 @@ import kin.sdk.migration.exception.WhitelistTransactionFailedException;
 import kin.sdk.migration.interfaces.IWhitelistService;
 import kin.sdk.migration.interfaces.IWhitelistServiceCallbacks;
 import kin.sdk.migration.interfaces.IWhitelistableTransaction;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,6 +24,8 @@ import okhttp3.ResponseBody;
 public class WhitelistService implements IWhitelistService {
 
     private static final String URL_WHITELISTING_SERVICE = "http://18.206.35.110:3000/whitelist"; // TODO: 18/12/2018 need the correct url
+//    private static final String URL_WHITELISTING_SERVICE = "playground/production market place url/orders/{order_id}/whitelist";
+
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private final OkHttpClient okHttpClient;
@@ -48,7 +48,7 @@ public class WhitelistService implements IWhitelistService {
     @Override
     public String whitelistTransaction(IWhitelistableTransaction whitelistableTransaction) throws WhitelistTransactionFailedException {
         String whitelistTransaction = null;
-        RequestBody requestBody = null;
+        RequestBody requestBody;
         try {
             requestBody = RequestBody.create(JSON, toJson(whitelistableTransaction));
         } catch (JSONException e) {

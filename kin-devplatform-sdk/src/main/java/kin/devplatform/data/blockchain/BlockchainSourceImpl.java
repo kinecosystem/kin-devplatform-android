@@ -68,10 +68,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	private final MainThreadExecutor mainThread = new MainThreadExecutor();
 
 	private String appID;
-	private static final int MEMO_FORMAT_VERSION = 1;
 	private static final String MEMO_DELIMITER = "-";
-	private static final String MEMO_FORMAT =
-			"%d" + MEMO_DELIMITER + "%s" + MEMO_DELIMITER + "%s"; // version-appID-orderID
 
 	private static final int APP_ID_INDEX = 1;
 	private static final int ORDER_ID_INDEX = 2;
@@ -131,7 +128,13 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	public void setAppID(String appID) {
 		if (!TextUtils.isEmpty(appID)) {
 			this.appID = appID;
+			local.setAppId(appID);
 		}
+	}
+
+	@Override
+	public String getAppId() {
+		return appID != null ? appID : local.getAppId();
 	}
 
 	@Override
@@ -177,7 +180,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	@SuppressLint("DefaultLocale")
 	@VisibleForTesting
 	String generateMemo(@NonNull final String orderID) {
-		return String.format(MEMO_FORMAT, MEMO_FORMAT_VERSION, appID, orderID);
+		return " " + orderID;
 	}
 
 

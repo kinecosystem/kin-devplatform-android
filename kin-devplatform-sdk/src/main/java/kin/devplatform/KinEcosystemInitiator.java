@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import java.util.UUID;
+
 import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.accountmanager.AccountManager.AccountState;
 import kin.devplatform.accountmanager.AccountManagerImpl;
@@ -29,11 +30,19 @@ import kin.devplatform.data.order.OrderRepository;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
+import kin.devplatform.network.model.KinVersionProvider;
 import kin.devplatform.network.model.SignInData;
+import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.MigrationManager;
+import kin.sdk.migration.MigrationNetworkInfo;
+import kin.sdk.migration.exception.MigrationInProcessException;
+import kin.sdk.migration.interfaces.IKinClient;
+import kin.sdk.migration.interfaces.MigrationManagerListener;
 
 public final class KinEcosystemInitiator {
 
+	private static final String TAG = KinEcosystemInitiator.class.getSimpleName();
 	private static final String KIN_ECOSYSTEM_STORE_PREFIX_KEY = "kinecosystem_store";
 	private static final int ACCOUNT_CREATION_TIME_OUT_MILLIS = 30000;
 	private static KinEcosystemInitiator instance;
@@ -62,10 +71,10 @@ public final class KinEcosystemInitiator {
 	 */
 	public void internalInit(Context context) {
 		try {
-			init(context, null, null);
+			init(context, null, null, false, null, null);
 		} catch (BlockchainException e) {
 			EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
-				ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
+				ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()), // TODO: 02/01/2019 why not firing some error? and why print the stack trace
 				"KinEcosystemInitiator internalInit failed"
 			));
 			e.printStackTrace();
@@ -78,71 +87,106 @@ public final class KinEcosystemInitiator {
 	public void externalInit(Context context, String appId, KinEnvironment environment, @NonNull SignInData signInData,
 							 final KinCallback<Void> loginCallback) {
 		if (isInitialized && isLoggedIn) {
-			BlockchainSourceImpl.getInstance().setAppID(appId);
 			fireStartCompleted(loginCallback);
 			return;
 		}
 
 		try {
-			init(context, appId, environment);
+			init(context, appId, environment, true, signInData, loginCallback);
 		} catch (BlockchainException e) {
 			fireStartError(e, loginCallback);
-			return;
 		}
-		login(signInData, loginCallback);
 	}
 
-	private void init(Context context, String appId, KinEnvironment environment) throws BlockchainException {
+	private void init(Context context, String appId, KinEnvironment environment, boolean withLogin,
+					  SignInData signInData, KinCallback<Void> loginCallback) throws BlockchainException {
 		if (!isInitialized) {
 			ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
 			if (environment != null) {
 				configurationLocal.setEnvironment(environment);
 			}
-			if (appId != null) {
-				appId = BlockchainSourceImpl.getInstance().getAppID(appId);
-			}
-			BlockchainSourceImpl.getInstance().setAppID(appId);
 
 			ConfigurationImpl.init(configurationLocal);
 			KinEnvironment kinEnvironment = ConfigurationImpl.getInstance().getEnvironment();
-			EventLogger eventLogger = EventLoggerImpl.getInstance();
-			final String networkUrl = kinEnvironment.getBlockchainNetworkUrl();
-			final String networkId = kinEnvironment.getBlockchainPassphrase();
+			final EventLogger eventLogger = EventLoggerImpl.getInstance();
+			final String oldNetworkUrl = kinEnvironment.getOldBlockchainNetworkUrl();
+			final String oldNetworkId = kinEnvironment.getOldBlockchainPassphrase();
+			final String newNetworkUrl = kinEnvironment.getNewBlockchainNetworkUrl();
+			final String newNetworkId = kinEnvironment.getNewBlockchainPassphrase();
 			final String issuer = kinEnvironment.getIssuer();
 
+			// TODO: 01/01/2019 is it ok to use issuer like i did or like they did in the past like this:
+//			new ServiceProvider(networkUrl, networkId) {
+//				@Override
+//				protected String getIssuerAccountId() {
+//					return issuer;
+//				}
 
-
-			IKinClient kinClient = new IKinClient(context, new ServiceProvider(networkUrl, networkId) {
-				@Override
-				protected String getIssuerAccountId() {
-					return issuer;
-				}
-			}, KIN_ECOSYSTEM_STORE_PREFIX_KEY);
-			BlockchainSourceImpl.init(eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
-
-			AuthRepository
-				.init(AuthLocalData.getInstance(context, executorsUtil),
-					AuthRemoteData.getInstance(executorsUtil));
-
-			EventCommonDataUtil.setBaseData(context);
-
-			AccountManagerImpl
-				.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),
-					BlockchainSourceImpl.getInstance());
-
-			OrderRepository.init(BlockchainSourceImpl.getInstance(),
-				eventLogger,
-				OrderRemoteData.getInstance(executorsUtil),
-				OrderLocalData.getInstance(context, executorsUtil));
-
-			OfferRepository
-				.init(OfferRemoteData.getInstance(executorsUtil), OrderRepository.getInstance());
-
-			DeviceUtils.init(context);
-
-			eventLogger.send(KinSdkInitiated.create());
-			isInitialized = true;
+			MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId, newNetworkUrl, newNetworkId, issuer);
+			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(), new WhitelistService(), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
+			try {
+				handleMigration(context, appId, eventLogger, migrationManager, withLogin, signInData, loginCallback);
+			} catch (MigrationInProcessException e) {
+				Logger.log(new Log().priority(Log.WARN).withTag(TAG).text("Start migration when it was already in migration process"));
+			}
 		}
+	}
+
+	private void handleMigration(final Context context, final String appId, final EventLogger eventLogger, MigrationManager migrationManager,
+								 final boolean withLogin, final SignInData signInData, final KinCallback<Void> loginCallback) throws MigrationInProcessException {
+		migrationManager.startMigration(new MigrationManagerListener() { // TODO: 01/01/2019 handle the case of process restart
+			@Override
+			public void onMigrationStart() {
+				int i = 0;;
+				i++;
+			}
+
+			@Override
+			public void onReady(IKinClient kinClient) {
+				try {
+					String applicationId = appId;
+					BlockchainSourceImpl.init(eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
+					if (applicationId != null) {
+						BlockchainSourceImpl.getInstance().setAppID(applicationId);
+					}
+
+					applicationId = BlockchainSourceImpl.getInstance().getAppId();
+
+					AuthRepository
+							.init(AuthLocalData.getInstance(context, executorsUtil),
+									AuthRemoteData.getInstance(executorsUtil), applicationId);
+
+					EventCommonDataUtil.setBaseData(context);
+
+					AccountManagerImpl
+							.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),
+									BlockchainSourceImpl.getInstance());
+
+					OrderRepository.init(BlockchainSourceImpl.getInstance(),
+							eventLogger,
+							OrderRemoteData.getInstance(executorsUtil),
+							OrderLocalData.getInstance(context, executorsUtil));
+
+					OfferRepository
+							.init(OfferRemoteData.getInstance(executorsUtil), OrderRepository.getInstance());
+
+					DeviceUtils.init(context);
+
+					eventLogger.send(KinSdkInitiated.create());
+					isInitialized = true;
+					if (withLogin) {
+						login(signInData, loginCallback);
+					}
+				} catch (BlockchainException e) {
+					onError(e);
+				}
+			}
+
+			@Override
+			public void onError(Exception e) {
+				// TODO: 01/01/2019 need to handle this case, maybe use login callback because at any case we should tell developers about error or completion.
+			}
+		});
 	}
 
 	private void login(@NonNull SignInData signInData, final KinCallback<Void> loginCallback) {

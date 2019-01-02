@@ -46,6 +46,7 @@ public class ConfigurationImpl implements Configuration {
 	private static final String AUTH_TOKEN_COULD_NOT_BE_GENERATED = "AuthToken could not be generated";
 
 	private static final String USERS_PATH = "/v1/users";
+	private static final String KIN_VERSION_PATH = "/v1/config/blockchain/";
 	private static final String PREFIX_ANDROID = "android ";
 
 	private static final Object apiClientLock = new Object();
@@ -89,7 +90,7 @@ public class ConfigurationImpl implements Configuration {
 					public Response intercept(Chain chain) throws IOException {
 						Request originalRequest = chain.request();
 						final String path = originalRequest.url().encodedPath();
-						if (path.equals(USERS_PATH) && originalRequest.method().equals(POST)) {
+						if (shouldSkipAuthentication(originalRequest, path)) {
 							return chain.proceed(originalRequest);
 						} else {
 							AuthToken authToken = AuthRepository.getInstance().getAuthTokenSync();
@@ -118,6 +119,10 @@ public class ConfigurationImpl implements Configuration {
 
 		addHeaders(defaultApiClient);
 		return defaultApiClient;
+	}
+
+	private boolean shouldSkipAuthentication(Request originalRequest, String path) {
+		return path.equals(USERS_PATH) && originalRequest.method().equals(POST) || path.contains(KIN_VERSION_PATH);
 	}
 
 	private void addHeaders(ApiClient apiClient) {

@@ -25,10 +25,10 @@ public interface BlockchainSource {
 	 */
 	void setAppID(String appID);
 
-//	/**
-//	 * @return the app id
-//	 */
-//	String getAppId();
+	/**
+	 * @return the app id
+	 */
+	String getAppId();
 
 	/**
 	 * Send transaction to the network
@@ -111,5 +111,9 @@ public interface BlockchainSource {
 		int getAccountIndex();
 
 		void setAccountIndex(int index);
+
+		String getAppId();
+
+		void setAppId(String appId);
 	}
 }

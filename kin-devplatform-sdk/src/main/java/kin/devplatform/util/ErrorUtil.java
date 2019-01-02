@@ -47,6 +47,7 @@ public class ErrorUtil {
 	private static final String FAILED_TO_LOAD_ACCOUNT_ON_INDEX = "Failed to load blockchain wallet on index %d";
 	private static final String ORDER_NOT_FOUND = "Cannot found a order";
 	private static final String ACCOUNT_IS_NOT_LOGGED_IN = "Account is not logged in, please call Kin.start(...) first.";
+	private static final String INCORRECT_APP_ID = "The supplied app id is not the same as the app id found on the server";
 	private static final String ACCOUNT_CREATION_TIMEOUT = "Account creation has timeout";
 
 
@@ -149,6 +150,9 @@ public class ErrorUtil {
 				break;
 			case ClientException.ACCOUNT_NOT_LOGGED_IN:
 				exception = new ClientException(ClientException.ACCOUNT_NOT_LOGGED_IN, ACCOUNT_IS_NOT_LOGGED_IN, e);
+				break;
+			case ClientException.INCORRECT_APP_ID:
+				exception = new ClientException(ClientException.INCORRECT_APP_ID, INCORRECT_APP_ID, e);
 				break;
 			case INTERNAL_INCONSISTENCY:
 			default:
