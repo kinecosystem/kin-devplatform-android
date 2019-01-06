@@ -20,7 +20,7 @@ public interface OrderDataSource {
 
 	void createOrder(@NonNull final String offerID, final KinCallback<OpenOrder> callback);
 
-	void submitOrder(@NonNull String offerID, @Nullable String content, @NonNull String orderID,
+	void submitOrder(OpenOrder order, @Nullable String content,
 		kin.devplatform.network.model.Origin origin, @Nullable KinCallback<Order> callback);
 
 	void cancelOrder(@NonNull final String offerID, @NonNull final String orderID, final KinCallback<Void> callback);

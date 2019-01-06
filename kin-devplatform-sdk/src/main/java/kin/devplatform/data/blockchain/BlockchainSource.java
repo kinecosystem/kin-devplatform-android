@@ -5,12 +5,13 @@ import android.support.annotation.Nullable;
 import com.kin.ecosystem.recovery.KeyStoreProvider;
 import java.math.BigDecimal;
 import kin.core.KinAccount;
+import kin.core.exception.OperationFailedException;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
-import kin.devplatform.network.model.Offer.OfferType;
+import kin.devplatform.network.model.OpenOrder;
 
 public interface BlockchainSource {
 
@@ -30,10 +31,10 @@ public interface BlockchainSource {
 	 *
 	 * @param publicAddress the recipient address
 	 * @param amount the amount to send
-	 * @param orderID the orderID to be included in the memo of the transaction
 	 */
+	@NonNull
 	void sendTransaction(@NonNull String publicAddress, @NonNull BigDecimal amount,
-		@NonNull String orderID, @NonNull String offerID, OfferType offerType);
+		@NonNull OpenOrder order) throws OperationFailedException;
 
 	/**
 	 * @return the cached balance.
