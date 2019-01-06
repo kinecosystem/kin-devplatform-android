@@ -167,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
 					showToast("Pay to user flow started");
 					enableView(v, false);
 					createPayToUserOffer();
+					dialog.dismiss();
 				}
 			})
 			.setNegativeButton("Cancel", null)

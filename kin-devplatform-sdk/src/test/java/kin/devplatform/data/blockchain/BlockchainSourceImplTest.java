@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -21,6 +22,7 @@ import kin.core.KinClient;
 import kin.core.Request;
 import kin.core.ResultCallback;
 import kin.core.TransactionId;
+import kin.core.exception.OperationFailedException;
 import kin.devplatform.BaseTestClass;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
@@ -29,6 +31,7 @@ import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSucceeded;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.network.model.Offer.OfferType;
+import kin.devplatform.network.model.OpenOrder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,6 +91,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		when(kinAccount.getBalance()).thenReturn(getBalanceReq);
 		when(balanceObj.value()).thenReturn(new BigDecimal(20));
 		when(kinAccount.getPublicAddress()).thenReturn(PUBLIC_ADDRESS);
+
 		doNothing().when(kinAccount).activateSync();
 
 		resetInstance();
@@ -144,47 +148,41 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	}
 
 	@Test
-	public void send_transaction_succeeded() throws InterruptedException {
+	public void send_transaction_succeeded() throws InterruptedException, OperationFailedException {
 		String toAddress = "some_pub_address";
 		final BigDecimal amount = new BigDecimal(10);
 		final String orderID = "someID";
-		final String transactionID = "transactionID";
 
-		Request<TransactionId> transactionRequest = mock(Request.class);
-		ArgumentCaptor<ResultCallback<TransactionId>> resultCallbackArgumentCaptor =
-			forClass(ResultCallback.class);
-		when(kinAccount.sendTransaction(any(String.class), any(BigDecimal.class), any(String.class)))
-			.thenReturn(transactionRequest);
-
+		when(kinAccount.sendTransactionSync(anyString(), (BigDecimal) any(), anyString())).thenReturn(
+			new TransactionId() {
+				@Override
+				public String id() {
+					return "transactionID";
+				}
+			});
 		blockchainSource.setAppID(APP_ID);
-		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID", OfferType.SPEND);
-		verify(transactionRequest).run(resultCallbackArgumentCaptor.capture());
-		resultCallbackArgumentCaptor.getValue().onResult(new TransactionId() {
-			@Override
-			public String id() {
-				return transactionID;
-			}
-		});
+		OpenOrder openOrder = new OpenOrder();
+		openOrder.setId(orderID);
+		openOrder.setOfferId("offerID");
+		openOrder.setOfferType(OfferType.SPEND);
+		blockchainSource.sendTransaction(toAddress, amount, openOrder);
 		verify(eventLogger).send(any(SpendTransactionBroadcastToBlockchainSucceeded.class));
 	}
 
 	@Test
-	public void send_transaction_failed() {
+	public void send_transaction_failed() throws OperationFailedException {
 		String toAddress = "some_pub_address";
 		BigDecimal amount = new BigDecimal(10);
 		final String orderID = "someID";
 
-		Request<TransactionId> transactionRequest = mock(Request.class);
-		ArgumentCaptor<ResultCallback<TransactionId>> resultCallbackArgumentCaptor =
-			forClass(ResultCallback.class);
-		when(kinAccount.sendTransaction(any(String.class), any(BigDecimal.class), any(String.class)))
-			.thenReturn(transactionRequest);
+		final OperationFailedException exception = new OperationFailedException("failed");
+		when(kinAccount.sendTransactionSync(any(String.class), any(BigDecimal.class), any(String.class)))
+			.thenThrow(exception);
 
 		blockchainSource.setAppID(APP_ID);
-		blockchainSource.sendTransaction(toAddress, amount, orderID, "offerID", OfferType.SPEND);
-		verify(transactionRequest).run(resultCallbackArgumentCaptor.capture());
-
-		final Exception exception = new Exception("failed");
+		OpenOrder openOrder = new OpenOrder();
+		openOrder.setId(orderID);
+		openOrder.setOfferType(OfferType.SPEND);
 
 		blockchainSource.addPaymentObservable(new Observer<Payment>() {
 			@Override
@@ -196,7 +194,11 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 			}
 		});
 
-		resultCallbackArgumentCaptor.getValue().onError(exception);
+		try {
+			blockchainSource.sendTransaction(toAddress, amount, openOrder);
+		} catch (OperationFailedException e) {
+			e.printStackTrace();
+		}
 		verify(eventLogger).send(any(SpendTransactionBroadcastToBlockchainFailed.class));
 	}
 

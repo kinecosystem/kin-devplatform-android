@@ -12,7 +12,8 @@ class ExternalEarnOrderCall extends CreateExternalOrderCall {
 		@NonNull BlockchainSource blockchainSource,
 		@NonNull String orderJwt,
 		@NonNull EventLogger eventLogger,
+		long paymentListenerTimeout,
 		@NonNull ExternalOrderCallbacks externalEarnOrderCallbacks) {
-		super(remote, blockchainSource, orderJwt, eventLogger, externalEarnOrderCallbacks);
+		super(remote, blockchainSource, orderJwt, eventLogger, externalEarnOrderCallbacks, paymentListenerTimeout);
 	}
 }

@@ -13,7 +13,6 @@ import kin.core.KinClient;
 import kin.core.ListenerRegistration;
 import kin.core.PaymentInfo;
 import kin.core.ResultCallback;
-import kin.core.TransactionId;
 import kin.core.exception.CreateAccountException;
 import kin.core.exception.OperationFailedException;
 import kin.devplatform.KinCallback;
@@ -37,6 +36,7 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.network.model.Offer.OfferType;
+import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.util.ErrorUtil;
 
 public class BlockchainSourceImpl implements BlockchainSource {
@@ -135,42 +135,54 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	@Override
 	public void sendTransaction(@NonNull final String publicAddress, @NonNull final BigDecimal amount,
-		@NonNull final String orderID, @NonNull final String offerID, final OfferType offerType) {
-		if (offerType == OfferType.SPEND) {
-			eventLogger.send(SpendTransactionBroadcastToBlockchainSubmitted.create(offerID, orderID));
-		} else if (offerType == OfferType.PAY_TO_USER) {
-			eventLogger.send(PayToUserTransactionBroadcastToBlockchainSubmitted.create(offerID, orderID));
-		}
-		account.sendTransaction(publicAddress, amount, generateMemo(orderID)).run(
-			new ResultCallback<TransactionId>() {
-				@Override
-				public void onResult(TransactionId result) {
-					if (offerType == OfferType.SPEND) {
-						eventLogger
-							.send(SpendTransactionBroadcastToBlockchainSucceeded.create(result.id(), offerID, orderID));
-					} else if (offerType == OfferType.PAY_TO_USER) {
-						eventLogger
-							.send(PayToUserTransactionBroadcastToBlockchainSucceeded
-								.create(result.id(), offerID, orderID));
-					}
-					Logger.log(new Log().withTag(TAG).put("sendTransaction onResult", result.id()));
-				}
+		@NonNull OpenOrder order) throws OperationFailedException {
+		OfferType offerType = order.getOfferType();
+		String offerId = order.getOfferId();
+		String orderId = order.getId();
 
-				@Override
-				public void onError(Exception e) {
-					if (offerType == OfferType.SPEND) {
-						eventLogger
-							.send(SpendTransactionBroadcastToBlockchainFailed
-								.create(ErrorUtil.getPrintableStackTrace(e), offerID, orderID, "", e.getMessage()));
-					} else if (offerType == OfferType.PAY_TO_USER) {
-						eventLogger
-							.send(PayToUserTransactionBroadcastToBlockchainFailed
-								.create(ErrorUtil.getPrintableStackTrace(e), offerID, orderID, "", e.getMessage()));
-					}
-					completedPayment.postValue(new Payment(orderID, false, e));
-					Logger.log(new Log().withTag(TAG).put("sendTransaction onError", e.getMessage()));
-				}
-			});
+		sendBroadcastToBlockchainSubmittedEvent(offerType, offerId, orderId);
+		try {
+			String transactionId = account.sendTransactionSync(publicAddress, amount, generateMemo(orderId))
+				.id();
+			sendTransactionSucceededEvent(offerType, offerId, orderId, transactionId);
+			Logger.log(new Log().withTag(TAG).put("sendTransaction onResult", transactionId));
+		} catch (OperationFailedException e) {
+			sendTransactionFailedEvent(offerType, offerId, orderId, e);
+			completedPayment.postValue(new Payment(orderId, false, e));
+			throw e;
+		}
+	}
+
+	private void sendBroadcastToBlockchainSubmittedEvent(OfferType offerType, String offerId, String orderId) {
+		if (offerType == OfferType.SPEND) {
+			eventLogger.send(SpendTransactionBroadcastToBlockchainSubmitted.create(offerId, orderId));
+		} else if (offerType == OfferType.PAY_TO_USER) {
+			eventLogger
+				.send(PayToUserTransactionBroadcastToBlockchainSubmitted.create(offerId, orderId));
+		}
+	}
+
+	private void sendTransactionSucceededEvent(OfferType offerType, String offerId, String orderId,
+		String transactionId) {
+		if (offerType == OfferType.SPEND) {
+			eventLogger
+				.send(SpendTransactionBroadcastToBlockchainSucceeded.create(transactionId, offerId, orderId));
+		} else if (offerType == OfferType.PAY_TO_USER) {
+			eventLogger
+				.send(PayToUserTransactionBroadcastToBlockchainSucceeded
+					.create(transactionId, offerId, orderId));
+		}
+	}
+
+	private void sendTransactionFailedEvent(OfferType offerType, String offerId, String orderId,
+		OperationFailedException e) {
+		if (offerType == OfferType.SPEND) {
+			eventLogger.send(SpendTransactionBroadcastToBlockchainFailed
+				.create(ErrorUtil.getPrintableStackTrace(e), offerId, orderId, "", e.getMessage()));
+		} else if (offerType == OfferType.PAY_TO_USER) {
+			eventLogger.send(PayToUserTransactionBroadcastToBlockchainFailed
+				.create(ErrorUtil.getPrintableStackTrace(e), offerId, orderId, "", e.getMessage()));
+		}
 	}
 
 	@SuppressLint("DefaultLocale")

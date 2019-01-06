@@ -2,6 +2,7 @@ package kin.devplatform.marketplace.presenter;
 
 import android.os.Handler;
 import java.math.BigDecimal;
+import kin.core.exception.OperationFailedException;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.BaseDialogPresenter;
 import kin.devplatform.bi.EventLogger;
@@ -21,7 +22,6 @@ import kin.devplatform.data.order.OrderDataSource;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.marketplace.view.ISpendDialog;
 import kin.devplatform.network.model.Offer;
-import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.OfferInfo;
 import kin.devplatform.network.model.OfferInfo.Confirmation;
 import kin.devplatform.network.model.OpenOrder;
@@ -130,7 +130,7 @@ public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> impl
 			final String addressee = offer.getBlockchainData().getRecipientAddress();
 			final String orderID = openOrder.getId();
 
-			submitOrder(offer.getId(), orderID);
+			submitOrder(openOrder);
 			sendTransaction(addressee, amount, orderID);
 		}
 	}
@@ -173,13 +173,24 @@ public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> impl
 		}, delayMilliseconds);
 	}
 
-	private void sendTransaction(String addressee, BigDecimal amount, String orderID) {
-		blockchainSource.sendTransaction(addressee, amount, orderID, offer.getId(), OfferType.SPEND);
+	private void sendTransaction(final String addressee, final BigDecimal amount, final String orderID) {
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					blockchainSource.sendTransaction(addressee, amount, openOrder);
+				} catch (OperationFailedException e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
 	}
 
-	private void submitOrder(String offerID, String orderID) {
-		eventLogger.send(SpendOrderCompletionSubmitted.create(offerID, orderID, Origin.MARKETPLACE));
-		orderRepository.submitOrder(offerID, null, orderID, kin.devplatform.network.model.Origin.MARKETPLACE, null);
+	private void submitOrder(OpenOrder openOrder) {
+		eventLogger
+			.send(SpendOrderCompletionSubmitted.create(openOrder.getOfferId(), openOrder.getId(), Origin.MARKETPLACE));
+		orderRepository.submitOrder(openOrder, null,
+			kin.devplatform.network.model.Origin.MARKETPLACE, null);
 	}
 
 	private void showToast(String msg) {
