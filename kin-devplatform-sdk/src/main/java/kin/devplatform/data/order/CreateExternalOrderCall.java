@@ -3,7 +3,6 @@ package kin.devplatform.data.order;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.text.format.DateUtils;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import kin.devplatform.data.Callback;
 import kin.devplatform.data.blockchain.BlockchainSource;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
+import kin.devplatform.data.order.OrderDataSource.Remote;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.JWTBodyPaymentConfirmationResult;
 import kin.devplatform.network.model.Offer.OfferType;
@@ -33,24 +33,25 @@ import kin.devplatform.util.ErrorUtil;
 
 class CreateExternalOrderCall extends Thread {
 
-	private static final long LISTEN_TO_PAYMENT_TIMEOUT_MILLIS = 15 * DateUtils.SECOND_IN_MILLIS;
 	private final OrderDataSource.Remote remote;
 	private final BlockchainSource blockchainSource;
 	private final String orderJwt;
 	private final ExternalOrderCallbacks externalOrderCallbacks;
 	private final EventLogger eventLogger;
+	private final long paymentListeningTimeout;
 
 	private OpenOrder openOrder;
 	private MainThreadExecutor mainThreadExecutor = new MainThreadExecutor();
 
-	CreateExternalOrderCall(@NonNull OrderDataSource.Remote remote, @NonNull BlockchainSource blockchainSource,
+	CreateExternalOrderCall(@NonNull Remote remote, @NonNull BlockchainSource blockchainSource,
 		@NonNull String orderJwt, @NonNull EventLogger eventLogger,
-		@NonNull ExternalOrderCallbacks externalOrderCallbacks) {
+		@NonNull ExternalOrderCallbacks externalOrderCallbacks, long paymentListeningTimeoutMillis) {
 		this.remote = remote;
 		this.blockchainSource = blockchainSource;
 		this.orderJwt = orderJwt;
 		this.eventLogger = eventLogger;
 		this.externalOrderCallbacks = externalOrderCallbacks;
+		this.paymentListeningTimeout = paymentListeningTimeoutMillis;
 	}
 
 	@Override
@@ -119,7 +120,7 @@ class CreateExternalOrderCall extends Thread {
 				blockchainSource.removePaymentObserver(paymentObserver);
 				getOrder(orderId);
 			}
-		}, LISTEN_TO_PAYMENT_TIMEOUT_MILLIS);
+		}, paymentListeningTimeout);
 		blockchainSource.addPaymentObservable(paymentObserver);
 	}
 

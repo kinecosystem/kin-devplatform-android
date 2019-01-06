@@ -341,111 +341,14 @@ public class OrderRepository implements OrderDataSource {
 			eventLogger.send(SpendOrderCreationRequested.create("", SpendOrderCreationRequested.Origin.EXTERNAL));
 		}
 		new ExternalSpendOrderCall(remoteData, blockchainSource, offerJwt, eventLogger,
-			new ExternalSpendOrderCallbacks() {
-				@Override
-				public void onOrderCreated(OpenOrder openOrder) {
-					cachedOpenOrder.postValue(openOrder);
-				}
-
-				@Override
-				public void onTransactionSent(final OpenOrder openOrder) {
-					submitOrder(openOrder, null, kin.devplatform.network.model.Origin.EXTERNAL,
-						new KinCallbackAdapter<Order>() {
-							@Override
-							public void onFailure(KinEcosystemException exception) {
-								handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
-							}
-						});
-					if (isPayToUser) {
-						eventLogger.send(PayToUserOrderCompletionSubmitted
-							.create(openOrder.getOfferId(), openOrder.getId(),
-								PayToUserOrderCompletionSubmitted.Origin.EXTERNAL));
-					} else {
-
-						eventLogger.send(SpendOrderCompletionSubmitted
-							.create(openOrder.getOfferId(), openOrder.getId(),
-								SpendOrderCompletionSubmitted.Origin.EXTERNAL));
-					}
-				}
-
-				@Override
-				public void onTransactionFailed(final OpenOrder openOrder, final KinEcosystemException exception) {
-					cancelOrder(openOrder.getOfferId(), openOrder.getId(), new KinCallback<Void>() {
-						@Override
-						public void onResponse(Void response) {
-							handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
-						}
-
-						@Override
-						public void onFailure(KinEcosystemException e) {
-							handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
-						}
-
-					});
-
-				}
-
-				@Override
-				public void onOrderConfirmed(String confirmationJwt, Order order) {
-					String offerID = "null";
-					String orderId = "null";
-					if (order != null) {
-						offerID = order.getOfferId();
-						orderId = order.getOrderId();
-					}
-					if (isPayToUser) {
-						eventLogger.send(PayToUserOrderCompleted
-							.create(offerID, orderId, PayToUserOrderCompleted.Origin.EXTERNAL,
-								Double.valueOf(order.getAmount())));
-					} else {
-						eventLogger.send(SpendOrderCompleted
-							.create(offerID, orderId, SpendOrderCompleted.Origin.EXTERNAL,
-								Double.valueOf(order.getAmount())));
-					}
-
-					if (callback != null) {
-						callback.onResponse(createOrderConfirmation(confirmationJwt));
-					}
-				}
-
-				@Override
-				public void onOrderFailed(KinEcosystemException exception, OpenOrder openOrder) {
-					if (openOrder != null) { // did not fail before submit
-						decrementCount();
-					}
-					handleOnFailure(exception, openOrder != null ? openOrder.getOfferId() : "null",
-						openOrder != null ? openOrder.getId() : "null");
-				}
-
-				private void handleOnFailure(KinEcosystemException exception, String offerId, String orderId) {
-					if (isPayToUser) {
-						eventLogger.send(PayToUserOrderFailed
-							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
-								PayToUserOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
-								exception.getMessage()));
-					} else {
-						eventLogger.send(SpendOrderFailed
-							.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
-								SpendOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
-								exception.getMessage()));
-					}
-
-					if (callback != null) {
-						callback.onFailure(exception);
-					}
-				}
-
-			}).start();
-	}
-
-	@Override
-	public void requestPayment(String offerJwt, final KinCallback<OrderConfirmation> callback) {
-		eventLogger
-			.send(EarnOrderCreationRequested.create(null, 0.0, "", EarnOrderCreationRequested.Origin.EXTERNAL));
-		new ExternalEarnOrderCall(remoteData, blockchainSource, offerJwt, eventLogger, new ExternalOrderCallbacks() {
+			LISTEN_TO_PAYMENT_TIMEOUT_MILLIS, new ExternalSpendOrderCallbacks() {
 			@Override
-			public void onOrderCreated(final OpenOrder openOrder) {
+			public void onOrderCreated(OpenOrder openOrder) {
 				cachedOpenOrder.postValue(openOrder);
+			}
+
+			@Override
+			public void onTransactionSent(final OpenOrder openOrder) {
 				submitOrder(openOrder, null, kin.devplatform.network.model.Origin.EXTERNAL,
 					new KinCallbackAdapter<Order>() {
 						@Override
@@ -453,9 +356,33 @@ public class OrderRepository implements OrderDataSource {
 							handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
 						}
 					});
-				eventLogger
-					.send(EarnOrderCompletionSubmitted.create(openOrder.getOfferId(), openOrder.getId(),
-						EarnOrderCompletionSubmitted.Origin.EXTERNAL));
+				if (isPayToUser) {
+					eventLogger.send(PayToUserOrderCompletionSubmitted
+						.create(openOrder.getOfferId(), openOrder.getId(),
+							PayToUserOrderCompletionSubmitted.Origin.EXTERNAL));
+				} else {
+
+					eventLogger.send(SpendOrderCompletionSubmitted
+						.create(openOrder.getOfferId(), openOrder.getId(),
+							SpendOrderCompletionSubmitted.Origin.EXTERNAL));
+				}
+			}
+
+			@Override
+			public void onTransactionFailed(final OpenOrder openOrder, final KinEcosystemException exception) {
+				cancelOrder(openOrder.getOfferId(), openOrder.getId(), new KinCallback<Void>() {
+					@Override
+					public void onResponse(Void response) {
+						handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
+					}
+
+					@Override
+					public void onFailure(KinEcosystemException e) {
+						handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
+					}
+
+				});
+
 			}
 
 			@Override
@@ -466,13 +393,19 @@ public class OrderRepository implements OrderDataSource {
 					offerID = order.getOfferId();
 					orderId = order.getOrderId();
 				}
-				eventLogger.send(EarnOrderCompleted
-					.create(offerID, orderId, EarnOrderCompleted.Origin.EXTERNAL, Double.valueOf(order.getAmount())));
+				if (isPayToUser) {
+					eventLogger.send(PayToUserOrderCompleted
+						.create(offerID, orderId, PayToUserOrderCompleted.Origin.EXTERNAL,
+							Double.valueOf(order.getAmount())));
+				} else {
+					eventLogger.send(SpendOrderCompleted
+						.create(offerID, orderId, SpendOrderCompleted.Origin.EXTERNAL,
+							Double.valueOf(order.getAmount())));
+				}
 
 				if (callback != null) {
 					callback.onResponse(createOrderConfirmation(confirmationJwt));
 				}
-
 			}
 
 			@Override
@@ -485,9 +418,17 @@ public class OrderRepository implements OrderDataSource {
 			}
 
 			private void handleOnFailure(KinEcosystemException exception, String offerId, String orderId) {
-				eventLogger
-					.send(EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
-						EarnOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()), exception.getMessage()));
+				if (isPayToUser) {
+					eventLogger.send(PayToUserOrderFailed
+						.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
+							PayToUserOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+							exception.getMessage()));
+				} else {
+					eventLogger.send(SpendOrderFailed
+						.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
+							SpendOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+							exception.getMessage()));
+				}
 
 				if (callback != null) {
 					callback.onFailure(exception);
@@ -495,6 +436,68 @@ public class OrderRepository implements OrderDataSource {
 			}
 
 		}).start();
+	}
+
+	@Override
+	public void requestPayment(String offerJwt, final KinCallback<OrderConfirmation> callback) {
+		eventLogger
+			.send(EarnOrderCreationRequested.create(null, 0.0, "", EarnOrderCreationRequested.Origin.EXTERNAL));
+		new ExternalEarnOrderCall(remoteData, blockchainSource, offerJwt, eventLogger, LISTEN_TO_PAYMENT_TIMEOUT_MILLIS,
+			new ExternalOrderCallbacks() {
+				@Override
+				public void onOrderCreated(final OpenOrder openOrder) {
+					cachedOpenOrder.postValue(openOrder);
+					submitOrder(openOrder, null, kin.devplatform.network.model.Origin.EXTERNAL,
+						new KinCallbackAdapter<Order>() {
+							@Override
+							public void onFailure(KinEcosystemException exception) {
+								handleOnFailure(exception, openOrder.getOfferId(), openOrder.getId());
+							}
+						});
+					eventLogger
+						.send(EarnOrderCompletionSubmitted.create(openOrder.getOfferId(), openOrder.getId(),
+							EarnOrderCompletionSubmitted.Origin.EXTERNAL));
+				}
+
+				@Override
+				public void onOrderConfirmed(String confirmationJwt, Order order) {
+					String offerID = "null";
+					String orderId = "null";
+					if (order != null) {
+						offerID = order.getOfferId();
+						orderId = order.getOrderId();
+					}
+					eventLogger.send(EarnOrderCompleted
+						.create(offerID, orderId, EarnOrderCompleted.Origin.EXTERNAL,
+							Double.valueOf(order.getAmount())));
+
+					if (callback != null) {
+						callback.onResponse(createOrderConfirmation(confirmationJwt));
+					}
+
+				}
+
+				@Override
+				public void onOrderFailed(KinEcosystemException exception, OpenOrder openOrder) {
+					if (openOrder != null) { // did not fail before submit
+						decrementCount();
+					}
+					handleOnFailure(exception, openOrder != null ? openOrder.getOfferId() : "null",
+						openOrder != null ? openOrder.getId() : "null");
+				}
+
+				private void handleOnFailure(KinEcosystemException exception, String offerId, String orderId) {
+					eventLogger
+						.send(EarnOrderFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerId, orderId,
+							EarnOrderFailed.Origin.EXTERNAL, String.valueOf(exception.getCode()),
+							exception.getMessage()));
+
+					if (callback != null) {
+						callback.onFailure(exception);
+					}
+				}
+
+			}).start();
 	}
 
 	private OrderConfirmation createOrderConfirmation(String confirmationJwt) {
