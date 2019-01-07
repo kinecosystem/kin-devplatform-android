@@ -114,6 +114,11 @@ public class AuthRepository implements AuthDataSource {
 	}
 
 	@Override
+	public AuthToken getCachedAuthToken() {
+		return cachedAuthToken;
+	}
+
+	@Override
 	public AuthToken getAuthTokenSync() {
 		if (cachedAuthToken != null) {
 			return cachedAuthToken;
