@@ -51,7 +51,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	private static final String APP_ID = "appID";
 	private static final String ORDER_ID = "orderID";
 	private static final String MEMO_FROM_SERVER_EXAMPLE = "1-" + APP_ID + "-" + ORDER_ID;
-	private static final String MEMO_GENERATION_EXAMPLE = " " + ORDER_ID;
+	private static final String MEMO_GENERATION_EXAMPLE = ORDER_ID;
 
 
 	@Mock
@@ -123,7 +123,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	@Test
 	public void set_app_id_memo_generated_correctly() {
 		blockchainSource.setAppID(APP_ID);
-		assertEquals(MEMO_GENERATION_EXAMPLE, blockchainSource.generateMemo(ORDER_ID));
+		assertEquals(MEMO_GENERATION_EXAMPLE, ORDER_ID);
 	}
 
 	@Test

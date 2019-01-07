@@ -7,18 +7,16 @@ import kin.sdk.migration.interfaces.IKinVersionProvider;
 
 public class KinVersionProvider implements IKinVersionProvider {
 
-    private static final String NEW_KIN_VERSION = "3";
-
     @Override
-    public boolean isNewKinSdkVersion(String appId) throws FailedToResolveSdkVersionException {
+    public SdkVersion getKinSdkVersion(String appId) throws FailedToResolveSdkVersionException {
         KinVersionApi kinVersionApi = new KinVersionApi();
-        boolean isNewKinSdkVersion;
+        SdkVersion sdkVersion;
         try {
             String blockchainVersion = kinVersionApi.getBlockchainVersion(appId);
-            isNewKinSdkVersion = blockchainVersion.equals(NEW_KIN_VERSION);
+            sdkVersion = SdkVersion.get(blockchainVersion);
         } catch (ApiException e) {
             throw new FailedToResolveSdkVersionException(e);
         }
-        return isNewKinSdkVersion;
+        return sdkVersion;
     }
 }

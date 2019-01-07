@@ -28,6 +28,7 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.network.model.Offer.OfferType;
+import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.exception.CreateAccountException;
 import kin.sdk.migration.exception.OperationFailedException;
@@ -145,7 +146,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		} else if (offerType == OfferType.PAY_TO_USER) {
 			eventLogger.send(PayToUserTransactionBroadcastToBlockchainSubmitted.create(offerID, orderID));
 		}
-		account.sendTransaction(publicAddress, amount, generateMemo(orderID)).run(
+		account.sendTransaction(publicAddress, amount, new WhitelistService(orderID), orderID).run(
 				new ResultCallback<ITransactionId>() {
 					@Override
 					public void onResult(ITransactionId result) {
@@ -176,13 +177,6 @@ public class BlockchainSourceImpl implements BlockchainSource {
 					}
 				});
 	}
-
-	@SuppressLint("DefaultLocale")
-	@VisibleForTesting
-	String generateMemo(@NonNull final String orderID) {
-		return " " + orderID;
-	}
-
 
 	private void initBalance() {
 		balance.postValue(getBalance());

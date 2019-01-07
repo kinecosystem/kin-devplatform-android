@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import java.util.UUID;
 
+import kin.core.exception.AccountNotActivatedException;
 import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.accountmanager.AccountManager.AccountState;
 import kin.devplatform.accountmanager.AccountManagerImpl;
@@ -32,7 +33,6 @@ import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.KinVersionProvider;
 import kin.devplatform.network.model.SignInData;
-import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.MigrationNetworkInfo;
@@ -123,7 +123,7 @@ public final class KinEcosystemInitiator {
 //				}
 
 			MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId, newNetworkUrl, newNetworkId, issuer);
-			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(), new WhitelistService(), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
+			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
 			try {
 				handleMigration(context, appId, eventLogger, migrationManager, withLogin, signInData, loginCallback);
 			} catch (MigrationInProcessException e) {
@@ -134,11 +134,10 @@ public final class KinEcosystemInitiator {
 
 	private void handleMigration(final Context context, final String appId, final EventLogger eventLogger, MigrationManager migrationManager,
 								 final boolean withLogin, final SignInData signInData, final KinCallback<Void> loginCallback) throws MigrationInProcessException {
-		migrationManager.startMigration(new MigrationManagerListener() { // TODO: 01/01/2019 handle the case of process restart
+		migrationManager.start(new MigrationManagerListener() {
 			@Override
 			public void onMigrationStart() {
-				int i = 0;;
-				i++;
+				// TODO: 06/01/2019 when implement the features we talked about with Ayelet then add here the onMigrationStarted for the external developers to use.
 			}
 
 			@Override
@@ -184,7 +183,8 @@ public final class KinEcosystemInitiator {
 
 			@Override
 			public void onError(Exception e) {
-				// TODO: 01/01/2019 need to handle this case, maybe use login callback because at any case we should tell developers about error or completion.
+				// TODO: 06/01/2019 when implement the features we talked about with Ayelet then add here the onError for the external developers to use.
+				// TODO: 06/01/2019 Also add the meaniningful error that we talked about.
 			}
 		});
 	}

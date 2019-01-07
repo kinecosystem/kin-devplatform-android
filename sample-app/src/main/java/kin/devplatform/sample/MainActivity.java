@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 	private Button showPublicAddressButton;
 	private Button payToUserButton;
 	private Button getOrderConfirmationButton;
+	private boolean isInitialized;
 
 	private TextView publicAddressTextArea;
 	private KinCallback<OrderConfirmation> nativeSpendOrderConfirmationCallback;
@@ -143,7 +144,8 @@ public class MainActivity extends AppCompatActivity {
 				Toast.makeText(MainActivity.this, "Starting SDK succeeded", Toast.LENGTH_LONG).show();
 				addNativeSpendOffer(nativeSpendOffer);
 				addNativeOfferClickedObserver();
-                addBalanceObserver(); // TODO: 02/01/2019 check if here is ok
+                addBalanceObserver();
+				isInitialized = true;
 			}
 
 			@Override
@@ -206,7 +208,10 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-//		addBalanceObserver(); // TODO: 02/01/2019 need to do it only if the sdk is initailized
+		// only if sdk is initialized then add the observer.
+		if (isInitialized) {
+			addBalanceObserver();
+		}
 	}
 
 	@Override
