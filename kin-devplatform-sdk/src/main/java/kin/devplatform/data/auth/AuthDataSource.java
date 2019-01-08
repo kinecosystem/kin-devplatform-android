@@ -28,6 +28,9 @@ public interface AuthDataSource {
 
 	void getAuthToken(@Nullable final KinCallback<AuthToken> callback);
 
+	@Nullable
+	AuthToken getCachedAuthToken();
+
 	AuthToken getAuthTokenSync();
 
 	boolean isActivated();
