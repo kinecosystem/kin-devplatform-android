@@ -157,7 +157,7 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 			final String orderId = openOrder.getId();
 			eventLogger.send(EarnOrderCompletionSubmitted
 				.create(offerID, orderId, EarnOrderCompletionSubmitted.Origin.MARKETPLACE));
-			orderRepository.submitOrder(offerID, result, orderId, kin.devplatform.network.model.Origin.MARKETPLACE,
+			orderRepository.submitOrder(openOrder, result, kin.devplatform.network.model.Origin.MARKETPLACE,
 				new KinCallback<Order>() {
 					@Override
 					public void onResponse(Order response) {

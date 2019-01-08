@@ -1,8 +1,6 @@
 package kin.devplatform;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import java.util.UUID;
 
@@ -44,7 +42,6 @@ public final class KinEcosystemInitiator {
 
 	private static final String TAG = KinEcosystemInitiator.class.getSimpleName();
 	private static final String KIN_ECOSYSTEM_STORE_PREFIX_KEY = "kinecosystem_store";
-	private static final int ACCOUNT_CREATION_TIME_OUT_MILLIS = 30000;
 	private static KinEcosystemInitiator instance;
 
 	private final ExecutorsUtil executorsUtil;
@@ -223,29 +220,18 @@ public final class KinEcosystemInitiator {
 
 	private void handleAccountNotCreatedState(final AccountManager accountManager,
 		final KinCallback<Void> loginCallback) {
-		final Handler handler = new Handler(Looper.getMainLooper());
 		final Observer<Integer> accountStateObserver = new Observer<Integer>() {
 			@Override
 			public void onChanged(@AccountState Integer value) {
 				if (value == AccountManager.ERROR) {
-					handler.removeCallbacksAndMessages(null);
 					accountManager.removeAccountStateObserver(this);
 					fireStartError(accountManager.getError(), loginCallback);
 				} else if (value == AccountManager.CREATION_COMPLETED) {
-					handler.removeCallbacksAndMessages(null);
 					accountManager.removeAccountStateObserver(this);
 					activateAccount(loginCallback);
 				}
 			}
 		};
-
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				accountManager.removeAccountStateObserver(accountStateObserver);
-				fireStartError(ErrorUtil.createCreateAccountTimeoutException(), loginCallback);
-			}
-		}, ACCOUNT_CREATION_TIME_OUT_MILLIS);
 		accountManager.addAccountStateObserver(accountStateObserver);
 		accountManager.start();
 	}

@@ -1,20 +1,22 @@
 package kin.devplatform.accountmanager;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.text.format.DateUtils;
 import kin.devplatform.KinCallback;
 import kin.devplatform.Log;
 import kin.devplatform.Logger;
 import kin.devplatform.base.ObservableData;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
-import kin.devplatform.bi.events.StellarAccountCreationRequested;
 import kin.devplatform.bi.events.WalletCreationSucceeded;
 import kin.devplatform.data.auth.AuthDataSource;
 import kin.devplatform.data.blockchain.BlockchainSource;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.KinEcosystemException;
-import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.exception.AccountNotActivatedException;
 import kin.sdk.migration.interfaces.IEventListener;
 import kin.sdk.migration.interfaces.IKinAccount;
 import kin.sdk.migration.interfaces.IListenerRegistration;
@@ -22,6 +24,7 @@ import kin.sdk.migration.interfaces.IListenerRegistration;
 public class AccountManagerImpl implements AccountManager {
 
 	private static final String TAG = AccountManagerImpl.class.getSimpleName();
+	private static final long ACCOUNT_CREATION_TIME_OUT_MILLIS = 15 * DateUtils.SECOND_IN_MILLIS;
 
 	private static volatile AccountManagerImpl instance;
 
@@ -109,36 +112,10 @@ public class AccountManagerImpl implements AccountManager {
 			this.accountState.postValue(accountState);
 			switch (accountState) {
 				case REQUIRE_CREATION:
-					eventLogger.send(StellarAccountCreationRequested.create());
-					Logger.log(new Log().withTag(TAG).put("setAccountState", "REQUIRE_CREATION"));
-					// Trigger account creation from server side.
-					authRepository.getAuthToken(new KinCallback<AuthToken>() {
-						@Override
-						public void onResponse(AuthToken response) {
-							setAccountState(PENDING_CREATION);
-						}
-
-						@Override
-						public void onFailure(KinEcosystemException error) {
-							instance.error = error;
-							setAccountState(ERROR);
-						}
-					});
+					handleRequiresCreationState();
 					break;
 				case PENDING_CREATION:
-					Logger.log(new Log().withTag(TAG).put("setAccountState", "PENDING_CREATION"));
-					// Start listen for account creation on the blockchain side.
-					if (accountCreationRegistration != null) {
-						removeAccountCreationRegistration();
-					}
-					accountCreationRegistration = getKinAccount()
-						.addAccountCreationListener(new IEventListener<Void>() {
-							@Override
-							public void onEvent(Void data) {
-								removeAccountCreationRegistration();
-								setAccountState(REQUIRE_TRUSTLINE);
-							}
-						});
+					handlePendingCreationState();
 					break;
 				case REQUIRE_TRUSTLINE:
 					Logger.log(new Log().withTag(TAG).put("setAccountState", "REQUIRE_TRUSTLINE"));
@@ -168,6 +145,83 @@ public class AccountManagerImpl implements AccountManager {
 
 			}
 		}
+	}
+
+	private void handleRequiresCreationState() {
+		eventLogger.send(StellarAccountCreationRequested.create());
+		Logger.log(new Log().withTag(TAG).put("setAccountState", "REQUIRE_CREATION"));
+		// Trigger account creation from server side, if not triggered already
+		if (authRepository.getCachedAuthToken() == null) {
+			authRepository.getAuthToken(new KinCallback<AuthToken>() {
+				@Override
+				public void onResponse(AuthToken response) {
+					setAccountState(PENDING_CREATION);
+				}
+
+				@Override
+				public void onFailure(KinEcosystemException error) {
+					instance.error = error;
+					setAccountState(ERROR);
+				}
+			});
+		} else {
+			setAccountState(PENDING_CREATION);
+		}
+	}
+
+	private void handlePendingCreationState() {
+		Logger.log(new Log().withTag(TAG).put("setAccountState", "PENDING_CREATION"));
+		// Start listen for account creation on the blockchain side.
+		final Handler handler = new Handler(Looper.getMainLooper());
+		if (accountCreationRegistration != null) {
+			removeAccountCreationRegistration();
+		}
+
+		prepareAccountCreationTimeoutFallback(handler);
+		accountCreationRegistration = getKinAccount().addAccountCreationListener(new IEventListener<Void>() {
+				@Override
+				public void onEvent(Void data) {
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							removeAccountCreationRegistration();
+							handler.removeCallbacksAndMessages(null);
+							setAccountState(REQUIRE_TRUSTLINE);
+						}
+					});
+				}
+			});
+	}
+
+	private void prepareAccountCreationTimeoutFallback(final Handler handler) {
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				Logger.log(new Log().withTag(TAG).put("PENDING_CREATION", "failed with timeout, querying blockchain"));
+				removeAccountCreationRegistration();
+				handler.removeCallbacksAndMessages(null);
+				//in case of SSE listening timeout, rely on direct call to blockchain for checking account creation
+				getKinAccount().getBalance().run(new IResultCallback<kin.core.Balance>() {
+					@Override
+					public void onResult(kin.core.Balance result) {
+						//result means we have account created successfully on kin blockchain
+						setAccountState(REQUIRE_TRUSTLINE);
+					}
+
+					@Override
+					public void onError(Exception e) {
+						if (e instanceof AccountNotActivatedException) {
+							//Account not activated means that we have a created account but no trustline, this is the
+							//expected result as we should establish trustline in the next state
+							setAccountState(REQUIRE_TRUSTLINE);
+						} else {
+							instance.error = ErrorUtil.createCreateAccountTimeoutException(e);
+							setAccountState(ERROR);
+						}
+					}
+				});
+			}
+		}, ACCOUNT_CREATION_TIME_OUT_MILLIS);
 	}
 
 	@Override

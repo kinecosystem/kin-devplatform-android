@@ -170,9 +170,9 @@ public class ErrorUtil {
 	}
 
 	@SuppressLint("DefaultLocale")
-	public static BlockchainException createCreateAccountTimeoutException() {
+	public static BlockchainException createCreateAccountTimeoutException(Exception e) {
 		return new BlockchainException(BlockchainException.ACCOUNT_CREATION_TIMEOUT,
-			ACCOUNT_CREATION_TIMEOUT, null);
+			ACCOUNT_CREATION_TIMEOUT, e);
 	}
 
 	public static String getPrintableStackTrace(Throwable t) {
