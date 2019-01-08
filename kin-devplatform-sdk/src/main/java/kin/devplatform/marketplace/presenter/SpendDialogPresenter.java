@@ -2,7 +2,6 @@ package kin.devplatform.marketplace.presenter;
 
 import android.os.Handler;
 import java.math.BigDecimal;
-import kin.core.exception.OperationFailedException;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.BaseDialogPresenter;
 import kin.devplatform.bi.EventLogger;
@@ -26,6 +25,7 @@ import kin.devplatform.network.model.OfferInfo;
 import kin.devplatform.network.model.OfferInfo.Confirmation;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.exception.OperationFailedException;
 
 
 public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> implements ISpendDialogPresenter {

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import java.util.UUID;
 
-import kin.core.exception.AccountNotActivatedException;
 import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.accountmanager.AccountManager.AccountState;
 import kin.devplatform.accountmanager.AccountManagerImpl;
