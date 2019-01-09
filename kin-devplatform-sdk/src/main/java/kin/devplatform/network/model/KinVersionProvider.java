@@ -24,11 +24,11 @@ public class KinVersionProvider implements IKinVersionProvider {
             migrationEventsListener.onVersionCheckStart();
             String blockchainVersion = kinVersionApi.getBlockchainVersion(appId);
             sdkVersion = SdkVersion.get(blockchainVersion);
+            migrationEventsListener.onVersionReceived(sdkVersion);
         } catch (ApiException e) {
             migrationEventsListener.onVersionCheckFailed(e);
             throw new FailedToResolveSdkVersionException(e);
         }
-        migrationEventsListener.onVersionReceived(sdkVersion);
         return sdkVersion;
     }
 }

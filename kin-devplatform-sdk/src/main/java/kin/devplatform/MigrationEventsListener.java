@@ -28,7 +28,7 @@ public class MigrationEventsListener implements IMigrationEventsListener {
 
     @Override
     public void onSDKSelected(boolean isNewSDK, String source) {
-        Log.i(TAG, "onSDKSelected: " + isNewSDK + " " + source);
+        Log.i(TAG, "onSDKSelected: isNewSDK=" + isNewSDK + " source=" + source);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class MigrationEventsListener implements IMigrationEventsListener {
 
     @Override
     public void onAccountBurnFailed(Exception exception, BigDecimal balance) {
-        Log.e(TAG, "onAccountBurnFailed: " + exception + " " + balance.toPlainString() );
+        Log.e(TAG, "onAccountBurnFailed: " + exception + " balance=" + balance.toPlainString() );
     }
 
     @Override
@@ -58,6 +58,6 @@ public class MigrationEventsListener implements IMigrationEventsListener {
 
     @Override
     public void onMigrationSuccess(BigDecimal balance) {
-        Log.i(TAG, "onMigrationSuccess: ");
+        Log.i(TAG, "onMigrationSuccess: balance=" + balance.toPlainString());
     }
 }
