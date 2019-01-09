@@ -74,7 +74,7 @@ public class Environment implements KinEnvironment {
                     "http://horizon-testnet.kininfrastructure.com",
                     "Kin Testnet ; December 2018",
                     "GBC3SG6NGTSZ2OMH3FFGB7UVRQWILW367U4GSOOF4TFSZONV42UJXUH7",
-                    "http://10.4.59.1:3000/v1",
+                    "https://api.developers.kinecosystem.com/v1",
                     "https://s3.amazonaws.com/assets.kinplayground.com/web-offers/cards-based/index.html",
                     "https://kin-bi.appspot.com/devp_play_");
         }

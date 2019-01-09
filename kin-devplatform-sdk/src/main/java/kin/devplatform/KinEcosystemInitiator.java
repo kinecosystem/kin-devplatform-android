@@ -117,9 +117,9 @@ public final class KinEcosystemInitiator {
 //				protected String getIssuerAccountId() {
 //					return issuer;
 //				}
-
+            MigrationEventsListener migrationEventsListener = new MigrationEventsListener();
 			MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId, newNetworkUrl, newNetworkId, issuer);
-			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
+			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(migrationEventsListener), KIN_ECOSYSTEM_STORE_PREFIX_KEY, migrationEventsListener);
 			try {
 				handleMigration(context, appId, eventLogger, migrationManager, withLogin, signInData, loginCallback);
 			} catch (MigrationInProcessException e) {

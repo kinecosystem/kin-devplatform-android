@@ -28,7 +28,7 @@ public class KinVersionProvider implements IKinVersionProvider {
             migrationEventsListener.onVersionCheckFailed(e);
             throw new FailedToResolveSdkVersionException(e);
         }
-        migrationEventsListener.onVesrsionReceived(sdkVersion);
+        migrationEventsListener.onVersionReceived(sdkVersion);
         return sdkVersion;
     }
 }
