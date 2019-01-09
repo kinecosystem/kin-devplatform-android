@@ -176,9 +176,7 @@ public class AccountManagerImpl implements AccountManager {
 		Logger.log(new Log().withTag(TAG).put("setAccountState", "PENDING_CREATION"));
 		// Start listen for account creation on the blockchain side.
 		final Handler handler = new Handler(Looper.getMainLooper());
-		if (accountCreationRegistration != null) {
-			removeAccountCreationRegistration();
-		}
+		removeAccountCreationRegistration();
 
 		prepareAccountCreationTimeoutFallback(handler);
 		accountCreationRegistration = getKinAccount().blockchainEvents()
@@ -261,8 +259,10 @@ public class AccountManagerImpl implements AccountManager {
 	}
 
 	private void removeAccountCreationRegistration() {
-		accountCreationRegistration.remove();
-		accountCreationRegistration = null;
+		if (accountCreationRegistration != null) {
+			accountCreationRegistration.remove();
+			accountCreationRegistration = null;
+		}
 	}
 
 	private boolean isValidState(int currentState, int newState) {
