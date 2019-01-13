@@ -82,6 +82,7 @@ public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> impl
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
+				// TODO: 13/01/2019 check for not same blockchain versions and act accordingly
 				showToast("Oops something went wrong...");
 				eventLogger.send(SpendOrderCreationFailed
 					.create(ErrorUtil.getPrintableStackTrace(exception), offer.getId(),
@@ -130,7 +131,7 @@ public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> impl
 			final String addressee = offer.getBlockchainData().getRecipientAddress();
 			final String orderID = openOrder.getId();
 
-			submitOrder(openOrder);
+			submitOrder(openOrder); // TODO: 13/01/2019 no callback here. need to check what is this case and maybe handle in case of not same blockchain versions
 			sendTransaction(addressee, amount, orderID);
 		}
 	}

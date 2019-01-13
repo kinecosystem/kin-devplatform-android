@@ -26,6 +26,7 @@ import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.SignInData.SignInTypeEnum;
 import kin.devplatform.splash.view.SplashViewActivity;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.KinSdkVersion;
 
 
 public class Kin {
@@ -35,7 +36,8 @@ public class Kin {
 	}
 
 	/**
-	 * @deprecated use {@link #start(Context, String, String, KinEnvironment, KinCallback)} instead.
+	 * @deprecated use {@link #start(Context, String, String, KinEnvironment, KinCallback, KinMigrationCallback)} instead.
+	 * or {@link #start(Context, String, String, KinEnvironment, KinCallback)} instead.
 	 */
 	@Deprecated
 	public static void start(@NonNull Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment)
@@ -47,8 +49,30 @@ public class Kin {
 
 			@Override
 			public void onFailure(KinEcosystemException error) {
+
+			}
+		}, new KinMigrationCallback() {
+			@Override
+			public void onStart() {
+
+			}
+
+			@Override
+			public void onFinish() {
+
+			}
+
+			@Override
+			public void onError(Exception e) {
+
 			}
 		});
+	}
+
+	public static void start(Context appContext, String appId, @NonNull String jwt, @NonNull KinEnvironment environment,
+							 KinCallback<Void> kinCallback) {
+		SignInData signInData = getJwtSignInData(jwt);
+		KinEcosystemInitiator.getInstance().externalInit(appContext, appId, environment, signInData, kinCallback, null);
 	}
 
 	/**
@@ -66,12 +90,12 @@ public class Kin {
 	 * @param appId a 4 character string which represent the application id which will be added to each transaction.
      *              <br><b>Note:</b> appId must contain only upper and/or lower case letters and/or digits and that the total string length is exactly 4.
      *              For example 1234 or 2ab3 or bcda, etc.</br>
-	 * @param callback success/failure callback
+	 * @param kinCallback success/failure callback
 	 */
 	public static void start(Context appContext, String appId, @NonNull String jwt, @NonNull KinEnvironment environment,
-							 KinCallback<Void> callback) {
+							KinCallback<Void> kinCallback, KinMigrationCallback migrationProcessCallback) {
 		SignInData signInData = getJwtSignInData(jwt);
-		KinEcosystemInitiator.getInstance().externalInit(appContext, appId, environment, signInData, callback);
+		KinEcosystemInitiator.getInstance().externalInit(appContext, appId, environment, signInData, kinCallback, migrationProcessCallback);
 	}
 
 	private static SignInData getJwtSignInData(@NonNull final String jwt) {
@@ -141,6 +165,15 @@ public class Kin {
 	public static void getBalance(@NonNull final KinCallback<Balance> callback) throws ClientException {
 		checkInitialized();
 		BlockchainSourceImpl.getInstance().getBalance(callback);
+	}
+
+	/**
+	 * @return The version of the sdk.
+	 * @throws ClientException - sdk not initialized or account not logged in.
+	 */
+	public static KinSdkVersion getKinSdkVersion() throws ClientException {
+		checkInitialized();
+		return BlockchainSourceImpl.getInstance().getKinSdkVersion();
 	}
 
 	/**

@@ -2,6 +2,8 @@ package kin.devplatform;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.util.UUID;
 
 import kin.devplatform.accountmanager.AccountManager;
@@ -67,7 +69,10 @@ public final class KinEcosystemInitiator {
 	 */
 	public void internalInit(Context context) {
 		try {
-			init(context, null, null, false, null, null);
+			init(context, null, null, false, null, null, null);
+			// TODO: 10/01/2019 1. change all UI with progress bars and stuff
+			// TODO: 10/01/2019 2. init and get last KinClient without starting the migration
+			// TODO: 10/01/2019 3. fuck it all
 		} catch (BlockchainException e) {
 			EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
 				ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()), // TODO: 02/01/2019 why not firing some error? and why print the stack trace
@@ -81,21 +86,25 @@ public final class KinEcosystemInitiator {
 	 * Uses for external (public API) initialization and jwt login.
 	 */
 	public void externalInit(Context context, String appId, KinEnvironment environment, @NonNull SignInData signInData,
-							 final KinCallback<Void> loginCallback) {
+							 final KinCallback<Void> loginCallback, @Nullable final KinMigrationCallback migrationProcessCallback) {
 		if (isInitialized && isLoggedIn) {
 			fireStartCompleted(loginCallback);
 			return;
 		}
 
 		try {
-			init(context, appId, environment, true, signInData, loginCallback);
+			init(context, appId, environment, true, signInData, loginCallback, migrationProcessCallback);
+			// If initialized then do the login and if not then will do login at end of init.
+			if (isInitialized) {
+				login(signInData, loginCallback);
+			}
 		} catch (BlockchainException e) {
 			fireStartError(e, loginCallback);
 		}
 	}
 
 	private void init(Context context, String appId, KinEnvironment environment, boolean withLogin,
-					  SignInData signInData, KinCallback<Void> loginCallback) throws BlockchainException {
+					  SignInData signInData, KinCallback<Void> loginCallback, KinMigrationCallback migrationCallback) throws BlockchainException {
 		if (!isInitialized) {
 			ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
 			if (environment != null) {
@@ -111,34 +120,30 @@ public final class KinEcosystemInitiator {
 			final String newNetworkId = kinEnvironment.getNewBlockchainPassphrase();
 			final String issuer = kinEnvironment.getIssuer();
 
-			// TODO: 01/01/2019 is it ok to use issuer like i did or like they did in the past like this:
-//			new ServiceProvider(networkUrl, networkId) {
-//				@Override
-//				protected String getIssuerAccountId() {
-//					return issuer;
-//				}
-
 			MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId, newNetworkUrl, newNetworkId, issuer);
 			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
 			try {
-				handleMigration(context, appId, eventLogger, migrationManager, withLogin, signInData, loginCallback);
+				handleMigration(context, appId, eventLogger, migrationManager, withLogin, signInData, loginCallback, migrationCallback);
 			} catch (MigrationInProcessException e) {
 				Logger.log(new Log().priority(Log.WARN).withTag(TAG).text("Start migration when it was already in migration process"));
 			}
 		}
 	}
 
-	private void handleMigration(final Context context, final String appId, final EventLogger eventLogger, MigrationManager migrationManager,
-								 final boolean withLogin, final SignInData signInData, final KinCallback<Void> loginCallback) throws MigrationInProcessException {
+	private void handleMigration(final Context context, final String appId, final EventLogger eventLogger, final MigrationManager migrationManager,
+								 final boolean withLogin, final SignInData signInData,
+								 final KinCallback<Void> loginCallback, final KinMigrationCallback migrationCallback) throws MigrationInProcessException {
 		migrationManager.start(new MigrationManagerListener() {
 			@Override
 			public void onMigrationStart() {
+				migrationCallback.onStart();
 				// TODO: 06/01/2019 when implement the features we talked about with Ayelet then add here the onMigrationStarted for the external developers to use.
 			}
 
 			@Override
 			public void onReady(IKinClient kinClient) {
 				try {
+					migrationCallback.onFinish();
 					String applicationId = appId;
 					BlockchainSourceImpl.init(eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
 					if (applicationId != null) {
@@ -179,8 +184,9 @@ public final class KinEcosystemInitiator {
 
 			@Override
 			public void onError(Exception e) {
+				migrationCallback.onError(e);
 				// TODO: 06/01/2019 when implement the features we talked about with Ayelet then add here the onError for the external developers to use.
-				// TODO: 06/01/2019 Also add the meaniningful error that we talked about.
+				// TODO: 06/01/2019 Also add the meaningful error that we talked about.
 			}
 		});
 	}

@@ -94,6 +94,7 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
+				// TODO: 13/01/2019 check for not same blockchain versions and act accordingly
 				showToast(SOMETHING_WENT_WRONG);
 				eventLogger
 					.send(EarnOrderCreationFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerID,

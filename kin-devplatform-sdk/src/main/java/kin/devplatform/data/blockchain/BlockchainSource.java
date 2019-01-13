@@ -9,7 +9,7 @@ import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
-import kin.devplatform.network.model.Offer.OfferType;
+import kin.sdk.migration.KinSdkVersion;
 import kin.sdk.migration.exception.OperationFailedException;
 import kin.sdk.migration.interfaces.IKinAccount;
 import kin.devplatform.network.model.OpenOrder;
@@ -51,6 +51,11 @@ public interface BlockchainSource {
 	 * Get balance from network
 	 */
 	void getBalance(@Nullable final KinCallback<Balance> callback);
+
+	/**
+	 * @return true if the account is on the new kin blockchain, meaning we are using the new kin sdk.
+	 */
+	KinSdkVersion getKinSdkVersion();
 
 	/**
 	 * Reconnect the balance connection, due to connection lose.

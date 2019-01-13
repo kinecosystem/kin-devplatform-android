@@ -31,6 +31,7 @@ import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.KinSdkVersion;
 import kin.sdk.migration.exception.CreateAccountException;
 import kin.sdk.migration.exception.OperationFailedException;
 import kin.sdk.migration.interfaces.IBalance;
@@ -232,6 +233,11 @@ public class BlockchainSourceImpl implements BlockchainSource {
 				Logger.log(new Log().withTag(TAG).priority(Log.ERROR).put("getBalance onError", e));
 			}
 		});
+	}
+
+	@Override
+	public KinSdkVersion getKinSdkVersion() {
+		return account.getKinSdkVersion();
 	}
 
 	@Override

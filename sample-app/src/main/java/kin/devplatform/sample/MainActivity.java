@@ -25,6 +25,7 @@ import java.util.Random;
 import kin.devplatform.Environment;
 import kin.devplatform.Kin;
 import kin.devplatform.KinCallback;
+import kin.devplatform.KinMigrationCallback;
 import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.OrderConfirmation;
@@ -141,10 +142,11 @@ public class MainActivity extends AppCompatActivity {
 		Kin.start(getApplicationContext(), "test", jwt, Environment.getPlayground(), new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
+				// TODO: 09/01/2019 maybe remove the progress bar that we added when migration was started?
 				Toast.makeText(MainActivity.this, "Starting SDK succeeded", Toast.LENGTH_LONG).show();
 				addNativeSpendOffer(nativeSpendOffer);
 				addNativeOfferClickedObserver();
-                addBalanceObserver();
+				addBalanceObserver();
 				isInitialized = true;
 			}
 
@@ -152,6 +154,21 @@ public class MainActivity extends AppCompatActivity {
 			public void onFailure(KinEcosystemException error) {
 				Toast.makeText(MainActivity.this, "Starting SDK failed", Toast.LENGTH_LONG).show();
 				Log.d(TAG, "Kin.start() failed with =  " + ErrorUtil.getPrintableStackTrace(error));
+			}
+		}, new KinMigrationCallback() {
+			@Override
+			public void onStart() {
+				// TODO: 09/01/2019 use some progress bar.
+			}
+
+			@Override
+			public void onFinish() {
+				// TODO: 09/01/2019 maybe do something here?
+			}
+
+			@Override
+			public void onError(Exception e) {
+				// TODO: 09/01/2019 Depends on the exception maybe show some error dialog with the message from the exception
 			}
 		});
 	}
