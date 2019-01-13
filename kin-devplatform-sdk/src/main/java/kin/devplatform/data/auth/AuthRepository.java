@@ -31,23 +31,21 @@ public class AuthRepository implements AuthDataSource {
 
 	private SignInData cachedSignInData;
 	private AuthToken cachedAuthToken;
-	private String appId;
 
 	private AuthRepository(@NonNull AuthDataSource.Local local,
-		@NonNull AuthDataSource.Remote remote, @NonNull String appId) {
+		@NonNull AuthDataSource.Remote remote) {
 		this.localData = local;
 		this.remoteData = remote;
 		this.cachedSignInData = local.getSignInData();
 		this.cachedAuthToken = local.getAuthTokenSync();
-		this.appId = appId;
 	}
 
 	public static void init(@NonNull Local localData,
-							@NonNull Remote remoteData, @NonNull String appId) {
+							@NonNull Remote remoteData) {
 		if (instance == null) {
 			synchronized (AuthRepository.class) {
 				if (instance == null) {
-					instance = new AuthRepository(localData, remoteData, appId);
+					instance = new AuthRepository(localData, remoteData);
 				}
 			}
 		}
@@ -62,7 +60,6 @@ public class AuthRepository implements AuthDataSource {
 		cachedSignInData = signInData;
 		localData.setSignInData(signInData);
 		remoteData.setSignInData(signInData);
-		setAppId(signInData.getAppId());
 	}
 
 	@Override
@@ -85,8 +82,8 @@ public class AuthRepository implements AuthDataSource {
 
 	@Override
 	public String getAppID() {
-		loadCachedAppIDIfNeeded();
-		return appId;
+		loadCachedAppIDIfNeeded(); // TODO: 13/01/2019 do we still need this method?
+		return cachedSignInData.getAppId();
 	}
 
 	@Override
@@ -105,11 +102,11 @@ public class AuthRepository implements AuthDataSource {
 	}
 
 	private void loadCachedAppIDIfNeeded() {
-		if (TextUtils.isEmpty(appId)) {
+		if (TextUtils.isEmpty(cachedSignInData.getAppId())) {
 			localData.getAppId(new Callback<String, Void>() {
 				@Override
 				public void onResponse(String appID) {
-					setAppId(appID);
+
 				}
 
 				@Override
@@ -141,6 +138,7 @@ public class AuthRepository implements AuthDataSource {
 					}
 				} catch (ClientException e) {
 					Logger.log(new Log().priority(ERROR).withTag(TAG).text("incorrect app id"));
+					return null;
 				}
 				return cachedAuthToken;
 			} else {
@@ -178,16 +176,14 @@ public class AuthRepository implements AuthDataSource {
 	public void setAuthToken(@NonNull AuthToken authToken) throws ClientException {
 		cachedAuthToken = authToken;
 		localData.setAuthToken(authToken);
-		if (appId == null) { // TODO: 31/12/2018 maybe if somehow it is null then we need to throw exception instead?
-			setAppId(authToken.getAppID());
-		} else if (!appId.equals(authToken.getAppID())) {
+		if (!cachedSignInData.getAppId().equals(authToken.getAppID())) {
 			throw ErrorUtil.getClientException(INCORRECT_APP_ID, null);
 		}
 	}
 
 	@Override
 	public void getAuthToken(@Nullable final KinCallback<AuthToken> callback) {
-		remoteData.getAuthToken(new Callback<AuthToken, Exception>() {
+		remoteData.getAuthToken(new Callback<AuthToken, ApiException>() {
 			@Override
 			public void onResponse(AuthToken authToken) {
 				try {
@@ -196,28 +192,18 @@ public class AuthRepository implements AuthDataSource {
 						callback.onResponse(cachedAuthToken);
 					}
 				} catch (ClientException e) {
-					onFailure(e);
+					onFailure(new ApiException(INCORRECT_APP_ID, e));
 				}
 
 			}
 
 			@Override
-			public void onFailure(Exception exception) {
+			public void onFailure(ApiException exception) {
 				if (callback != null) {
-					if (exception instanceof ApiException) { // TODO: 31/12/2018 can change back to ApiException but feels like app id errors should be conider as ClientException.
-						callback.onFailure(ErrorUtil.fromApiException((ApiException) exception));
-					} else if (exception instanceof ClientException){
-						callback.onFailure((ClientException) exception);
-					} else {
-						onFailure(ErrorUtil.fromApiException(null));
-					}
+					callback.onFailure(ErrorUtil.fromApiException(exception));
 				}
 			}
 		});
-	}
-
-	private void setAppId(@Nullable String appId) {
-		this.appId = appId;
 	}
 
 	@Override
@@ -227,7 +213,7 @@ public class AuthRepository implements AuthDataSource {
 
 	@Override
 	public void activateAccount(@NonNull final KinCallback<Void> callback) {
-		remoteData.activateAccount(new Callback<AuthToken, Exception>() {
+		remoteData.activateAccount(new Callback<AuthToken, ApiException>() {
 			@Override
 			public void onResponse(AuthToken response) {
 				localData.activateAccount();
@@ -237,20 +223,14 @@ public class AuthRepository implements AuthDataSource {
 						callback.onResponse(null);
 					}
 				} catch (ClientException e) {
-					onFailure(e);
+					onFailure(new ApiException(INCORRECT_APP_ID, e));
 				}
 			}
 
 			@Override
-			public void onFailure(Exception e) {
+			public void onFailure(ApiException e) {
 				if (callback != null) {
-					if (e instanceof ApiException) { // TODO: 31/12/2018 can change back to ApiException but feels like app id errors should be conider as ClientException.
-						callback.onFailure(ErrorUtil.fromApiException((ApiException) e));
-					} else if (e instanceof ClientException){
-						callback.onFailure((ClientException) e);
-					} else {
-						onFailure(ErrorUtil.fromApiException(null));
-					}
+					callback.onFailure(ErrorUtil.fromApiException(e));
 				}
 			}
 		});

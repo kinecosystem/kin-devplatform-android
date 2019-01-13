@@ -16,9 +16,7 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.OrderConfirmation;
 import kin.devplatform.data.offer.OfferRepository;
 import kin.devplatform.data.order.OrderRepository;
-import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.ClientException;
-import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.main.view.EcosystemActivity;
 import kin.devplatform.marketplace.model.NativeOffer;
 import kin.devplatform.marketplace.model.NativeSpendOffer;
@@ -33,40 +31,6 @@ public class Kin {
 
 	public static void enableLogs(final boolean enableLogs) {
 		Logger.enableLogs(enableLogs);
-	}
-
-	/**
-	 * @deprecated use {@link #start(Context, String, String, KinEnvironment, KinCallback, KinMigrationCallback)} instead.
-	 * or {@link #start(Context, String, String, KinEnvironment, KinCallback)} instead.
-	 */
-	@Deprecated
-	public static void start(@NonNull Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment)
-			throws ClientException, BlockchainException {
-		start(appContext, "", jwt, environment, new KinCallback<Void>() {
-			@Override
-			public void onResponse(Void response) {
-			}
-
-			@Override
-			public void onFailure(KinEcosystemException error) {
-
-			}
-		}, new KinMigrationCallback() {
-			@Override
-			public void onStart() {
-
-			}
-
-			@Override
-			public void onFinish() {
-
-			}
-
-			@Override
-			public void onError(Exception e) {
-
-			}
-		});
 	}
 
 	public static void start(Context appContext, String appId, @NonNull String jwt, @NonNull KinEnvironment environment,
@@ -93,7 +57,7 @@ public class Kin {
 	 * @param kinCallback success/failure callback
 	 */
 	public static void start(Context appContext, String appId, @NonNull String jwt, @NonNull KinEnvironment environment,
-							KinCallback<Void> kinCallback, KinMigrationCallback migrationProcessCallback) {
+							KinCallback<Void> kinCallback, KinMigrationListener migrationProcessCallback) {
 		SignInData signInData = getJwtSignInData(jwt);
 		KinEcosystemInitiator.getInstance().externalInit(appContext, appId, environment, signInData, kinCallback, migrationProcessCallback);
 	}

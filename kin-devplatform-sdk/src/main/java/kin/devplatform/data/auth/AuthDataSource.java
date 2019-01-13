@@ -63,13 +63,13 @@ public interface AuthDataSource {
 
 	interface Remote {
 
-		void getAuthToken(@NonNull final Callback<AuthToken, Exception> callback);
+		void getAuthToken(@NonNull final Callback<AuthToken, ApiException> callback);
 
 		void setSignInData(@NonNull final SignInData signInData);
 
 		AuthToken getAuthTokenSync();
 
-		void activateAccount(@NonNull final Callback<AuthToken, Exception> callback);
+		void activateAccount(@NonNull final Callback<AuthToken, ApiException> callback);
 
 		void updateWalletAddress(@NonNull UserProperties userProperties, @NonNull final Callback<Void, ApiException> callback);
 	}

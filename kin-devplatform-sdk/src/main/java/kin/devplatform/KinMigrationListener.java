@@ -1,6 +1,6 @@
 package kin.devplatform;
 
-public interface KinMigrationCallback {
+public interface KinMigrationListener {
 
     /**
      * Method is invoked before the migration process itself will start.
@@ -9,7 +9,7 @@ public interface KinMigrationCallback {
     void onStart();
 
     /**
-     * Method is invoked when
+     * Method is invoked when migration is finished, whether there was an actual migration or not.
      */
     void onFinish();
 

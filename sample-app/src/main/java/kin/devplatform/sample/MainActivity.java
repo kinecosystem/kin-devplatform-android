@@ -25,7 +25,7 @@ import java.util.Random;
 import kin.devplatform.Environment;
 import kin.devplatform.Kin;
 import kin.devplatform.KinCallback;
-import kin.devplatform.KinMigrationCallback;
+import kin.devplatform.KinMigrationListener;
 import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.OrderConfirmation;
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
 				Toast.makeText(MainActivity.this, "Starting SDK failed", Toast.LENGTH_LONG).show();
 				Log.d(TAG, "Kin.start() failed with =  " + ErrorUtil.getPrintableStackTrace(error));
 			}
-		}, new KinMigrationCallback() {
+		}, new KinMigrationListener() {
 			@Override
 			public void onStart() {
 				// TODO: 09/01/2019 use some progress bar.
