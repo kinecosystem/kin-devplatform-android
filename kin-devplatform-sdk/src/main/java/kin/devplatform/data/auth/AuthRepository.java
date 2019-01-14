@@ -12,7 +12,6 @@ import kin.devplatform.core.network.ApiException;
 import kin.devplatform.core.util.DateUtil;
 import kin.devplatform.data.Callback;
 import kin.devplatform.exception.ClientException;
-import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.UserProperties;
@@ -83,7 +82,7 @@ public class AuthRepository implements AuthDataSource {
 	@Override
 	public String getAppID() {
 		loadCachedAppIDIfNeeded(); // TODO: 13/01/2019 do we still need this method?
-		return cachedSignInData.getAppId();
+		return cachedSignInData != null ? cachedSignInData.getAppId() : null;
 	}
 
 	@Override
@@ -102,16 +101,19 @@ public class AuthRepository implements AuthDataSource {
 	}
 
 	private void loadCachedAppIDIfNeeded() {
-		if (TextUtils.isEmpty(cachedSignInData.getAppId())) {
+		if (cachedSignInData != null && TextUtils.isEmpty(cachedSignInData.getAppId())) {
 			localData.getAppId(new Callback<String, Void>() {
 				@Override
 				public void onResponse(String appID) {
-
+					int i = 0;
+					i++; // TODO: 14/01/2019 delete after test
 				}
 
 				@Override
 				public void onFailure(Void t) {
 					// No Data Available
+					int i = 0;
+					i++; // TODO: 14/01/2019 delete after test
 				}
 			});
 		}
