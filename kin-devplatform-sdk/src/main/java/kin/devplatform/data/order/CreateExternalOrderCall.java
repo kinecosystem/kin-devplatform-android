@@ -22,7 +22,7 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.data.order.OrderDataSource.Remote;
 import kin.devplatform.exception.KinEcosystemException;
-import kin.devplatform.exception.MigrationNeededExceptions;
+import kin.devplatform.exception.MigrationNeededException;
 import kin.devplatform.network.model.JWTBodyPaymentConfirmationResult;
 import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.OpenOrder;
@@ -66,7 +66,7 @@ class CreateExternalOrderCall extends Thread {
 				KinSdkVersion serverKinSdkVersion = KinSdkVersion.get(openOrder.getBlockchainData().getBlockchainVersion());
 				if (serverKinSdkVersion != blockchainSource.getKinAccount().getKinSdkVersion()) {
 					remote.cancelOrderSync(openOrder.getId());
-					onOrderFailed(new MigrationNeededExceptions());
+					onOrderFailed(new MigrationNeededException());
 					return;
 				}
 			}

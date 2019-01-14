@@ -1,6 +1,6 @@
 package kin.devplatform.data.order;
 
-import static kin.devplatform.exception.BlockchainException.BLOCKCHAIN_VERSIONS_ARE_NOT_THE_SAME;
+import static kin.devplatform.exception.BlockchainException.MIGRATION_IS_NEEDED;
 import static kin.devplatform.exception.ClientException.INTERNAL_INCONSISTENCY;
 import static kin.devplatform.exception.ClientException.ORDER_NOT_FOUND;
 import static kin.devplatform.util.ErrorUtil.getClientException;
@@ -40,7 +40,7 @@ import kin.devplatform.data.model.Payment;
 import kin.devplatform.data.order.CreateExternalOrderCall.ExternalOrderCallbacks;
 import kin.devplatform.data.order.CreateExternalOrderCall.ExternalSpendOrderCallbacks;
 import kin.devplatform.exception.DataNotAvailableException;
-import kin.devplatform.exception.MigrationNeededExceptions;
+import kin.devplatform.exception.MigrationNeededException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.BlockchainData;
 import kin.devplatform.network.model.JWTBodyPaymentConfirmationResult;
@@ -131,13 +131,10 @@ public class OrderRepository implements OrderDataSource {
 			@Override
 			public void onResponse(OpenOrder response) {
 				if (response != null) {
-					try {
-						validateBlockchainVersions(response.getBlockchainData());
-					} catch (MigrationNeededExceptions e) {
-						// Cancel the order and send the failure.
+					if (validateBlockchainVersions(response.getBlockchainData())) {
 						cancelOrder(response.getOfferId(), response.getId(), null);
 						if (callback != null) {
-							callback.onFailure(e);
+							callback.onFailure(new MigrationNeededException());
 						}
 						return;
 					}
@@ -166,14 +163,13 @@ public class OrderRepository implements OrderDataSource {
 		remoteData.submitOrder(content, order.getId(), new Callback<Order, ApiException>() {
 			@Override
 			public void onResponse(Order response) {
-				try {
-					validateBlockchainVersions(response.getBlockchainData());
-				} catch (MigrationNeededExceptions e) {
-					updateFailure(new Error("Migration needed", MigrationNeededExceptions.EXCEPTION_MESSAGE, BLOCKCHAIN_VERSIONS_ARE_NOT_THE_SAME));
+				if (validateBlockchainVersions(response.getBlockchainData())) {
+					updateFailure(new Error("Migration needed", MigrationNeededException.EXCEPTION_MESSAGE,
+						MIGRATION_IS_NEEDED));
 					if (callback != null) {
-						callback.onFailure(e);
+						callback.onFailure(new MigrationNeededException());
+						return;
 					}
-					return;
 				}
 
 				pendingOrdersCount.incrementAndGet();
@@ -200,14 +196,16 @@ public class OrderRepository implements OrderDataSource {
 		});
 	}
 
-	private void validateBlockchainVersions(BlockchainData blockchainData) throws MigrationNeededExceptions {
+	private boolean validateBlockchainVersions(BlockchainData blockchainData)  {
+		boolean sameVersions = true;
 		if (blockchainData != null && blockchainSource.getKinAccount() != null) {
 			KinSdkVersion serverKinSdkVersion = KinSdkVersion.get(blockchainData.getBlockchainVersion());
 			// Check if the kin account sdk has the same blockchain version as the server.
 			if (serverKinSdkVersion != blockchainSource.getKinAccount().getKinSdkVersion()) {
-				throw new MigrationNeededExceptions();
+				sameVersions = false;
 			}
 		}
+		return sameVersions;
 	}
 
 

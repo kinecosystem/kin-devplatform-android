@@ -131,7 +131,7 @@ public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> impl
 			final String addressee = offer.getBlockchainData().getRecipientAddress();
 			final String orderID = openOrder.getId();
 
-			submitOrder(openOrder); // TODO: 13/01/2019 no callback here. need to check what is this case and maybe handle in case of not same blockchain versions
+			submitOrder(openOrder);
 			sendTransaction(addressee, amount, orderID);
 		}
 	}
