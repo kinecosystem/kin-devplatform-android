@@ -122,7 +122,7 @@ public class ConfigurationImpl implements Configuration {
 	}
 
 	private boolean shouldSkipAuthentication(Request originalRequest, String path) {
-		return path.equals(USERS_PATH) && originalRequest.method().equals(POST) || path.contains(KIN_VERSION_PATH);
+		return (path.equals(USERS_PATH) && originalRequest.method().equals(POST)) || path.contains(KIN_VERSION_PATH);
 	}
 
 	private void addHeaders(ApiClient apiClient) {

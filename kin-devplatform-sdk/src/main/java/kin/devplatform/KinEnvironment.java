@@ -10,7 +10,7 @@ public interface KinEnvironment {
 
 	String getNewBlockchainPassphrase();
 
-	String getIssuer();
+	String getOldBlockchainIssuer();
 
 	String getEcosystemServerUrl();
 

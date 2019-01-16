@@ -22,12 +22,14 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.data.order.OrderDataSource.Remote;
 import kin.devplatform.exception.KinEcosystemException;
+import kin.devplatform.exception.MigrationNeededException;
 import kin.devplatform.network.model.JWTBodyPaymentConfirmationResult;
 import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.KinSdkVersion;
 import kin.sdk.migration.exception.InsufficientKinException;
 import kin.sdk.migration.exception.OperationFailedException;
 
@@ -58,6 +60,17 @@ class CreateExternalOrderCall extends Thread {
 	public void run() {
 		try {
 			openOrder = remote.createExternalOrderSync(orderJwt);
+
+			// Check if the kin account sdk has the same blockchain version as the server.
+			if (blockchainSource.getKinAccount() != null) {
+				KinSdkVersion serverKinSdkVersion = KinSdkVersion.get(openOrder.getBlockchainData().getBlockchainVersion());
+				if (serverKinSdkVersion != blockchainSource.getKinAccount().getKinSdkVersion()) {
+					remote.cancelOrderSync(openOrder.getId());
+					onOrderFailed(new MigrationNeededException());
+					return;
+				}
+			}
+
 			sendOrderCreationReceivedEvent();
 
 			if (doesClientSendsTransaction(openOrder)) {

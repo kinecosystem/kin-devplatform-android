@@ -48,7 +48,7 @@ public class AuthRemoteData implements AuthDataSource.Remote {
 	}
 
 	@Override
-	public void getAuthToken(@NonNull final Callback<AuthToken, Exception> callback) {
+	public void getAuthToken(@NonNull final Callback<AuthToken, ApiException> callback) {
 		try {
 			authApi.signInAsync(signInData, "", new ApiCallback<AuthToken>() {
 				@Override
@@ -93,7 +93,7 @@ public class AuthRemoteData implements AuthDataSource.Remote {
 	}
 
 	@Override
-	public void activateAccount(@NonNull final Callback<AuthToken, Exception> callback) {
+	public void activateAccount(@NonNull final Callback<AuthToken, ApiException> callback) {
 		try {
 			authApi.activateAcountAsync("", new ApiCallback<AuthToken>() {
 				@Override
