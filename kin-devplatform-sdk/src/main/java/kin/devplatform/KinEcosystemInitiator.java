@@ -3,9 +3,7 @@ package kin.devplatform;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import java.util.UUID;
-
 import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.accountmanager.AccountManager.AccountState;
 import kin.devplatform.accountmanager.AccountManagerImpl;
@@ -105,6 +103,11 @@ public final class KinEcosystemInitiator {
 			}
 
 			ConfigurationImpl.init(configurationLocal);
+			AuthRepository
+				.init(AuthLocalData.getInstance(context, executorsUtil),
+					AuthRemoteData.getInstance(executorsUtil));
+			EventCommonDataUtil.setBaseData(context);
+
 			KinEnvironment kinEnvironment = ConfigurationImpl.getInstance().getEnvironment();
 			final EventLogger eventLogger = EventLoggerImpl.getInstance();
 			final String oldNetworkUrl = kinEnvironment.getOldBlockchainNetworkUrl();
@@ -175,12 +178,6 @@ public final class KinEcosystemInitiator {
 			BlockchainSourceImpl.getInstance().setAppID(appId);
 			signInData.setAppId(appId);
 		}
-
-		AuthRepository
-			.init(AuthLocalData.getInstance(context, executorsUtil),
-				AuthRemoteData.getInstance(executorsUtil));
-
-		EventCommonDataUtil.setBaseData(context);
 
 		AccountManagerImpl
 			.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),
