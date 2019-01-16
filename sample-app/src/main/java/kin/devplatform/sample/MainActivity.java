@@ -138,13 +138,14 @@ public class MainActivity extends AppCompatActivity {
 		 * DO NOT!!!! use this approach in your real app.
 		 * */
 		String jwt = SignInRepo.getJWT(this);
+		Kin.enableLogs(true);
 		Kin.start(getApplicationContext(), "test", jwt, Environment.getPlayground(), new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
 				Toast.makeText(MainActivity.this, "Starting SDK succeeded", Toast.LENGTH_LONG).show();
 				addNativeSpendOffer(nativeSpendOffer);
 				addNativeOfferClickedObserver();
-                addBalanceObserver();
+				addBalanceObserver();
 				isInitialized = true;
 			}
 
