@@ -10,25 +10,19 @@ import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When failing to burn
- * 
+ * start method of migration module called
  */
-public class MigrationBurnFailed implements Event {
+public class MigrationMethodStarted implements Event {
 
-	public static final String EVENT_NAME = "migration_burn_failed";
+	public static final String EVENT_NAME = "migration_method_started";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationBurnFailed create(String errorReason, String errorCode, String errorMessage,
-		String publicAddress) {
-		return new MigrationBurnFailed(
+	public static MigrationMethodStarted create() {
+		return new MigrationMethodStarted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
-			(Client) EventsStore.client(),
-			errorReason,
-			errorCode,
-			errorMessage,
-			publicAddress);
+			(Client) EventsStore.client());
 	}
 
 	/**
@@ -61,59 +55,26 @@ public class MigrationBurnFailed implements Event {
 	@SerializedName("client")
 	@Expose
 	private Client client;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_reason")
-	@Expose
-	private String errorReason;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_code")
-	@Expose
-	private String errorCode;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_message")
-	@Expose
-	private String errorMessage;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("public_address")
-	@Expose
-	private String publicAddress;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public MigrationBurnFailed() {
+	public MigrationMethodStarted() {
 	}
 
 	/**
 	 *
 	 * @param common
-	 * @param errorReason
-	 * @param errorMessage
 
 	 * @param client
-	 * @param errorCode
-	 * @param publicAddress
 
 	 * @param user
 	 */
-	public MigrationBurnFailed(Common common, User user, Client client, String errorReason, String errorCode,
-		String errorMessage, String publicAddress) {
+	public MigrationMethodStarted(Common common, User user, Client client) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.errorReason = errorReason;
-		this.errorCode = errorCode;
-		this.errorMessage = errorMessage;
-		this.publicAddress = publicAddress;
 	}
 
 	/**
@@ -184,62 +145,6 @@ public class MigrationBurnFailed implements Event {
 	 */
 	public void setClient(Client client) {
 		this.client = client;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getErrorReason() {
-		return errorReason;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setErrorReason(String errorReason) {
-		this.errorReason = errorReason;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getPublicAddress() {
-		return publicAddress;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setPublicAddress(String publicAddress) {
-		this.publicAddress = publicAddress;
 	}
 
 }

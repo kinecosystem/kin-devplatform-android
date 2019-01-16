@@ -5,28 +5,28 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * Client failing to get the blockchain version
- * 
+ * When successfully burning
  */
-public class MigrationSelectedSDK implements Event {
+public class MigrationBurnSucceeded implements Event {
 
-	public static final String EVENT_NAME = "migration_selected_sdk";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "migration_burn_succeeded";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationSelectedSDK create(boolean isNewSDK, String source) {
-		return new MigrationSelectedSDK(
+	public static MigrationBurnSucceeded create(MigrationBurnSucceeded.BurnReason burnReason, String publicAddress) {
+		return new MigrationBurnSucceeded(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-				isNewSDK,
-				source);
+			burnReason,
+			publicAddress);
 	}
 
 	/**
@@ -62,31 +62,40 @@ public class MigrationSelectedSDK implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("is_new_SDK")
+	@SerializedName("burn_reason")
 	@Expose
-	private boolean isNewSdk;
+	private MigrationBurnSucceeded.BurnReason burnReason;
 	/**
 	 * (Required)
 	 */
-	@SerializedName("source")
+	@SerializedName("public_address")
 	@Expose
-	private String source;
+	private String publicAddress;
+
+	/**
+	 * No args constructor for use in serialization
+	 */
+	public MigrationBurnSucceeded() {
+	}
 
 	/**
 	 *
+	 * @param burnReason
 	 * @param common
+
 	 * @param client
+	 * @param publicAddress
+
 	 * @param user
-	 * @param isNewSDK
-	 * @param source
 	 */
-	public MigrationSelectedSDK(Common common, User user, Client client, boolean isNewSDK, String source) {
+	public MigrationBurnSucceeded(Common common, User user, Client client, MigrationBurnSucceeded.BurnReason burnReason,
+		String publicAddress) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.isNewSdk = isNewSDK;
-		this.source = source;
+		this.burnReason = burnReason;
+		this.publicAddress = publicAddress;
 	}
 
 	/**
@@ -162,29 +171,72 @@ public class MigrationSelectedSDK implements Event {
 	/**
 	 * (Required)
 	 */
-	public boolean getIsNewSdk() {
-		return this.isNewSdk;
+	public MigrationBurnSucceeded.BurnReason getBurnReason() {
+		return burnReason;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setIsNewSdk(boolean isNewSDK) {
-		this.isNewSdk = isNewSDK;
+	public void setBurnReason(MigrationBurnSucceeded.BurnReason burnReason) {
+		this.burnReason = burnReason;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public String getSource() {
-		return this.source;
+	public String getPublicAddress() {
+		return publicAddress;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setSource(String source) {
-		this.source = source;
+	public void setPublicAddress(String publicAddress) {
+		this.publicAddress = publicAddress;
+	}
+
+	public enum BurnReason {
+
+		@SerializedName("burned")
+		BURNED("burned"),
+		@SerializedName("already_burned")
+		ALREADY_BURNED("already_burned"),
+		@SerializedName("no_account")
+		NO_ACCOUNT("no_account"),
+		@SerializedName("no_trustline")
+		NO_TRUSTLINE("no_trustline");
+		private final String value;
+		private final static Map<String, MigrationBurnSucceeded.BurnReason> CONSTANTS = new HashMap<String, MigrationBurnSucceeded.BurnReason>();
+
+		static {
+			for (MigrationBurnSucceeded.BurnReason c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private BurnReason(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static MigrationBurnSucceeded.BurnReason fromValue(String value) {
+			MigrationBurnSucceeded.BurnReason constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

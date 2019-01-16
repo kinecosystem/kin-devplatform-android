@@ -1,89 +1,124 @@
 package kin.devplatform;
 
-import android.util.Log;
-
-import java.math.BigDecimal;
-
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.events.MigrationBurnFailed;
-import kin.devplatform.bi.events.MigrationBurnStart;
-import kin.devplatform.bi.events.MigrationBurnSuccess;
-import kin.devplatform.bi.events.MigrationMigrationFailed;
-import kin.devplatform.bi.events.MigrationMigrationStart;
-import kin.devplatform.bi.events.MigrationMigrationSuccess;
-import kin.devplatform.bi.events.MigrationSelectedSDK;
+import kin.devplatform.bi.events.MigrationBurnStarted;
+import kin.devplatform.bi.events.MigrationBurnSucceeded;
+import kin.devplatform.bi.events.MigrationCallbackFailed;
+import kin.devplatform.bi.events.MigrationCallbackReady;
+import kin.devplatform.bi.events.MigrationCallbackStart;
+import kin.devplatform.bi.events.MigrationCheckBurnFailed;
+import kin.devplatform.bi.events.MigrationCheckBurnStarted;
+import kin.devplatform.bi.events.MigrationCheckBurnSucceeded;
+import kin.devplatform.bi.events.MigrationMethodStarted;
+import kin.devplatform.bi.events.MigrationRequestAccountMigrationFailed;
+import kin.devplatform.bi.events.MigrationRequestAccountMigrationStarted;
+import kin.devplatform.bi.events.MigrationRequestAccountMigrationSucceeded;
+import kin.devplatform.bi.events.MigrationRequestAccountMigrationSucceeded.MigrationReason;
 import kin.devplatform.bi.events.MigrationVersionCheckFailed;
-import kin.devplatform.bi.events.MigrationVersionCheckReceived;
-import kin.devplatform.bi.events.MigrationVersionCheckStart;
+import kin.devplatform.bi.events.MigrationVersionCheckStarted;
+import kin.devplatform.bi.events.MigrationVersionCheckSucceeded;
+import kin.devplatform.bi.events.MigrationVersionCheckSucceeded.SdkVersion;
+import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.KinSdkVersion;
 import kin.sdk.migration.bi.IMigrationEventsListener;
-import kin.sdk.migration.interfaces.IKinVersionProvider;
 
 public class MigrationEventsListener implements IMigrationEventsListener {
 
-    private final String TAG = "MigrationEventsListener";
-    final EventLogger eventLogger;
+	private final EventLogger eventLogger;
 
-    MigrationEventsListener(final EventLogger eventLogger) {
-        this.eventLogger = eventLogger;
-    }
+	public MigrationEventsListener(EventLogger eventLogger) {
+		this.eventLogger = eventLogger;
+	}
 
-    @Override
-    public void onVersionCheckStart() {
-        Log.i(TAG, "onVersionCheckStart: ");
-        eventLogger.send(MigrationVersionCheckStart.create());
-    }
+	@Override
+	public void onMethodStarted() {
+		eventLogger.send(MigrationMethodStarted.create());
+	}
 
-    @Override
-    public void onVersionReceived(IKinVersionProvider.SdkVersion sdkVersion) {
-        Log.i(TAG, "onVersionReceived: " + sdkVersion);
-        eventLogger.send(MigrationVersionCheckReceived.create(sdkVersion));
-    }
+	@Override
+	public void onVersionCheckStarted() {
+		eventLogger.send(MigrationVersionCheckStarted.create());
+	}
 
-    @Override
-    public void onVersionCheckFailed(Exception exception) {
-        Log.i(TAG, "onVersionCheckFailed: " + exception.getMessage());
-        eventLogger.send(MigrationVersionCheckFailed.create(exception));
-    }
+	@Override
+	public void onVersionCheckSucceeded(KinSdkVersion sdkVersion) {
+		eventLogger.send(MigrationVersionCheckSucceeded.create(SdkVersion.fromValue(sdkVersion.getVersion())));
+	}
 
-    @Override
-    public void onSDKSelected(boolean isNewSDK, String source) {
-        Log.i(TAG, "onSDKSelected: isNewSDK=" + isNewSDK + " source=" + source);
-        eventLogger.send(MigrationSelectedSDK.create(isNewSDK, source));
-    }
+	@Override
+	public void onVersionCheckFailed(Exception exception) {
+		eventLogger.send(MigrationVersionCheckFailed
+			.create(ErrorUtil.getPrintableStackTrace(exception), "", exception.getMessage()));
+	}
 
-    @Override
-    public void onAccountBurnStart() {
-        Log.i(TAG, "onAccountBurnStart: ");
-        eventLogger.send(MigrationBurnStart.create());
-    }
+	@Override
+	public void onCallbackStart() {
+		eventLogger.send(MigrationCallbackStart.create());
+	}
 
-    @Override
-    public void onAccountBurnFailed(Exception exception, BigDecimal balance) {
-        Log.e(TAG, "onAccountBurnFailed: " + exception + " balance=" + balance.toPlainString() );
-        eventLogger.send(MigrationBurnFailed.create(exception, balance));
-    }
+	@Override
+	public void onCheckBurnStarted(String publicAddress) {
+		eventLogger.send(MigrationCheckBurnStarted.create(publicAddress));
+	}
 
-    @Override
-    public void onAccountBurnSuccess() {
-        Log.i(TAG, "onAccountBurnSuccess: ");
-        eventLogger.send(MigrationBurnSuccess.create());
-    }
+	@Override
+	public void onCheckBurnSucceeded(String publicAddress, CheckBurnReason reason) {
+		eventLogger.send(MigrationCheckBurnSucceeded
+			.create(MigrationCheckBurnSucceeded.CheckBurnReason.fromValue(reason.value()), publicAddress));
+	}
 
-    @Override
-    public void onMigrationStart() {
-        Log.i(TAG, "onMigrationStart: ");
-        eventLogger.send(MigrationMigrationStart.create());
-    }
+	@Override
+	public void onCheckBurnFailed(String publicAddress, Exception exception) {
+		eventLogger.send(MigrationCheckBurnFailed
+			.create(publicAddress, ErrorUtil.getPrintableStackTrace(exception), "", exception.getMessage()));
+	}
 
-    @Override
-    public void onMigrationFailed(Exception exception) {
-        Log.e(TAG, "onMigrationFailed: " + exception.getMessage());
-        eventLogger.send(MigrationMigrationFailed.create(exception));
-    }
+	@Override
+	public void onBurnStarted(String publicAddress) {
+		eventLogger.send(MigrationBurnStarted.create(publicAddress));
+	}
 
-    @Override
-    public void onMigrationSuccess(BigDecimal balance) {
-        Log.i(TAG, "onMigrationSuccess: balance=" + balance.toPlainString());
-        eventLogger.send(MigrationMigrationSuccess.create());
-    }
+	@Override
+	public void onBurnSucceeded(String publicAddress, BurnReason reason) {
+		eventLogger.send(
+			MigrationBurnSucceeded.create(MigrationBurnSucceeded.BurnReason.fromValue(reason.value()), publicAddress));
+	}
+
+	@Override
+	public void onBurnFailed(String publicAddress, Exception exception) {
+		eventLogger.send(MigrationBurnFailed
+			.create(publicAddress, ErrorUtil.getPrintableStackTrace(exception), "", exception.getMessage()));
+	}
+
+	@Override
+	public void onRequestAccountMigrationStarted(String publicAddress) {
+		eventLogger.send(MigrationRequestAccountMigrationStarted.create(publicAddress));
+	}
+
+	@Override
+	public void onRequestAccountMigrationSucceeded(String publicAddress, RequestAccountMigrationSuccessReason reason) {
+		eventLogger.send(
+			MigrationRequestAccountMigrationSucceeded.create(MigrationReason.fromValue(reason.value()), publicAddress));
+	}
+
+	@Override
+	public void onRequestAccountMigrationFailed(String publicAddress, Exception exception) {
+		eventLogger.send(MigrationRequestAccountMigrationFailed
+			.create(publicAddress, ErrorUtil.getPrintableStackTrace(exception), "", exception.getMessage()));
+	}
+
+	@Override
+	public void onCallbackReady(KinSdkVersion sdkVersion, SelectedSdkReason selectedSdkReason) {
+		eventLogger.send(MigrationCallbackReady
+			.create(MigrationCallbackReady.SelectedSdkReason.fromValue(selectedSdkReason.value()),
+				MigrationCallbackReady.SdkVersion
+					.fromValue(sdkVersion.getVersion())));
+	}
+
+	@Override
+	public void onCallbackFailed(Exception exception) {
+		eventLogger.send(
+			MigrationCallbackFailed.create(ErrorUtil.getPrintableStackTrace(exception), "", exception.getMessage()));
+	}
 }

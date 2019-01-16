@@ -5,28 +5,29 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
-import kin.sdk.migration.interfaces.IKinVersionProvider;
 
 
 /**
- * Client reciving the blockchain version from the server
- * 
+ * Checking if account is burn failed
  */
-public class MigrationVersionCheckReceived implements Event {
+public class MigrationCheckBurnFailed implements Event {
 
-	public static final String EVENT_NAME = "migration_version_check_received";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "migration_check_burn_failed";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationVersionCheckReceived create(IKinVersionProvider.SdkVersion sdkVersion) {
-		return new MigrationVersionCheckReceived(
+	public static MigrationCheckBurnFailed create(String errorReason, String errorCode, String errorMessage,
+		String publicAddress) {
+		return new MigrationCheckBurnFailed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-				sdkVersion);
+			errorReason,
+			errorCode,
+			errorMessage,
+			publicAddress);
 	}
 
 	/**
@@ -62,23 +63,56 @@ public class MigrationVersionCheckReceived implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("sdkֹֹֹֹֹ_version")
+	@SerializedName("error_reason")
 	@Expose
-	private IKinVersionProvider.SdkVersion sdkVersion;
+	private String errorReason;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_code")
+	@Expose
+	private String errorCode;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_message")
+	@Expose
+	private String errorMessage;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("public_address")
+	@Expose
+	private String publicAddress;
+
+	/**
+	 * No args constructor for use in serialization
+	 */
+	public MigrationCheckBurnFailed() {
+	}
 
 	/**
 	 *
 	 * @param common
+	 * @param errorReason
+	 * @param errorMessage
+
 	 * @param client
+	 * @param errorCode
+	 * @param publicAddress
+
 	 * @param user
-	 * @param sdkVersion
 	 */
-	public MigrationVersionCheckReceived(Common common, User user, Client client, IKinVersionProvider.SdkVersion sdkVersion) {
+	public MigrationCheckBurnFailed(Common common, User user, Client client, String errorReason, String errorCode,
+		String errorMessage, String publicAddress) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.sdkVersion = sdkVersion;
+		this.errorReason = errorReason;
+		this.errorCode = errorCode;
+		this.errorMessage = errorMessage;
+		this.publicAddress = publicAddress;
 	}
 
 	/**
@@ -154,15 +188,57 @@ public class MigrationVersionCheckReceived implements Event {
 	/**
 	 * (Required)
 	 */
-	public IKinVersionProvider.SdkVersion getSdkVersion() {
-		return sdkVersion;
+	public String getErrorReason() {
+		return errorReason;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setSdkVersion(IKinVersionProvider.SdkVersion sdkVersion) {
-		this.sdkVersion = sdkVersion;
+	public void setErrorReason(String errorReason) {
+		this.errorReason = errorReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorCode() {
+		return errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getPublicAddress() {
+		return publicAddress;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setPublicAddress(String publicAddress) {
+		this.publicAddress = publicAddress;
 	}
 
 }

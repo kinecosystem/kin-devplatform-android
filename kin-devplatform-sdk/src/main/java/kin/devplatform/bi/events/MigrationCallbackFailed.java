@@ -5,26 +5,27 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When getting the current balance for burn
- * 
+ * Failed callback is triggered, migration start is failed, no sdk was returned
  */
-public class MigrationBurnGotBalance implements Event {
+public class MigrationCallbackFailed implements Event {
 
-	public static final String EVENT_NAME = "migration_burn_got_balance";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "migration_callback_failed";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationBurnGotBalance create() {
-		return new MigrationBurnGotBalance(
+	public static MigrationCallbackFailed create(String errorReason, String errorCode, String errorMessage) {
+		return new MigrationCallbackFailed(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
-			(Client) EventsStore.client());
+			(Client) EventsStore.client(),
+			errorReason,
+			errorCode,
+			errorMessage);
 	}
 
 	/**
@@ -57,18 +58,51 @@ public class MigrationBurnGotBalance implements Event {
 	@SerializedName("client")
 	@Expose
 	private Client client;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_reason")
+	@Expose
+	private String errorReason;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_code")
+	@Expose
+	private String errorCode;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("error_message")
+	@Expose
+	private String errorMessage;
+
+	/**
+	 * No args constructor for use in serialization
+	 */
+	public MigrationCallbackFailed() {
+	}
 
 	/**
 	 *
 	 * @param common
+	 * @param errorReason
+	 * @param errorMessage
+
 	 * @param client
+	 * @param errorCode
+
 	 * @param user
 	 */
-	public MigrationBurnGotBalance(Common common, User user, Client client) {
+	public MigrationCallbackFailed(Common common, User user, Client client, String errorReason, String errorCode,
+		String errorMessage) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
+		this.errorReason = errorReason;
+		this.errorCode = errorCode;
+		this.errorMessage = errorMessage;
 	}
 
 	/**
@@ -130,7 +164,6 @@ public class MigrationBurnGotBalance implements Event {
 	/**
 	 * common properties for all client events (Required)
 	 */
-
 	public Client getClient() {
 		return client;
 	}
@@ -140,6 +173,48 @@ public class MigrationBurnGotBalance implements Event {
 	 */
 	public void setClient(Client client) {
 		this.client = client;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorReason() {
+		return errorReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorReason(String errorReason) {
+		this.errorReason = errorReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorCode() {
+		return errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 
 }

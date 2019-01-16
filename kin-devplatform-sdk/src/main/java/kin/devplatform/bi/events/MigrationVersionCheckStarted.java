@@ -5,23 +5,21 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When the migration successful
- * 
+ * When checking what blockchain version to work with
  */
-public class MigrationMigrationSuccess implements Event {
+public class MigrationVersionCheckStarted implements Event {
 
-	public static final String EVENT_NAME = "migration_migration_success";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "migration_version_check_started";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationMigrationSuccess create() {
-		return new MigrationMigrationSuccess(
+	public static MigrationVersionCheckStarted create() {
+		return new MigrationVersionCheckStarted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client());
@@ -59,12 +57,20 @@ public class MigrationMigrationSuccess implements Event {
 	private Client client;
 
 	/**
+	 * No args constructor for use in serialization
+	 */
+	public MigrationVersionCheckStarted() {
+	}
+
+	/**
 	 *
 	 * @param common
+
 	 * @param client
+
 	 * @param user
 	 */
-	public MigrationMigrationSuccess(Common common, User user, Client client) {
+	public MigrationVersionCheckStarted(Common common, User user, Client client) {
 		super();
 		this.common = common;
 		this.user = user;

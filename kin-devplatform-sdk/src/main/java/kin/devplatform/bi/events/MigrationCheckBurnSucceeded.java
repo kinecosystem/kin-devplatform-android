@@ -5,29 +5,28 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When failing to burn
- * 
+ * checking burn succeed
  */
-public class MigrationBurnFailed implements Event {
+public class MigrationCheckBurnSucceeded implements Event {
 
-	public static final String EVENT_NAME = "migration_burn_failed";
+	public static final String EVENT_NAME = "migration_check_burn_succeeded";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationBurnFailed create(String errorReason, String errorCode, String errorMessage,
+	public static MigrationCheckBurnSucceeded create(MigrationCheckBurnSucceeded.CheckBurnReason checkBurnReason,
 		String publicAddress) {
-		return new MigrationBurnFailed(
+		return new MigrationCheckBurnSucceeded(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			errorReason,
-			errorCode,
-			errorMessage,
+			checkBurnReason,
 			publicAddress);
 	}
 
@@ -64,21 +63,9 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("error_reason")
+	@SerializedName("check_burn_reason")
 	@Expose
-	private String errorReason;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_code")
-	@Expose
-	private String errorCode;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_message")
-	@Expose
-	private String errorMessage;
+	private MigrationCheckBurnSucceeded.CheckBurnReason checkBurnReason;
 	/**
 	 * (Required)
 	 */
@@ -89,30 +76,26 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public MigrationBurnFailed() {
+	public MigrationCheckBurnSucceeded() {
 	}
 
 	/**
 	 *
 	 * @param common
-	 * @param errorReason
-	 * @param errorMessage
+	 * @param checkBurnReason
 
 	 * @param client
-	 * @param errorCode
 	 * @param publicAddress
 
 	 * @param user
 	 */
-	public MigrationBurnFailed(Common common, User user, Client client, String errorReason, String errorCode,
-		String errorMessage, String publicAddress) {
+	public MigrationCheckBurnSucceeded(Common common, User user, Client client,
+		MigrationCheckBurnSucceeded.CheckBurnReason checkBurnReason, String publicAddress) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.errorReason = errorReason;
-		this.errorCode = errorCode;
-		this.errorMessage = errorMessage;
+		this.checkBurnReason = checkBurnReason;
 		this.publicAddress = publicAddress;
 	}
 
@@ -189,43 +172,15 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	public String getErrorReason() {
-		return errorReason;
+	public MigrationCheckBurnSucceeded.CheckBurnReason getCheckBurnReason() {
+		return checkBurnReason;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setErrorReason(String errorReason) {
-		this.errorReason = errorReason;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public void setCheckBurnReason(MigrationCheckBurnSucceeded.CheckBurnReason checkBurnReason) {
+		this.checkBurnReason = checkBurnReason;
 	}
 
 	/**
@@ -240,6 +195,49 @@ public class MigrationBurnFailed implements Event {
 	 */
 	public void setPublicAddress(String publicAddress) {
 		this.publicAddress = publicAddress;
+	}
+
+	public enum CheckBurnReason {
+
+		@SerializedName("not_burned")
+		NOT_BURNED("not_burned"),
+		@SerializedName("already_burned")
+		ALREADY_BURNED("already_burned"),
+		@SerializedName("no_account")
+		NO_ACCOUNT("no_account"),
+		@SerializedName("no_trustline")
+		NO_TRUSTLINE("no_trustline");
+		private final String value;
+		private final static Map<String, MigrationCheckBurnSucceeded.CheckBurnReason> CONSTANTS = new HashMap<String, MigrationCheckBurnSucceeded.CheckBurnReason>();
+
+		static {
+			for (MigrationCheckBurnSucceeded.CheckBurnReason c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private CheckBurnReason(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static MigrationCheckBurnSucceeded.CheckBurnReason fromValue(String value) {
+			MigrationCheckBurnSucceeded.CheckBurnReason constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

@@ -3,7 +3,6 @@ package kin.devplatform;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import java.util.UUID;
-
 import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.accountmanager.AccountManager.AccountState;
 import kin.devplatform.accountmanager.AccountManagerImpl;
@@ -70,7 +69,8 @@ public final class KinEcosystemInitiator {
 			init(context, null, null, false, null, null);
 		} catch (BlockchainException e) {
 			EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
-				ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()), // TODO: 02/01/2019 why not firing some error? and why print the stack trace
+				ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
+				// TODO: 02/01/2019 why not firing some error? and why print the stack trace
 				"KinEcosystemInitiator internalInit failed"
 			));
 			e.printStackTrace();
@@ -81,7 +81,7 @@ public final class KinEcosystemInitiator {
 	 * Uses for external (public API) initialization and jwt login.
 	 */
 	public void externalInit(Context context, String appId, KinEnvironment environment, @NonNull SignInData signInData,
-							 final KinCallback<Void> loginCallback) {
+		final KinCallback<Void> loginCallback) {
 		if (isInitialized && isLoggedIn) {
 			fireStartCompleted(loginCallback);
 			return;
@@ -95,7 +95,7 @@ public final class KinEcosystemInitiator {
 	}
 
 	private void init(Context context, String appId, KinEnvironment environment, boolean withLogin,
-					  SignInData signInData, KinCallback<Void> loginCallback) throws BlockchainException {
+		SignInData signInData, KinCallback<Void> loginCallback) throws BlockchainException {
 		if (!isInitialized) {
 			ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
 			if (environment != null) {
@@ -119,18 +119,23 @@ public final class KinEcosystemInitiator {
 //				}
 
 			MigrationEventsListener migrationEventsListener = new MigrationEventsListener(eventLogger);
-			MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId, newNetworkUrl, newNetworkId, issuer);
-			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(migrationEventsListener), KIN_ECOSYSTEM_STORE_PREFIX_KEY, migrationEventsListener);
+			MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId,
+				newNetworkUrl, newNetworkId, issuer);
+			MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo,
+				new KinVersionProvider(), migrationEventsListener, KIN_ECOSYSTEM_STORE_PREFIX_KEY);
 			try {
 				handleMigration(context, appId, eventLogger, migrationManager, withLogin, signInData, loginCallback);
 			} catch (MigrationInProcessException e) {
-				Logger.log(new Log().priority(Log.WARN).withTag(TAG).text("Start migration when it was already in migration process"));
+				Logger.log(new Log().priority(Log.WARN).withTag(TAG)
+					.text("Start migration when it was already in migration process"));
 			}
 		}
 	}
 
-	private void handleMigration(final Context context, final String appId, final EventLogger eventLogger, MigrationManager migrationManager,
-								 final boolean withLogin, final SignInData signInData, final KinCallback<Void> loginCallback) throws MigrationInProcessException {
+	private void handleMigration(final Context context, final String appId, final EventLogger eventLogger,
+		MigrationManager migrationManager,
+		final boolean withLogin, final SignInData signInData, final KinCallback<Void> loginCallback)
+		throws MigrationInProcessException {
 		migrationManager.start(new MigrationManagerListener() {
 			@Override
 			public void onMigrationStart() {
@@ -149,22 +154,22 @@ public final class KinEcosystemInitiator {
 					applicationId = BlockchainSourceImpl.getInstance().getAppId();
 
 					AuthRepository
-							.init(AuthLocalData.getInstance(context, executorsUtil),
-									AuthRemoteData.getInstance(executorsUtil), applicationId);
+						.init(AuthLocalData.getInstance(context, executorsUtil),
+							AuthRemoteData.getInstance(executorsUtil), applicationId);
 
 					EventCommonDataUtil.setBaseData(context);
 
 					AccountManagerImpl
-							.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),
-									BlockchainSourceImpl.getInstance());
+						.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),
+							BlockchainSourceImpl.getInstance());
 
 					OrderRepository.init(BlockchainSourceImpl.getInstance(),
-							eventLogger,
-							OrderRemoteData.getInstance(executorsUtil),
-							OrderLocalData.getInstance(context, executorsUtil));
+						eventLogger,
+						OrderRemoteData.getInstance(executorsUtil),
+						OrderLocalData.getInstance(context, executorsUtil));
 
 					OfferRepository
-							.init(OfferRemoteData.getInstance(executorsUtil), OrderRepository.getInstance());
+						.init(OfferRemoteData.getInstance(executorsUtil), OrderRepository.getInstance());
 
 					DeviceUtils.init(context);
 

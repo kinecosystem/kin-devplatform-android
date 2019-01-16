@@ -5,26 +5,25 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When starting the burn process
- * 
+ * When requesting migration server to migrate an account
  */
-public class MigrationBurnStart implements Event {
+public class MigrationRequestAccountMigrationStarted implements Event {
 
-	public static final String EVENT_NAME = "migration_burn_start";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "migration_request_account_migration_started";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationBurnStart create() {
-		return new MigrationBurnStart(
+	public static MigrationRequestAccountMigrationStarted create(String publicAddress) {
+		return new MigrationRequestAccountMigrationStarted(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
-			(Client) EventsStore.client());
+			(Client) EventsStore.client(),
+			publicAddress);
 	}
 
 	/**
@@ -57,18 +56,34 @@ public class MigrationBurnStart implements Event {
 	@SerializedName("client")
 	@Expose
 	private Client client;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("public_address")
+	@Expose
+	private String publicAddress;
+
+	/**
+	 * No args constructor for use in serialization
+	 */
+	public MigrationRequestAccountMigrationStarted() {
+	}
 
 	/**
 	 *
 	 * @param common
+
 	 * @param client
+	 * @param publicAddress
+
 	 * @param user
 	 */
-	public MigrationBurnStart(Common common, User user, Client client) {
+	public MigrationRequestAccountMigrationStarted(Common common, User user, Client client, String publicAddress) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
+		this.publicAddress = publicAddress;
 	}
 
 	/**
@@ -139,6 +154,20 @@ public class MigrationBurnStart implements Event {
 	 */
 	public void setClient(Client client) {
 		this.client = client;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getPublicAddress() {
+		return publicAddress;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setPublicAddress(String publicAddress) {
+		this.publicAddress = publicAddress;
 	}
 
 }

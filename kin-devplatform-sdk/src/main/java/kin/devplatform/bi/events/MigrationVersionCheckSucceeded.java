@@ -5,30 +5,27 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When failing to burn
- * 
+ * When reciving the blockchain version from the server
  */
-public class MigrationBurnFailed implements Event {
+public class MigrationVersionCheckSucceeded implements Event {
 
-	public static final String EVENT_NAME = "migration_burn_failed";
+	public static final String EVENT_NAME = "migration_version_check_succeeded";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationBurnFailed create(String errorReason, String errorCode, String errorMessage,
-		String publicAddress) {
-		return new MigrationBurnFailed(
+	public static MigrationVersionCheckSucceeded create(MigrationVersionCheckSucceeded.SdkVersion sdkVersion) {
+		return new MigrationVersionCheckSucceeded(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			errorReason,
-			errorCode,
-			errorMessage,
-			publicAddress);
+			sdkVersion);
 	}
 
 	/**
@@ -64,56 +61,32 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("error_reason")
+	@SerializedName("sdk_version")
 	@Expose
-	private String errorReason;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_code")
-	@Expose
-	private String errorCode;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_message")
-	@Expose
-	private String errorMessage;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("public_address")
-	@Expose
-	private String publicAddress;
+	private MigrationVersionCheckSucceeded.SdkVersion sdkVersion;
 
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public MigrationBurnFailed() {
+	public MigrationVersionCheckSucceeded() {
 	}
 
 	/**
 	 *
 	 * @param common
-	 * @param errorReason
-	 * @param errorMessage
 
 	 * @param client
-	 * @param errorCode
-	 * @param publicAddress
+	 * @param sdkVersion
 
 	 * @param user
 	 */
-	public MigrationBurnFailed(Common common, User user, Client client, String errorReason, String errorCode,
-		String errorMessage, String publicAddress) {
+	public MigrationVersionCheckSucceeded(Common common, User user, Client client,
+		MigrationVersionCheckSucceeded.SdkVersion sdkVersion) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.errorReason = errorReason;
-		this.errorCode = errorCode;
-		this.errorMessage = errorMessage;
-		this.publicAddress = publicAddress;
+		this.sdkVersion = sdkVersion;
 	}
 
 	/**
@@ -189,57 +162,54 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	public String getErrorReason() {
-		return errorReason;
+	public MigrationVersionCheckSucceeded.SdkVersion getSdkVersion() {
+		return sdkVersion;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setErrorReason(String errorReason) {
-		this.errorReason = errorReason;
+	public void setSdkVersion(MigrationVersionCheckSucceeded.SdkVersion sdkVersion) {
+		this.sdkVersion = sdkVersion;
 	}
 
-	/**
-	 * (Required)
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
+	public enum SdkVersion {
 
-	/**
-	 * (Required)
-	 */
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
-	}
+		@SerializedName("2")
+		_2("2"),
+		@SerializedName("3")
+		_3("3");
+		private final String value;
+		private final static Map<String, MigrationVersionCheckSucceeded.SdkVersion> CONSTANTS = new HashMap<String, MigrationVersionCheckSucceeded.SdkVersion>();
 
-	/**
-	 * (Required)
-	 */
-	public String getErrorMessage() {
-		return errorMessage;
-	}
+		static {
+			for (MigrationVersionCheckSucceeded.SdkVersion c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
 
-	/**
-	 * (Required)
-	 */
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
+		private SdkVersion(String value) {
+			this.value = value;
+		}
 
-	/**
-	 * (Required)
-	 */
-	public String getPublicAddress() {
-		return publicAddress;
-	}
+		@Override
+		public String toString() {
+			return this.value;
+		}
 
-	/**
-	 * (Required)
-	 */
-	public void setPublicAddress(String publicAddress) {
-		this.publicAddress = publicAddress;
+		public String value() {
+			return this.value;
+		}
+
+		public static MigrationVersionCheckSucceeded.SdkVersion fromValue(String value) {
+			MigrationVersionCheckSucceeded.SdkVersion constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }

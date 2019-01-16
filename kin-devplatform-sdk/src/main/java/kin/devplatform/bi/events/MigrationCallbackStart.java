@@ -5,23 +5,21 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When successfully burning
- * 
+ * migration start callback, signals start of migration process
  */
-public class MigrationBurnSuccess implements Event {
+public class MigrationCallbackStart implements Event {
 
-	public static final String EVENT_NAME = "migration_burn_success";
-	public static final String EVENT_TYPE = "business";
+	public static final String EVENT_NAME = "migration_callback_start";
+	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationBurnSuccess create() {
-		return new MigrationBurnSuccess(
+	public static MigrationCallbackStart create() {
+		return new MigrationCallbackStart(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client());
@@ -59,12 +57,20 @@ public class MigrationBurnSuccess implements Event {
 	private Client client;
 
 	/**
+	 * No args constructor for use in serialization
+	 */
+	public MigrationCallbackStart() {
+	}
+
+	/**
 	 *
 	 * @param common
+
 	 * @param client
+
 	 * @param user
 	 */
-	public MigrationBurnSuccess(Common common, User user, Client client) {
+	public MigrationCallbackStart(Common common, User user, Client client) {
 		super();
 		this.common = common;
 		this.user = user;

@@ -5,29 +5,28 @@ package kin.devplatform.bi.events;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
 import kin.devplatform.bi.Event;
 import kin.devplatform.bi.EventsStore;
 
 
 /**
- * When failing to burn
- * 
+ * Requesting account migration succeeded
  */
-public class MigrationBurnFailed implements Event {
+public class MigrationRequestAccountMigrationSucceeded implements Event {
 
-	public static final String EVENT_NAME = "migration_burn_failed";
+	public static final String EVENT_NAME = "migration_request_account_migration_succeeded";
 	public static final String EVENT_TYPE = "log";
 
 	// Augmented by script
-	public static MigrationBurnFailed create(String errorReason, String errorCode, String errorMessage,
-		String publicAddress) {
-		return new MigrationBurnFailed(
+	public static MigrationRequestAccountMigrationSucceeded create(
+		MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason, String publicAddress) {
+		return new MigrationRequestAccountMigrationSucceeded(
 			(Common) EventsStore.common(),
 			(User) EventsStore.user(),
 			(Client) EventsStore.client(),
-			errorReason,
-			errorCode,
-			errorMessage,
+			migrationReason,
 			publicAddress);
 	}
 
@@ -64,21 +63,9 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	@SerializedName("error_reason")
+	@SerializedName("migration_reason")
 	@Expose
-	private String errorReason;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_code")
-	@Expose
-	private String errorCode;
-	/**
-	 * (Required)
-	 */
-	@SerializedName("error_message")
-	@Expose
-	private String errorMessage;
+	private MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason;
 	/**
 	 * (Required)
 	 */
@@ -89,30 +76,26 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * No args constructor for use in serialization
 	 */
-	public MigrationBurnFailed() {
+	public MigrationRequestAccountMigrationSucceeded() {
 	}
 
 	/**
 	 *
+	 * @param migrationReason
 	 * @param common
-	 * @param errorReason
-	 * @param errorMessage
 
 	 * @param client
-	 * @param errorCode
 	 * @param publicAddress
 
 	 * @param user
 	 */
-	public MigrationBurnFailed(Common common, User user, Client client, String errorReason, String errorCode,
-		String errorMessage, String publicAddress) {
+	public MigrationRequestAccountMigrationSucceeded(Common common, User user, Client client,
+		MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason, String publicAddress) {
 		super();
 		this.common = common;
 		this.user = user;
 		this.client = client;
-		this.errorReason = errorReason;
-		this.errorCode = errorCode;
-		this.errorMessage = errorMessage;
+		this.migrationReason = migrationReason;
 		this.publicAddress = publicAddress;
 	}
 
@@ -189,43 +172,15 @@ public class MigrationBurnFailed implements Event {
 	/**
 	 * (Required)
 	 */
-	public String getErrorReason() {
-		return errorReason;
+	public MigrationRequestAccountMigrationSucceeded.MigrationReason getMigrationReason() {
+		return migrationReason;
 	}
 
 	/**
 	 * (Required)
 	 */
-	public void setErrorReason(String errorReason) {
-		this.errorReason = errorReason;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getErrorCode() {
-		return errorCode;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setErrorCode(String errorCode) {
-		this.errorCode = errorCode;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
-	/**
-	 * (Required)
-	 */
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public void setMigrationReason(MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason) {
+		this.migrationReason = migrationReason;
 	}
 
 	/**
@@ -240,6 +195,47 @@ public class MigrationBurnFailed implements Event {
 	 */
 	public void setPublicAddress(String publicAddress) {
 		this.publicAddress = publicAddress;
+	}
+
+	public enum MigrationReason {
+
+		@SerializedName("migrated")
+		MIGRATED("migrated"),
+		@SerializedName("already_migrated")
+		ALREADY_MIGRATED("already_migrated"),
+		@SerializedName("account_not_found")
+		ACCOUNT_NOT_FOUND("account_not_found");
+		private final String value;
+		private final static Map<String, MigrationRequestAccountMigrationSucceeded.MigrationReason> CONSTANTS = new HashMap<String, MigrationRequestAccountMigrationSucceeded.MigrationReason>();
+
+		static {
+			for (MigrationRequestAccountMigrationSucceeded.MigrationReason c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private MigrationReason(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static MigrationRequestAccountMigrationSucceeded.MigrationReason fromValue(String value) {
+			MigrationRequestAccountMigrationSucceeded.MigrationReason constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
 	}
 
 }
