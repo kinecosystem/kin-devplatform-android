@@ -4,12 +4,10 @@ public class JwtBody {
 
 	private String appId;
 	private String userId;
-	private String deviceId;
 
-	public JwtBody(String appId, String userId, String deviceId) {
+	public JwtBody(String appId, String userId) {
 		this.appId = appId;
 		this.userId = userId;
-		this.deviceId = deviceId;
 	}
 
 	public String getAppId() {
@@ -20,7 +18,4 @@ public class JwtBody {
 		return userId;
 	}
 
-	public String getDeviceId() {
-		return deviceId;
-	}
 }

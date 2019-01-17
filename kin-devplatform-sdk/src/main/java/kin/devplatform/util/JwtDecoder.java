@@ -11,7 +11,6 @@ public class JwtDecoder {
 
 	private static final String ISS_KEY = "iss";
 	private static final String USER_ID_KEY = "user_id";
-	private static final String DEVICE_ID_KEY = "device_id";
 	private static final int JWT_SPLIT_PARTS_SIZE = 3;
 
 	@Nullable
@@ -23,8 +22,7 @@ public class JwtDecoder {
 
 		JSONObject object = new JSONObject(body);
 		return new JwtBody(object.getString(ISS_KEY),
-			object.getString(USER_ID_KEY),
-			object.getString(DEVICE_ID_KEY));
+			object.getString(USER_ID_KEY));
 	}
 
 	@Nullable

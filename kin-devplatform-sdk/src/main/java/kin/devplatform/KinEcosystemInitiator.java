@@ -73,7 +73,7 @@ public final class KinEcosystemInitiator {
 	public void internalInit(Context context) {
 		if (!isInitialized) {
 			initConfiguration(context, null);
-			initEventManagerRelatedServices(context, null);
+			initEventManagerRelatedServices(context, null, null);
 			MigrationManager migrationManager = getMigrationManager(context, null);
 			try {
 				handleKinClientReady(migrationManager.getCurrentKinClient(), context, null, null,
@@ -96,7 +96,7 @@ public final class KinEcosystemInitiator {
 		SignInData signInData;
 		try {
 			signInData = getJwtSignInData(jwt);
-			initEventManagerRelatedServices(context, signInData);
+			initEventManagerRelatedServices(context, signInData, environment);
 		} catch (JSONException | IllegalArgumentException e) {
 			fireStartError(ErrorUtil.getClientException(ClientException.BAD_CONFIGURATION, e), loginCallback);
 			return;
@@ -106,14 +106,16 @@ public final class KinEcosystemInitiator {
 			return;
 		}
 
-		init(context, signInData.getAppId(), environment, signInData, loginCallback, migrationProcessCallback);
+		init(context, signInData.getAppId(), signInData, loginCallback, migrationProcessCallback);
 		// If initialized then do the login and if not then will do login at end of migration which happens inside init.
 		if (isInitialized) {
 			login(signInData, loginCallback);
 		}
 	}
 
-	private void initEventManagerRelatedServices(Context context, SignInData signInData) {
+	private void initEventManagerRelatedServices(Context context, SignInData signInData,
+		KinEnvironment environment) {
+		initConfiguration(context, environment);
 		AuthRepository
 			.init(AuthLocalData.getInstance(context, executorsUtil), AuthRemoteData.getInstance(executorsUtil));
 		if (signInData != null) {
@@ -136,10 +138,9 @@ public final class KinEcosystemInitiator {
 			.jwt(jwt);
 	}
 
-	private void init(Context context, String appId, KinEnvironment environment,
-		SignInData signInData, KinCallback<Void> loginCallback, KinMigrationListener migrationCallback) {
+	private void init(Context context, String appId, SignInData signInData, KinCallback<Void> loginCallback,
+		KinMigrationListener migrationCallback) {
 		if (!isInitialized) {
-			initConfiguration(context, environment);
 			MigrationManager migrationManager = getMigrationManager(context, appId);
 			try {
 				handleMigration(context, appId, migrationManager, signInData, loginCallback, migrationCallback);
