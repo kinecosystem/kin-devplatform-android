@@ -154,22 +154,23 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onFailure(KinEcosystemException error) {
 				Toast.makeText(MainActivity.this, "Starting SDK failed", Toast.LENGTH_LONG).show();
-				Log.d(TAG, "Kin.start() failed with =  " + ErrorUtil.getPrintableStackTrace(error));
+				Log.e(TAG, "Kin.start() failed with =  " + ErrorUtil.getPrintableStackTrace(error));
 			}
 		}, new KinMigrationListener() {
 			@Override
 			public void onStart() {
-				// TODO: 09/01/2019 use some progress bar.
+				Toast.makeText(MainActivity.this, "Migration started", Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
 			public void onFinish() {
-				// TODO: 09/01/2019 maybe do something here?
+				Toast.makeText(MainActivity.this, "Migration finished successfully!", Toast.LENGTH_SHORT).show();
 			}
 
 			@Override
 			public void onError(Exception e) {
-				// TODO: 09/01/2019 Depends on the exception maybe show some error dialog with the message from the exception
+				Log.e(TAG, "Migration onError, e =  " + ErrorUtil.getPrintableStackTrace(e));
+				Toast.makeText(MainActivity.this, "Migration failed with " + e.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
