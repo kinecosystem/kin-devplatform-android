@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.support.annotation.NonNull;
 import kin.devplatform.core.util.ExecutorsUtil;
-import kin.devplatform.data.Callback;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.SignInData.SignInTypeEnum;
@@ -62,6 +61,7 @@ public class AuthLocalData implements AuthDataSource.Local {
 
 				if (signInData.getSignInType() == SignInTypeEnum.JWT) {
 					editor.putString(JWT_KEY, signInData.getJwt());
+					editor.putString(USER_ID_KEY, signInData.getUserId());
 				} else {
 					editor.putString(USER_ID_KEY, signInData.getUserId());
 					editor.putString(APP_ID_KEY, signInData.getAppId());

@@ -20,8 +20,6 @@ import kin.devplatform.exception.ClientException;
 import kin.devplatform.main.view.EcosystemActivity;
 import kin.devplatform.marketplace.model.NativeOffer;
 import kin.devplatform.marketplace.model.NativeSpendOffer;
-import kin.devplatform.network.model.SignInData;
-import kin.devplatform.network.model.SignInData.SignInTypeEnum;
 import kin.devplatform.splash.view.SplashViewActivity;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.KinSdkVersion;
@@ -33,10 +31,9 @@ public class Kin {
 		Logger.enableLogs(enableLogs);
 	}
 
-	public static void start(Context appContext, String appId, @NonNull String jwt, @NonNull KinEnvironment environment,
-							 KinCallback<Void> kinCallback) {
-		SignInData signInData = getJwtSignInData(jwt);
-		KinEcosystemInitiator.getInstance().externalInit(appContext, appId, environment, signInData, kinCallback, null);
+	public static void start(Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment,
+		KinCallback<Void> kinCallback) {
+		KinEcosystemInitiator.getInstance().externalInit(appContext, environment, jwt, kinCallback, null);
 	}
 
 	/**
@@ -44,28 +41,20 @@ public class Kin {
 	 * happened in initialization process. This method can be called again (retry) in case of an error.
 	 * <p></p>
 	 * <p><b>Note:</b> SDK cannot be used before calling this method.</p>
-	 * <p><b>Note:</b> This method is not thread safe, and shouldn't be called multiple times in parallel. callbacks will be fired on
+	 * <p><b>Note:</b> This method is not thread safe, and shouldn't be called multiple times in parallel. callbacks
+	 * will be fired on
 	 * the main thread.</p>
 	 * <b>Note:</b> The first call to this method will create Kin wallet account for the user on Kin blockchain, this
-	 * process can take some time (couple of seconds), callback will be called only after account setup and creation will be
-	 * completed.
+	 * process can take some time (couple of seconds), callback will be called only after account setup and creation
+	 * will be completed.
 	 *
 	 * @param jwt 'register' jwt token required for authorized the user.
-	 * @param appId a 4 character string which represent the application id which will be added to each transaction.
-     *              <br><b>Note:</b> appId must contain only upper and/or lower case letters and/or digits and that the total string length is exactly 4.
-     *              For example 1234 or 2ab3 or bcda, etc.</br>
 	 * @param kinCallback success/failure callback
 	 */
-	public static void start(Context appContext, String appId, @NonNull String jwt, @NonNull KinEnvironment environment,
-							KinCallback<Void> kinCallback, KinMigrationListener migrationProcessCallback) {
-		SignInData signInData = getJwtSignInData(jwt);
-		KinEcosystemInitiator.getInstance().externalInit(appContext, appId, environment, signInData, kinCallback, migrationProcessCallback);
-	}
-
-	private static SignInData getJwtSignInData(@NonNull final String jwt) {
-		return new SignInData()
-				.signInType(SignInTypeEnum.JWT)
-				.jwt(jwt);
+	public static void start(Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment,
+		KinCallback<Void> kinCallback, KinMigrationListener migrationProcessCallback) {
+		KinEcosystemInitiator.getInstance()
+			.externalInit(appContext, environment, jwt, kinCallback, migrationProcessCallback);
 	}
 
 	private static void checkInitialized() throws ClientException {
@@ -173,7 +162,7 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized or account not logged in.
 	 */
 	public static void purchase(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
-			throws ClientException {
+		throws ClientException {
 		checkInitialized();
 		OrderRepository.getInstance().purchase(offerJwt, callback);
 	}
@@ -188,7 +177,7 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized or account not logged in.
 	 */
 	public static void payToUser(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
-			throws ClientException {
+		throws ClientException {
 		checkInitialized();
 		OrderRepository.getInstance().payToUser(offerJwt, callback);
 	}
@@ -202,7 +191,7 @@ public class Kin {
 	 * OrderConfirmation}, with the jwtConfirmation and you can validate the order when the order status is completed.
 	 */
 	public static void requestPayment(String offerJwt, @Nullable KinCallback<OrderConfirmation> callback)
-			throws ClientException {
+		throws ClientException {
 		checkInitialized();
 		OrderRepository.getInstance().requestPayment(offerJwt, callback);
 	}
@@ -214,7 +203,7 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized.
 	 */
 	public static void getOrderConfirmation(@NonNull String offerID, @NonNull KinCallback<OrderConfirmation> callback)
-			throws ClientException {
+		throws ClientException {
 		checkInitialized();
 		OrderRepository.getInstance().getExternalOrderStatus(offerID, callback);
 	}
@@ -225,7 +214,7 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized.
 	 */
 	public static void addNativeOfferClickedObserver(@NonNull Observer<NativeSpendOffer> observer)
-			throws ClientException {
+		throws ClientException {
 		checkInitialized();
 		OfferRepository.getInstance().addNativeOfferClickedObserver(observer);
 	}
@@ -236,7 +225,7 @@ public class Kin {
 	 * @throws ClientException - sdk not initialized.
 	 */
 	public static void removeNativeOfferClickedObserver(@NonNull Observer<NativeSpendOffer> observer)
-			throws ClientException {
+		throws ClientException {
 		checkInitialized();
 		OfferRepository.getInstance().removeNativeOfferClickedObserver(observer);
 	}

@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 		 * */
 		String jwt = SignInRepo.getJWT(this);
 		Kin.enableLogs(true);
-		Kin.start(getApplicationContext(), SignInRepo.getAppId(), jwt, Environment.getPlayground(),
+		Kin.start(getApplicationContext(), jwt, Environment.getPlayground(),
 			new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
