@@ -140,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
 		 * */
 		String jwt = SignInRepo.getJWT(this);
 		Kin.enableLogs(true);
-		Kin.start(getApplicationContext(), "test", jwt, Environment.getPlayground(), new KinCallback<Void>() {
+		Kin.start(getApplicationContext(), SignInRepo.getAppId(), jwt, Environment.getPlayground(),
+			new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
 				// TODO: 09/01/2019 maybe remove the progress bar that we added when migration was started?
