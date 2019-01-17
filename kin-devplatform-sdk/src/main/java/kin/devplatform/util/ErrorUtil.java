@@ -50,6 +50,7 @@ public class ErrorUtil {
 	private static final String ACCOUNT_IS_NOT_LOGGED_IN = "Account is not logged in, please call Kin.start(...) first.";
 	private static final String THEE_APP_ID_IS_INCORRECT = "The supplied app id is not the same as the app id found on the server";
 	private static final String ACCOUNT_CREATION_TIMEOUT = "Account creation has timeout";
+	private static final String BAD_JWT = "Bad or missing jwt";
 
 
 	private static final int REQUEST_TIMEOUT_CODE = 408;
@@ -157,6 +158,9 @@ public class ErrorUtil {
 				break;
 			case INCORRECT_APP_ID:
 				exception = new ClientException(INCORRECT_APP_ID, THEE_APP_ID_IS_INCORRECT, e);
+				break;
+			case ClientException.BAD_JWT:
+				exception = new ClientException(ClientException.BAD_JWT, BAD_JWT, e);
 				break;
 			case INTERNAL_INCONSISTENCY:
 			default:

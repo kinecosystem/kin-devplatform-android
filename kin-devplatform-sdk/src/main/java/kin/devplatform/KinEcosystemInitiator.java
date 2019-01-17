@@ -26,16 +26,21 @@ import kin.devplatform.data.order.OrderLocalData;
 import kin.devplatform.data.order.OrderRemoteData;
 import kin.devplatform.data.order.OrderRepository;
 import kin.devplatform.exception.BlockchainException;
+import kin.devplatform.exception.ClientException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.KinVersionProvider;
 import kin.devplatform.network.model.SignInData;
+import kin.devplatform.network.model.SignInData.SignInTypeEnum;
 import kin.devplatform.util.ErrorUtil;
+import kin.devplatform.util.JwtBody;
+import kin.devplatform.util.JwtDecoder;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.MigrationNetworkInfo;
 import kin.sdk.migration.exception.MigrationInProcessException;
 import kin.sdk.migration.interfaces.IKinClient;
 import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
+import org.json.JSONException;
 
 public final class KinEcosystemInitiator {
 
@@ -68,6 +73,7 @@ public final class KinEcosystemInitiator {
 	public void internalInit(Context context) {
 		if (!isInitialized) {
 			initConfiguration(context, null);
+			initEventManagerRelatedServices(context, null);
 			MigrationManager migrationManager = getMigrationManager(context, null);
 			try {
 				handleKinClientReady(migrationManager.getCurrentKinClient(), context, null, null,
@@ -85,20 +91,49 @@ public final class KinEcosystemInitiator {
 	/**
 	 * Uses for external (public API) initialization and jwt login.
 	 */
-	public void externalInit(Context context, String appId, KinEnvironment environment, @NonNull SignInData signInData,
+	public void externalInit(Context context, KinEnvironment environment, @NonNull String jwt,
 		final KinCallback<Void> loginCallback, @Nullable final KinMigrationListener migrationProcessCallback) {
+		SignInData signInData;
+		try {
+			signInData = getJwtSignInData(jwt);
+			initEventManagerRelatedServices(context, signInData);
+		} catch (JSONException | IllegalArgumentException e) {
+			fireStartError(ErrorUtil.getClientException(ClientException.BAD_CONFIGURATION, e), loginCallback);
+			return;
+		}
 		if (isInitialized && isLoggedIn) {
 			fireStartCompleted(loginCallback);
 			return;
 		}
-		if (appId != null) {
-			signInData.setAppId(appId);
-		}
-		init(context, appId, environment, signInData, loginCallback, migrationProcessCallback);
+
+		init(context, signInData.getAppId(), environment, signInData, loginCallback, migrationProcessCallback);
 		// If initialized then do the login and if not then will do login at end of migration which happens inside init.
 		if (isInitialized) {
 			login(signInData, loginCallback);
 		}
+	}
+
+	private void initEventManagerRelatedServices(Context context, SignInData signInData) {
+		AuthRepository
+			.init(AuthLocalData.getInstance(context, executorsUtil), AuthRemoteData.getInstance(executorsUtil));
+		if (signInData != null) {
+			String deviceID = AuthRepository.getInstance().getDeviceID();
+			signInData.setDeviceId(deviceID != null ? deviceID : UUID.randomUUID().toString());
+			AuthRepository.getInstance().setSignInData(signInData);
+		}
+		EventCommonDataUtil.setBaseData(context);
+	}
+
+	private SignInData getJwtSignInData(@NonNull final String jwt) throws JSONException {
+		JwtBody jwtBody = JwtDecoder.getJwtBody(jwt);
+		if (jwtBody == null) {
+			throw new IllegalArgumentException("jwt is empty");
+		}
+		return new SignInData()
+			.signInType(SignInTypeEnum.JWT)
+			.appId(jwtBody.getAppId())
+			.userId(jwtBody.getUserId())
+			.jwt(jwt);
 	}
 
 	private void init(Context context, String appId, KinEnvironment environment,
