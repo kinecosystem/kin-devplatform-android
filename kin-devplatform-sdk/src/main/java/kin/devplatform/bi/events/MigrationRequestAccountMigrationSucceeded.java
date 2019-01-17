@@ -1,0 +1,241 @@
+
+package kin.devplatform.bi.events;
+
+// Augmented by script
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import java.util.HashMap;
+import java.util.Map;
+import kin.devplatform.bi.Event;
+import kin.devplatform.bi.EventsStore;
+
+
+/**
+ * Requesting account migration succeeded
+ */
+public class MigrationRequestAccountMigrationSucceeded implements Event {
+
+	public static final String EVENT_NAME = "migration_request_account_migration_succeeded";
+	public static final String EVENT_TYPE = "log";
+
+	// Augmented by script
+	public static MigrationRequestAccountMigrationSucceeded create(
+		MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason, String publicAddress) {
+		return new MigrationRequestAccountMigrationSucceeded(
+			(Common) EventsStore.common(),
+			(User) EventsStore.user(),
+			(Client) EventsStore.client(),
+			migrationReason,
+			publicAddress);
+	}
+
+	/**
+	 * (Required)
+	 */
+	@SerializedName("event_name")
+	@Expose
+	private String eventName = EVENT_NAME;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("event_type")
+	@Expose
+	private String eventType = EVENT_TYPE;
+	/**
+	 * common properties for all events (Required)
+	 */
+	@SerializedName("common")
+	@Expose
+	private Common common;
+	/**
+	 * common user properties (Required)
+	 */
+	@SerializedName("user")
+	@Expose
+	private User user;
+	/**
+	 * common properties for all client events (Required)
+	 */
+	@SerializedName("client")
+	@Expose
+	private Client client;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("migration_reason")
+	@Expose
+	private MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason;
+	/**
+	 * (Required)
+	 */
+	@SerializedName("public_address")
+	@Expose
+	private String publicAddress;
+
+	/**
+	 * No args constructor for use in serialization
+	 */
+	public MigrationRequestAccountMigrationSucceeded() {
+	}
+
+	/**
+	 *
+	 * @param migrationReason
+	 * @param common
+
+	 * @param client
+	 * @param publicAddress
+
+	 * @param user
+	 */
+	public MigrationRequestAccountMigrationSucceeded(Common common, User user, Client client,
+		MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason, String publicAddress) {
+		super();
+		this.common = common;
+		this.user = user;
+		this.client = client;
+		this.migrationReason = migrationReason;
+		this.publicAddress = publicAddress;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getEventName() {
+		return eventName;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getEventType() {
+		return eventType;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setEventType(String eventType) {
+		this.eventType = eventType;
+	}
+
+	/**
+	 * common properties for all events (Required)
+	 */
+	public Common getCommon() {
+		return common;
+	}
+
+	/**
+	 * common properties for all events (Required)
+	 */
+	public void setCommon(Common common) {
+		this.common = common;
+	}
+
+	/**
+	 * common user properties (Required)
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * common user properties (Required)
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	/**
+	 * common properties for all client events (Required)
+	 */
+	public Client getClient() {
+		return client;
+	}
+
+	/**
+	 * common properties for all client events (Required)
+	 */
+	public void setClient(Client client) {
+		this.client = client;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public MigrationRequestAccountMigrationSucceeded.MigrationReason getMigrationReason() {
+		return migrationReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setMigrationReason(MigrationRequestAccountMigrationSucceeded.MigrationReason migrationReason) {
+		this.migrationReason = migrationReason;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public String getPublicAddress() {
+		return publicAddress;
+	}
+
+	/**
+	 * (Required)
+	 */
+	public void setPublicAddress(String publicAddress) {
+		this.publicAddress = publicAddress;
+	}
+
+	public enum MigrationReason {
+
+		@SerializedName("migrated")
+		MIGRATED("migrated"),
+		@SerializedName("already_migrated")
+		ALREADY_MIGRATED("already_migrated"),
+		@SerializedName("account_not_found")
+		ACCOUNT_NOT_FOUND("account_not_found");
+		private final String value;
+		private final static Map<String, MigrationRequestAccountMigrationSucceeded.MigrationReason> CONSTANTS = new HashMap<String, MigrationRequestAccountMigrationSucceeded.MigrationReason>();
+
+		static {
+			for (MigrationRequestAccountMigrationSucceeded.MigrationReason c : values()) {
+				CONSTANTS.put(c.value, c);
+			}
+		}
+
+		private MigrationReason(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return this.value;
+		}
+
+		public String value() {
+			return this.value;
+		}
+
+		public static MigrationRequestAccountMigrationSucceeded.MigrationReason fromValue(String value) {
+			MigrationRequestAccountMigrationSucceeded.MigrationReason constant = CONSTANTS.get(value);
+			if (constant == null) {
+				throw new IllegalArgumentException(value);
+			} else {
+				return constant;
+			}
+		}
+
+	}
+
+}

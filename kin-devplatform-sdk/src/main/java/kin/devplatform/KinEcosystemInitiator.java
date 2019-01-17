@@ -3,9 +3,7 @@ package kin.devplatform;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import java.util.UUID;
-
 import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.accountmanager.AccountManager.AccountState;
 import kin.devplatform.accountmanager.AccountManagerImpl;
@@ -33,10 +31,8 @@ import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.KinVersionProvider;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.KinSdkVersion;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.MigrationNetworkInfo;
-import kin.sdk.migration.bi.IMigrationEventsListener;
 import kin.sdk.migration.exception.MigrationInProcessException;
 import kin.sdk.migration.interfaces.IKinClient;
 import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
@@ -69,8 +65,7 @@ public final class KinEcosystemInitiator {
 	/**
 	 * Uses for internal initialization after process restart
 	 */
-	public void internalInit(
-		Context context) {
+	public void internalInit(Context context) {
 		if (!isInitialized) {
 			initConfiguration(context, null);
 			MigrationManager migrationManager = getMigrationManager(context, null);
@@ -121,7 +116,12 @@ public final class KinEcosystemInitiator {
 	}
 
 	private MigrationManager getMigrationManager(Context context, String appId) {
+		AuthRepository
+			.init(AuthLocalData.getInstance(context, executorsUtil),
+				AuthRemoteData.getInstance(executorsUtil));
+		EventCommonDataUtil.setBaseData(context);
 		KinEnvironment kinEnvironment = ConfigurationImpl.getInstance().getEnvironment();
+
 		final String oldNetworkUrl = kinEnvironment.getOldBlockchainNetworkUrl();
 		final String oldNetworkId = kinEnvironment.getOldBlockchainPassphrase();
 		final String newNetworkUrl = kinEnvironment.getNewBlockchainNetworkUrl();
@@ -132,92 +132,11 @@ public final class KinEcosystemInitiator {
 			appId = BlockchainSourceLocal.getInstance(context).getAppId();
 		}
 
-		MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId, newNetworkUrl,
-			newNetworkId, issuer);
-		return new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(appId)
-			, new IMigrationEventsListener() {
+		MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId,
+			newNetworkUrl, newNetworkId, issuer);
 
-			@Override
-			public void onMethodStarted() {
-
-			}
-
-			@Override
-			public void onVersionCheckStarted() {
-
-			}
-
-			@Override
-			public void onVersionCheckSucceeded(KinSdkVersion sdkVersion) {
-
-			}
-
-			@Override
-			public void onVersionCheckFailed(Exception exception) {
-
-			}
-
-			@Override
-			public void onCallbackStart() {
-
-			}
-
-			@Override
-			public void onCheckBurnStarted(String publicAddress) {
-
-			}
-
-			@Override
-			public void onCheckBurnSucceeded(String publicAddress, CheckBurnReason reason) {
-
-			}
-
-			@Override
-			public void onCheckBurnFailed(String publicAddress, Exception exception) {
-
-			}
-
-			@Override
-			public void onBurnStarted(String publicAddress) {
-
-			}
-
-			@Override
-			public void onBurnSucceeded(String publicAddress, BurnReason reason) {
-
-			}
-
-			@Override
-			public void onBurnFailed(String publicAddress, Exception exception) {
-
-			}
-
-			@Override
-			public void onRequestAccountMigrationStarted(String publicAddress) {
-
-			}
-
-			@Override
-			public void onRequestAccountMigrationSucceeded(String publicAddress,
-				RequestAccountMigrationSuccessReason reason) {
-
-			}
-
-			@Override
-			public void onRequestAccountMigrationFailed(String publicAddress, Exception exception) {
-
-			}
-
-			@Override
-			public void onCallbackReady(KinSdkVersion sdkVersion, SelectedSdkReason selectedSdkReason) {
-
-			}
-
-			@Override
-			public void onCallbackFailed(Exception exception) {
-
-			}
-		}, KIN_ECOSYSTEM_STORE_PREFIX_KEY);
+		return new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(appId),
+			new MigrationEventsListener(EventLoggerImpl.getInstance()), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
 	}
 
 	private void initConfiguration(Context context, KinEnvironment environment) {
@@ -229,10 +148,11 @@ public final class KinEcosystemInitiator {
 		ConfigurationImpl.init(configurationLocal);
 	}
 
-	private void handleMigration(final Context context, final String appId, final MigrationManager migrationManager,
+	private void handleMigration(final Context context, final String appId,
+		final MigrationManager migrationManager,
 		final SignInData signInData,
-		final KinCallback<Void> loginCallback, final KinMigrationListener migrationCallback)
-		throws MigrationInProcessException {
+		final KinCallback<Void> loginCallback, final KinMigrationListener migrationCallback) throws
+		MigrationInProcessException {
 		migrationManager.start(new IMigrationManagerCallbacks() {
 			@Override
 			public void onMigrationStart() {
@@ -246,7 +166,8 @@ public final class KinEcosystemInitiator {
 			public void onReady(IKinClient kinClient) {
 				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
 				try {
-					handleKinClientReady(kinClient, context, appId, signInData, true, loginCallback, migrationCallback);
+					handleKinClientReady(kinClient, context, appId, signInData, true, loginCallback,
+						migrationCallback);
 				} catch (BlockchainException e) {
 					fireStartError(e, loginCallback);
 				}
@@ -273,12 +194,6 @@ public final class KinEcosystemInitiator {
 		if (appId != null) {
 			BlockchainSourceImpl.getInstance().setAppID(appId);
 		}
-
-		AuthRepository
-			.init(AuthLocalData.getInstance(context, executorsUtil),
-				AuthRemoteData.getInstance(executorsUtil));
-
-		EventCommonDataUtil.setBaseData(context);
 
 		AccountManagerImpl
 			.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),

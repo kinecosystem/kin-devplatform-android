@@ -80,7 +80,8 @@ class EventCommonDataUtil {
 				userProxy.setBalance(new DynamicValue<Double>() {
 					@Override
 					public Double get() {
-						return BlockchainSourceImpl.getInstance().getBalance().getAmount().doubleValue();
+						return BlockchainSourceImpl.getInstance() == null ? null :
+							BlockchainSourceImpl.getInstance().getBalance().getAmount().doubleValue();
 					}
 				});
 
