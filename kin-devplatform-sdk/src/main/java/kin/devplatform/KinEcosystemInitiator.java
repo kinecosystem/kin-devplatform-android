@@ -154,8 +154,12 @@ public final class KinEcosystemInitiator {
 		final KinCallback<Void> loginCallback, final KinMigrationListener migrationCallback) throws
 		MigrationInProcessException {
 		migrationManager.start(new IMigrationManagerCallbacks() {
+
+			private boolean didMigrationStarted;
+
 			@Override
 			public void onMigrationStart() {
+				didMigrationStarted = true;
 				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onMigrationStart"));
 				if (migrationCallback != null) {
 					migrationCallback.onStart();
@@ -168,7 +172,12 @@ public final class KinEcosystemInitiator {
 				try {
 					handleKinClientReady(kinClient, context, appId, signInData, true, loginCallback,
 						migrationCallback);
+					if (migrationCallback != null && didMigrationStarted) {
+						didMigrationStarted = false;
+						migrationCallback.onFinish();
+					}
 				} catch (BlockchainException e) {
+					didMigrationStarted = false;
 					fireStartError(e, loginCallback);
 				}
 			}
@@ -184,12 +193,9 @@ public final class KinEcosystemInitiator {
 	}
 
 	private void handleKinClientReady(IKinClient kinClient, Context context, String appId, SignInData signInData,
-		boolean withLogin,
-		KinCallback<Void> loginCallback, KinMigrationListener migrationCallback) throws BlockchainException {
+		boolean withLogin, KinCallback<Void> loginCallback,
+		KinMigrationListener migrationCallback) throws BlockchainException {
 		final EventLogger eventLogger = EventLoggerImpl.getInstance();
-		if (migrationCallback != null) {
-			migrationCallback.onFinish();
-		}
 		BlockchainSourceImpl.init(eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
 		if (appId != null) {
 			BlockchainSourceImpl.getInstance().setAppID(appId);
