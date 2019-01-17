@@ -159,8 +159,8 @@ public final class KinEcosystemInitiator {
 
 			@Override
 			public void onMigrationStart() {
-				didMigrationStarted = true;
 				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onMigrationStart"));
+				didMigrationStarted = true;
 				if (migrationCallback != null) {
 					migrationCallback.onStart();
 				}
