@@ -131,7 +131,8 @@ public class OrderRepository implements OrderDataSource {
 			@Override
 			public void onResponse(OpenOrder response) {
 				if (response != null) {
-					if (validateBlockchainVersions(response.getBlockchainData())) {
+					boolean validationSucceed = validateBlockchainVersions(response.getBlockchainData());
+					if (!validationSucceed) {
 						cancelOrder(response.getOfferId(), response.getId(), null);
 						if (callback != null) {
 							callback.onFailure(new MigrationNeededException());
@@ -163,7 +164,8 @@ public class OrderRepository implements OrderDataSource {
 		remoteData.submitOrder(content, order.getId(), new Callback<Order, ApiException>() {
 			@Override
 			public void onResponse(Order response) {
-				if (validateBlockchainVersions(response.getBlockchainData())) {
+				boolean validationSucceed = validateBlockchainVersions(response.getBlockchainData());
+				if (!validationSucceed) {
 					updateFailure(new Error("Migration needed", MigrationNeededException.EXCEPTION_MESSAGE,
 						MIGRATION_IS_NEEDED));
 					if (callback != null) {

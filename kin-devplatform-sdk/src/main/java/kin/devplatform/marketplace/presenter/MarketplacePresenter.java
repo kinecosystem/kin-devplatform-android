@@ -1,6 +1,8 @@
 package kin.devplatform.marketplace.presenter;
 
 
+import static kin.devplatform.exception.BlockchainException.MIGRATION_IS_NEEDED;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.gson.Gson;
@@ -16,6 +18,7 @@ import kin.devplatform.bi.events.EarnOfferTapped;
 import kin.devplatform.bi.events.MarketplacePageViewed;
 import kin.devplatform.bi.events.NotEnoughKinPageViewed;
 import kin.devplatform.bi.events.SpendOfferTapped;
+import kin.devplatform.core.network.model.Error;
 import kin.devplatform.data.KinCallbackAdapter;
 import kin.devplatform.data.blockchain.BlockchainSource;
 import kin.devplatform.data.offer.OfferDataSource;
@@ -103,6 +106,13 @@ public class MarketplacePresenter extends BasePresenter<IMarketplaceView> implem
 						removeOfferFromList(order.getOfferId(), order.getOfferType());
 						break;
 					case FAILED:
+						Error error = order.getError();
+						if (error != null &&  error.getCode() == MIGRATION_IS_NEEDED) {
+							if (view != null) {
+								view.showMigrationErrorDialog();
+							}
+							break;
+						}
 					case COMPLETED:
 						getOffers();
 						break;

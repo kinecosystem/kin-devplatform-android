@@ -19,7 +19,7 @@ android {
 dependencies {
 
     implementation project(':kin-devplatform-core')
-    implementation 'com.github.kinecosystem:kin-migration-module-android:0308aca'
+    implementation 'com.github.kinecosystem:kin-migration-module-android:8ccb3a91c6'
     implementation 'com.github.kinecosystem.kin-ecosystem-android-sdk:recovery:d73ef56'
     api 'com.github.kinecosystem:kin-utils-android:1.1'
     implementation devDependencies.appCompat_v7

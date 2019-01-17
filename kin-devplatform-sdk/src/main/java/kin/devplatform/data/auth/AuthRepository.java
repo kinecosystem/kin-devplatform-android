@@ -40,7 +40,7 @@ public class AuthRepository implements AuthDataSource {
 	}
 
 	public static void init(@NonNull Local localData,
-							@NonNull Remote remoteData) {
+		@NonNull Remote remoteData) {
 		if (instance == null) {
 			synchronized (AuthRepository.class) {
 				if (instance == null) {
@@ -81,7 +81,6 @@ public class AuthRepository implements AuthDataSource {
 
 	@Override
 	public String getAppID() {
-		loadCachedAppIDIfNeeded(); // TODO: 13/01/2019 do we still need this method?
 		return cachedSignInData != null ? cachedSignInData.getAppId() : null;
 	}
 
@@ -98,25 +97,6 @@ public class AuthRepository implements AuthDataSource {
 	@Override
 	public String getEcosystemUserID() {
 		return localData.getEcosystemUserID();
-	}
-
-	private void loadCachedAppIDIfNeeded() {
-		if (cachedSignInData != null && TextUtils.isEmpty(cachedSignInData.getAppId())) {
-			localData.getAppId(new Callback<String, Void>() {
-				@Override
-				public void onResponse(String appID) {
-					int i = 0;
-					i++; // TODO: 14/01/2019 delete after test
-				}
-
-				@Override
-				public void onFailure(Void t) {
-					// No Data Available
-					int i = 0;
-					i++; // TODO: 14/01/2019 delete after test
-				}
-			});
-		}
 	}
 
 	@Override
