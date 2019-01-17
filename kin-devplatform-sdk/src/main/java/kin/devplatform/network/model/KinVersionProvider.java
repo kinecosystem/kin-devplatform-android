@@ -8,8 +8,14 @@ import kin.sdk.migration.interfaces.IKinVersionProvider;
 
 public class KinVersionProvider implements IKinVersionProvider {
 
+    private final String appId;
+
+    public KinVersionProvider(String appId) {
+        this.appId = appId;
+    }
+
     @Override
-    public KinSdkVersion getKinSdkVersion(String appId) throws FailedToResolveSdkVersionException {
+    public KinSdkVersion getKinSdkVersion() throws FailedToResolveSdkVersionException {
         KinVersionApi kinVersionApi = new KinVersionApi();
         KinSdkVersion sdkVersion;
         try {
