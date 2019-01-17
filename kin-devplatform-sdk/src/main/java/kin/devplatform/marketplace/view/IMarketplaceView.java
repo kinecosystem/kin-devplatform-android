@@ -17,6 +17,8 @@ public interface IMarketplaceView extends IBaseView<IMarketplacePresenter> {
 
 	void showSpendDialog(ISpendDialogPresenter spendDialogPresenter);
 
+	void showMigrationErrorDialog();
+
 	void showToast(String msg);
 
 	void notifyEarnItemRemoved(int index);

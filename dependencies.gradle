@@ -1,7 +1,6 @@
 ext {
 
     //Version
-    kinCoreVersion = '3907369a9c'
     constraintLayoutVersion = '1.1.2'
     supportVersion = '26.1.0'
     picassoVersion = '2.71828'
@@ -27,7 +26,6 @@ ext {
     robolectricPackage = 'org.robolectric'
 
     devDependencies = [
-            kinCore            : buildDependency(kinFoundationPackage, 'kin-core-android', kinCoreVersion),
             appCompat_v7       : buildDependency(supportPackage, 'appcompat-v7', supportVersion),
             recyclerView_v7    : buildDependency(supportPackage, 'recyclerview-v7', supportVersion),
             constraintLayout   : buildDependency(constraintLayoutPackage, 'constraint-layout', constraintLayoutVersion),

@@ -14,6 +14,8 @@ public class BlockchainData {
 	private String senderAddress = null;
 	@SerializedName("recipient_address")
 	private String recipientAddress = null;
+	@SerializedName("blockchain_version")
+	private String blockchainVersion;
 
 	public BlockchainData transactionId(String transactionId) {
 		this.transactionId = transactionId;
@@ -72,6 +74,10 @@ public class BlockchainData {
 		this.recipientAddress = recipientAddress;
 	}
 
+	public String getBlockchainVersion() {
+		return blockchainVersion;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -83,7 +89,8 @@ public class BlockchainData {
 		BlockchainData blockchainData = (BlockchainData) o;
 		return Objects.equals(this.transactionId, blockchainData.transactionId) &&
 			Objects.equals(this.senderAddress, blockchainData.senderAddress) &&
-			Objects.equals(this.recipientAddress, blockchainData.recipientAddress);
+			Objects.equals(this.recipientAddress, blockchainData.recipientAddress) &&
+			Objects.equals(this.blockchainVersion, blockchainData.blockchainVersion);
 	}
 
 	@Override

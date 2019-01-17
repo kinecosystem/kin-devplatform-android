@@ -6,18 +6,23 @@ import android.text.TextUtils;
 import java.util.Calendar;
 import java.util.Date;
 import kin.devplatform.KinCallback;
-import kin.devplatform.base.ObservableData;
+import kin.devplatform.Log;
+import kin.devplatform.Logger;
 import kin.devplatform.core.network.ApiException;
 import kin.devplatform.core.util.DateUtil;
 import kin.devplatform.data.Callback;
+import kin.devplatform.exception.ClientException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.UserProperties;
 import kin.devplatform.util.ErrorUtil;
 
+import static kin.devplatform.Log.ERROR;
+import static kin.devplatform.exception.ClientException.INCORRECT_APP_ID;
+
 public class AuthRepository implements AuthDataSource {
 
-
+	private final static String TAG = AuthRepository.class.getSimpleName();
 	private static AuthRepository instance = null;
 
 	private final AuthDataSource.Local localData;
@@ -25,7 +30,6 @@ public class AuthRepository implements AuthDataSource {
 
 	private SignInData cachedSignInData;
 	private AuthToken cachedAuthToken;
-	private ObservableData<String> appId = ObservableData.create(null);
 
 	private AuthRepository(@NonNull AuthDataSource.Local local,
 		@NonNull AuthDataSource.Remote remote) {
@@ -35,8 +39,8 @@ public class AuthRepository implements AuthDataSource {
 		this.cachedAuthToken = local.getAuthTokenSync();
 	}
 
-	public static void init(@NonNull AuthDataSource.Local localData,
-		@NonNull AuthDataSource.Remote remoteData) {
+	public static void init(@NonNull Local localData,
+		@NonNull Remote remoteData) {
 		if (instance == null) {
 			synchronized (AuthRepository.class) {
 				if (instance == null) {
@@ -55,7 +59,6 @@ public class AuthRepository implements AuthDataSource {
 		cachedSignInData = signInData;
 		localData.setSignInData(signInData);
 		remoteData.setSignInData(signInData);
-		postAppID(signInData.getAppId());
 	}
 
 	@Override
@@ -77,9 +80,8 @@ public class AuthRepository implements AuthDataSource {
 	}
 
 	@Override
-	public ObservableData<String> getAppID() {
-		loadCachedAppIDIfNeeded();
-		return appId;
+	public String getAppID() {
+		return cachedSignInData != null ? cachedSignInData.getAppId() : null;
 	}
 
 	@Override
@@ -97,22 +99,6 @@ public class AuthRepository implements AuthDataSource {
 		return localData.getEcosystemUserID();
 	}
 
-	private void loadCachedAppIDIfNeeded() {
-		if (TextUtils.isEmpty(appId.getValue())) {
-			localData.getAppId(new Callback<String, Void>() {
-				@Override
-				public void onResponse(String appID) {
-					postAppID(appID);
-				}
-
-				@Override
-				public void onFailure(Void t) {
-					// No Data Available
-				}
-			});
-		}
-	}
-
 	@Override
 	@Nullable
 	public AuthToken getCachedAuthToken() {
@@ -125,11 +111,16 @@ public class AuthRepository implements AuthDataSource {
 			return cachedAuthToken;
 		} else {
 			if (cachedSignInData != null) {
-				AuthToken authToken = localData.getAuthTokenSync();
-				if (authToken != null && !isAuthTokenExpired(authToken)) {
-					setAuthToken(authToken);
-				} else {
-					refreshTokenSync();
+				try {
+					AuthToken authToken = localData.getAuthTokenSync();
+					if (authToken != null && !isAuthTokenExpired(authToken)) {
+						setAuthToken(authToken);
+					} else {
+						refreshTokenSync();
+					}
+				} catch (ClientException e) {
+					Logger.log(new Log().priority(ERROR).withTag(TAG).text("incorrect app id"));
+					return null;
 				}
 				return cachedAuthToken;
 			} else {
@@ -155,15 +146,21 @@ public class AuthRepository implements AuthDataSource {
 	private void refreshTokenSync() {
 		AuthToken authToken = remoteData.getAuthTokenSync();
 		if (authToken != null) {
-			setAuthToken(authToken);
+			try {
+				setAuthToken(authToken);
+			} catch (ClientException e) {
+				Logger.log(new Log().priority(ERROR).withTag(TAG).text("incorrect app id"));
+			}
 		}
 	}
 
 	@Override
-	public void setAuthToken(@NonNull AuthToken authToken) {
+	public void setAuthToken(@NonNull AuthToken authToken) throws ClientException {
 		cachedAuthToken = authToken;
 		localData.setAuthToken(authToken);
-		postAppID(authToken.getAppID());
+		if (!cachedSignInData.getAppId().equals(authToken.getAppID())) {
+			throw ErrorUtil.getClientException(INCORRECT_APP_ID, null);
+		}
 	}
 
 	@Override
@@ -171,10 +168,15 @@ public class AuthRepository implements AuthDataSource {
 		remoteData.getAuthToken(new Callback<AuthToken, ApiException>() {
 			@Override
 			public void onResponse(AuthToken authToken) {
-				setAuthToken(authToken);
-				if (callback != null) {
-					callback.onResponse(cachedAuthToken);
+				try {
+					setAuthToken(authToken);
+					if (callback != null) {
+						callback.onResponse(cachedAuthToken);
+					}
+				} catch (ClientException e) {
+					onFailure(new ApiException(INCORRECT_APP_ID, e));
 				}
+
 			}
 
 			@Override
@@ -184,10 +186,6 @@ public class AuthRepository implements AuthDataSource {
 				}
 			}
 		});
-	}
-
-	private void postAppID(@Nullable String appID) {
-		appId.postValue(appID);
 	}
 
 	@Override
@@ -201,13 +199,21 @@ public class AuthRepository implements AuthDataSource {
 			@Override
 			public void onResponse(AuthToken response) {
 				localData.activateAccount();
-				setAuthToken(response);
-				callback.onResponse(null);
+				try {
+					setAuthToken(response);
+					if (callback != null) {
+						callback.onResponse(null);
+					}
+				} catch (ClientException e) {
+					onFailure(new ApiException(INCORRECT_APP_ID, e));
+				}
 			}
 
 			@Override
 			public void onFailure(ApiException e) {
-				callback.onFailure(ErrorUtil.fromApiException(e));
+				if (callback != null) {
+					callback.onFailure(ErrorUtil.fromApiException(e));
+				}
 			}
 		});
 	}

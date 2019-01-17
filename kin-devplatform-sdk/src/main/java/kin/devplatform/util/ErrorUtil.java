@@ -6,6 +6,7 @@ import static kin.devplatform.exception.BlockchainException.ACCOUNT_NOT_FOUND;
 import static kin.devplatform.exception.BlockchainException.INSUFFICIENT_KIN;
 import static kin.devplatform.exception.BlockchainException.TRANSACTION_FAILED;
 import static kin.devplatform.exception.ClientException.BAD_CONFIGURATION;
+import static kin.devplatform.exception.ClientException.INCORRECT_APP_ID;
 import static kin.devplatform.exception.ClientException.INTERNAL_INCONSISTENCY;
 import static kin.devplatform.exception.ClientException.SDK_NOT_STARTED;
 import static kin.devplatform.exception.KinEcosystemException.UNKNOWN;
@@ -17,11 +18,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import kin.core.exception.AccountNotActivatedException;
-import kin.core.exception.AccountNotFoundException;
-import kin.core.exception.CreateAccountException;
-import kin.core.exception.InsufficientKinException;
-import kin.core.exception.TransactionFailedException;
 import kin.devplatform.core.network.ApiException;
 import kin.devplatform.core.network.model.Error;
 import kin.devplatform.exception.BlockchainException;
@@ -30,6 +26,11 @@ import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.exception.ServiceException;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
+import kin.sdk.migration.exception.AccountNotActivatedException;
+import kin.sdk.migration.exception.AccountNotFoundException;
+import kin.sdk.migration.exception.CreateAccountException;
+import kin.sdk.migration.exception.InsufficientKinException;
+import kin.sdk.migration.exception.TransactionFailedException;
 
 public class ErrorUtil {
 
@@ -47,6 +48,7 @@ public class ErrorUtil {
 	private static final String FAILED_TO_LOAD_ACCOUNT_ON_INDEX = "Failed to load blockchain wallet on index %d";
 	private static final String ORDER_NOT_FOUND = "Cannot found a order";
 	private static final String ACCOUNT_IS_NOT_LOGGED_IN = "Account is not logged in, please call Kin.start(...) first.";
+	private static final String THEE_APP_ID_IS_INCORRECT = "The supplied app id is not the same as the app id found on the server";
 	private static final String ACCOUNT_CREATION_TIMEOUT = "Account creation has timeout";
 
 
@@ -92,6 +94,9 @@ public class ErrorUtil {
 					break;
 				case INTERNAL_INCONSISTENCY:
 					exception = new ClientException(INTERNAL_INCONSISTENCY, THE_OPERATION_TIMED_OUT, apiException);
+					break;
+				case INCORRECT_APP_ID:
+					exception = new ClientException(INTERNAL_INCONSISTENCY, THEE_APP_ID_IS_INCORRECT, apiException);
 					break;
 				default:
 					exception = createUnknownException(apiException);
@@ -149,6 +154,9 @@ public class ErrorUtil {
 				break;
 			case ClientException.ACCOUNT_NOT_LOGGED_IN:
 				exception = new ClientException(ClientException.ACCOUNT_NOT_LOGGED_IN, ACCOUNT_IS_NOT_LOGGED_IN, e);
+				break;
+			case INCORRECT_APP_ID:
+				exception = new ClientException(INCORRECT_APP_ID, THEE_APP_ID_IS_INCORRECT, e);
 				break;
 			case INTERNAL_INCONSISTENCY:
 			default:

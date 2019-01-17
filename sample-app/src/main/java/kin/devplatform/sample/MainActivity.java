@@ -25,6 +25,7 @@ import java.util.Random;
 import kin.devplatform.Environment;
 import kin.devplatform.Kin;
 import kin.devplatform.KinCallback;
+import kin.devplatform.KinMigrationListener;
 import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.OrderConfirmation;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 	private Button showPublicAddressButton;
 	private Button payToUserButton;
 	private Button getOrderConfirmationButton;
+	private boolean isInitialized;
 
 	private TextView publicAddressTextArea;
 	private KinCallback<OrderConfirmation> nativeSpendOrderConfirmationCallback;
@@ -138,19 +140,36 @@ public class MainActivity extends AppCompatActivity {
 		 * */
 		String jwt = SignInRepo.getJWT(this);
 		Kin.enableLogs(true);
-		Kin.start(getApplicationContext(), jwt, Environment.getPlayground(), new KinCallback<Void>() {
+		Kin.start(getApplicationContext(), "test", jwt, Environment.getPlayground(), new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
+				// TODO: 09/01/2019 maybe remove the progress bar that we added when migration was started?
 				Toast.makeText(MainActivity.this, "Starting SDK succeeded", Toast.LENGTH_LONG).show();
 				addNativeSpendOffer(nativeSpendOffer);
 				addNativeOfferClickedObserver();
-
+				addBalanceObserver();
+				isInitialized = true;
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException error) {
 				Toast.makeText(MainActivity.this, "Starting SDK failed", Toast.LENGTH_LONG).show();
 				Log.d(TAG, "Kin.start() failed with =  " + ErrorUtil.getPrintableStackTrace(error));
+			}
+		}, new KinMigrationListener() {
+			@Override
+			public void onStart() {
+				// TODO: 09/01/2019 use some progress bar.
+			}
+
+			@Override
+			public void onFinish() {
+				// TODO: 09/01/2019 maybe do something here?
+			}
+
+			@Override
+			public void onError(Exception e) {
+				// TODO: 09/01/2019 Depends on the exception maybe show some error dialog with the message from the exception
 			}
 		});
 	}
@@ -208,7 +227,10 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		addBalanceObserver();
+		// only if sdk is initialized then add the observer.
+		if (isInitialized) {
+			addBalanceObserver();
+		}
 	}
 
 	@Override

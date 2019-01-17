@@ -4,13 +4,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.kin.ecosystem.recovery.KeyStoreProvider;
 import java.math.BigDecimal;
-import kin.core.KinAccount;
-import kin.core.exception.OperationFailedException;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
+import kin.sdk.migration.KinSdkVersion;
+import kin.sdk.migration.exception.OperationFailedException;
+import kin.sdk.migration.interfaces.IKinAccount;
 import kin.devplatform.network.model.OpenOrder;
 
 public interface BlockchainSource {
@@ -19,12 +20,17 @@ public interface BlockchainSource {
 	 * Getting the current account.
 	 */
 	@Nullable
-	KinAccount getKinAccount();
+	IKinAccount getKinAccount();
 
 	/**
 	 * @param appID - appID - will be included in the memo for each transaction.
 	 */
 	void setAppID(String appID);
+
+	/**
+	 * @return the app id
+	 */
+	String getAppId();
 
 	/**
 	 * Send transaction to the network
@@ -45,6 +51,11 @@ public interface BlockchainSource {
 	 * Get balance from network
 	 */
 	void getBalance(@Nullable final KinCallback<Balance> callback);
+
+	/**
+	 * @return true if the account is on the new kin blockchain, meaning we are using the new kin sdk.
+	 */
+	KinSdkVersion getKinSdkVersion();
 
 	/**
 	 * Reconnect the balance connection, due to connection lose.
@@ -107,5 +118,9 @@ public interface BlockchainSource {
 		int getAccountIndex();
 
 		void setAccountIndex(int index);
+
+		String getAppId();
+
+		void setAppId(String appId);
 	}
 }

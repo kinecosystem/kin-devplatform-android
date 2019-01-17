@@ -11,9 +11,11 @@ public class ConfigurationLocal implements Configuration.Local {
 
 	private static final String CONFIGURATION_PREF_NAME = "com.kin.ecosystem.sdk_configuration_pref";
 
-	private static final String BLOCKCHAIN_NETWORK_URL_KEY = "blockchain_network_url";
-	private static final String BLOCKCHAIN_PASSPHRASE_KEY = "blockchain_passphrase";
-	private static final String ISSUER_KEY = "issuer";
+	private static final String OLD_BLOCKCHAIN_NETWORK_URL_KEY = "old_blockchain_network_url";
+	private static final String OLD_BLOCKCHAIN_PASSPHRASE_KEY = "old_blockchain_passphrase";
+	private static final String NEW_BLOCKCHAIN_NETWORK_URL_KEY = "new_blockchain_network_url";
+	private static final String NEW_BLOCKCHAIN_PASSPHRASE_KEY = "new_blockchain_passphrase";
+	private static final String OLD_BLOCKCHAIN_ISSUER_KEY = "old_blockchain_issuer";
 	private static final String ECOSYSTEM_SERVER_URL_KEY = "ecosystem_server_url";
 	private static final String ECOSYSTEM_WEB_FRONT_URL_KEY = "ecosystem_web_front_url";
 	private static final String BI_URL_KEY = "bi_url";
@@ -40,18 +42,20 @@ public class ConfigurationLocal implements Configuration.Local {
 
 	@Override
 	public KinEnvironment getEnvironment() {
-		final String blockchainNetworkUrl = configurationSharedPreferences.getString(BLOCKCHAIN_NETWORK_URL_KEY, null);
-		final String blockchainPassphrase = configurationSharedPreferences.getString(BLOCKCHAIN_PASSPHRASE_KEY, null);
-		final String issuer = configurationSharedPreferences.getString(ISSUER_KEY, null);
+		final String oldBlockchainNetworkUrl = configurationSharedPreferences.getString(OLD_BLOCKCHAIN_NETWORK_URL_KEY, null);
+		final String oldBlockchainPassphrase = configurationSharedPreferences.getString(OLD_BLOCKCHAIN_PASSPHRASE_KEY, null);
+		final String newBlockchainNetworkUrl = configurationSharedPreferences.getString(NEW_BLOCKCHAIN_NETWORK_URL_KEY, null);
+		final String newBlockchainPassphrase = configurationSharedPreferences.getString(NEW_BLOCKCHAIN_PASSPHRASE_KEY, null);
+		final String issuer = configurationSharedPreferences.getString(OLD_BLOCKCHAIN_ISSUER_KEY, null);
 		final String ecosystemServerUrl = configurationSharedPreferences.getString(ECOSYSTEM_SERVER_URL_KEY, null);
 		final String ecosystemWebFrontUrl = configurationSharedPreferences.getString(ECOSYSTEM_WEB_FRONT_URL_KEY, null);
 		final String biUrl = configurationSharedPreferences.getString(BI_URL_KEY, null);
-		if (blockchainNetworkUrl == null || blockchainPassphrase == null ||
+		if (oldBlockchainNetworkUrl == null || oldBlockchainPassphrase == null || newBlockchainNetworkUrl  == null || newBlockchainPassphrase == null ||
 			issuer == null || ecosystemServerUrl == null || ecosystemWebFrontUrl == null || biUrl == null) {
 			return null;
 		} else {
-			return new Environment(blockchainNetworkUrl, blockchainPassphrase, issuer, ecosystemServerUrl,
-				ecosystemWebFrontUrl, biUrl);
+			return new Environment(oldBlockchainNetworkUrl, oldBlockchainPassphrase, newBlockchainNetworkUrl, newBlockchainPassphrase,
+					issuer, ecosystemServerUrl, ecosystemWebFrontUrl, biUrl);
 		}
 
 	}
@@ -59,9 +63,11 @@ public class ConfigurationLocal implements Configuration.Local {
 	@Override
 	public void setEnvironment(@NonNull KinEnvironment kinEnvironment) {
 		Editor editor = configurationSharedPreferences.edit();
-		editor.putString(BLOCKCHAIN_NETWORK_URL_KEY, kinEnvironment.getBlockchainNetworkUrl());
-		editor.putString(BLOCKCHAIN_PASSPHRASE_KEY, kinEnvironment.getBlockchainPassphrase());
-		editor.putString(ISSUER_KEY, kinEnvironment.getIssuer());
+		editor.putString(OLD_BLOCKCHAIN_NETWORK_URL_KEY, kinEnvironment.getOldBlockchainNetworkUrl());
+		editor.putString(OLD_BLOCKCHAIN_PASSPHRASE_KEY, kinEnvironment.getOldBlockchainPassphrase());
+		editor.putString(NEW_BLOCKCHAIN_NETWORK_URL_KEY, kinEnvironment.getNewBlockchainNetworkUrl());
+		editor.putString(NEW_BLOCKCHAIN_PASSPHRASE_KEY, kinEnvironment.getNewBlockchainPassphrase());
+		editor.putString(OLD_BLOCKCHAIN_ISSUER_KEY, kinEnvironment.getOldBlockchainIssuer());
 		editor.putString(ECOSYSTEM_SERVER_URL_KEY, kinEnvironment.getEcosystemServerUrl());
 		editor.putString(ECOSYSTEM_WEB_FRONT_URL_KEY, kinEnvironment.getEcosystemWebFront());
 		editor.putString(BI_URL_KEY, kinEnvironment.getBiUrl());
