@@ -71,7 +71,7 @@ public final class KinEcosystemInitiator {
 			MigrationManager migrationManager = getMigrationManager(context, null);
 			try {
 				handleKinClientReady(migrationManager.getCurrentKinClient(), context, null, null,
-					false, null, null);
+					false, null);
 			} catch (BlockchainException e) {
 				EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
 					ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
@@ -170,8 +170,7 @@ public final class KinEcosystemInitiator {
 			public void onReady(IKinClient kinClient) {
 				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
 				try {
-					handleKinClientReady(kinClient, context, appId, signInData, true, loginCallback,
-						migrationCallback);
+					handleKinClientReady(kinClient, context, appId, signInData, true, loginCallback);
 					if (migrationCallback != null && didMigrationStarted) {
 						didMigrationStarted = false;
 						migrationCallback.onFinish();
@@ -193,8 +192,7 @@ public final class KinEcosystemInitiator {
 	}
 
 	private void handleKinClientReady(IKinClient kinClient, Context context, String appId, SignInData signInData,
-		boolean withLogin, KinCallback<Void> loginCallback,
-		KinMigrationListener migrationCallback) throws BlockchainException {
+		boolean withLogin, KinCallback<Void> loginCallback) throws BlockchainException {
 		final EventLogger eventLogger = EventLoggerImpl.getInstance();
 		BlockchainSourceImpl.init(eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
 		if (appId != null) {
