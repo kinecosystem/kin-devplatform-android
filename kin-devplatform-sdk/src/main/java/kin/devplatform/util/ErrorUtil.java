@@ -47,7 +47,7 @@ public class ErrorUtil {
 	private static final String BAD_OR_MISSING_PARAMETERS = "Bad or missing parameters";
 	private static final String FAILED_TO_LOAD_ACCOUNT_ON_INDEX = "Failed to load blockchain wallet on index %d";
 	private static final String ORDER_NOT_FOUND = "Cannot found a order";
-	private static final String ACCOUNT_IS_NOT_LOGGED_IN = "Account is not logged in, please call Kin.start(...) first.";
+	private static final String SDK_IS_NOT_STARTED_IN = "SDK is not started, please call Kin.start(...) first.";
 	private static final String THEE_APP_ID_IS_INCORRECT = "The supplied app id is not the same as the app id found on the server";
 	private static final String ACCOUNT_CREATION_TIMEOUT = "Account creation has timeout";
 	private static final String BAD_JWT = "Bad or missing jwt";
@@ -153,8 +153,8 @@ public class ErrorUtil {
 			case ClientException.ORDER_NOT_FOUND:
 				exception = new ClientException(ClientException.ORDER_NOT_FOUND, ORDER_NOT_FOUND, e);
 				break;
-			case ClientException.ACCOUNT_NOT_LOGGED_IN:
-				exception = new ClientException(ClientException.ACCOUNT_NOT_LOGGED_IN, ACCOUNT_IS_NOT_LOGGED_IN, e);
+			case ClientException.SDK_IS_NOT_STARTED:
+				exception = new ClientException(ClientException.SDK_IS_NOT_STARTED, SDK_IS_NOT_STARTED_IN, e);
 				break;
 			case INCORRECT_APP_ID:
 				exception = new ClientException(INCORRECT_APP_ID, THEE_APP_ID_IS_INCORRECT, e);
