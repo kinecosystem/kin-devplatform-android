@@ -43,13 +43,13 @@ public class ErrorUtil {
 	private static final String FAILED_TO_CREATE_A_BLOCKCHAIN_WALLET_KEYPAIR = "Failed to create a blockchain wallet keypair";
 	private static final String THE_REQUESTED_ACCOUNT_COULD_NOT_BE_FOUND = "The requested account could not be found";
 	private static final String FAILED_TO_ACTIVATE_ON_THE_BLOCKCHAIN_NETWORK = "A Wallet was created locally, but failed to activate on the blockchain network";
-	private static final String ECOSYSTEM_SDK_IS_NOT_STARTED = "Operation not permitted: Ecosystem SDK is not started, please call Kin.initialize(...) first.";
+	private static final String ECOSYSTEM_SDK_IS_NOT_STARTED = "SDK is not started, please call Kin.start(...) first..";
 	private static final String BAD_OR_MISSING_PARAMETERS = "Bad or missing parameters";
 	private static final String FAILED_TO_LOAD_ACCOUNT_ON_INDEX = "Failed to load blockchain wallet on index %d";
 	private static final String ORDER_NOT_FOUND = "Cannot found a order";
-	private static final String SDK_IS_NOT_STARTED_IN = "SDK is not started, please call Kin.start(...) first.";
 	private static final String THEE_APP_ID_IS_INCORRECT = "The supplied app id is not the same as the app id found on the server";
 	private static final String ACCOUNT_CREATION_TIMEOUT = "Account creation has timeout";
+	private static final String MIGRATION_FAILURE_MSG = "Migrating client to new blockchain has failed. cannot start the SDK";
 	private static final String BAD_JWT = "Bad or missing jwt";
 
 
@@ -153,9 +153,6 @@ public class ErrorUtil {
 			case ClientException.ORDER_NOT_FOUND:
 				exception = new ClientException(ClientException.ORDER_NOT_FOUND, ORDER_NOT_FOUND, e);
 				break;
-			case ClientException.SDK_IS_NOT_STARTED:
-				exception = new ClientException(ClientException.SDK_IS_NOT_STARTED, SDK_IS_NOT_STARTED_IN, e);
-				break;
 			case INCORRECT_APP_ID:
 				exception = new ClientException(INCORRECT_APP_ID, THEE_APP_ID_IS_INCORRECT, e);
 				break;
@@ -181,6 +178,12 @@ public class ErrorUtil {
 	public static BlockchainException createCreateAccountTimeoutException(Exception e) {
 		return new BlockchainException(BlockchainException.ACCOUNT_CREATION_TIMEOUT,
 			ACCOUNT_CREATION_TIMEOUT, e);
+	}
+
+	@SuppressLint("DefaultLocale")
+	public static BlockchainException createMigrationFailureException(Exception e) {
+		return new BlockchainException(BlockchainException.MIGRATION_FAILURE,
+			MIGRATION_FAILURE_MSG, e);
 	}
 
 	public static String getPrintableStackTrace(Throwable t) {

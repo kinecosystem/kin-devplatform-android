@@ -1,5 +1,6 @@
 package kin.devplatform;
 
+
 import static kin.devplatform.exception.ClientException.SDK_NOT_STARTED;
 
 import android.app.Activity;
