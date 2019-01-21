@@ -222,6 +222,7 @@ public final class KinEcosystemInitiator {
 				if (migrationCallback != null) {
 					migrationCallback.onError(e);
 				}
+				fireStartError(ErrorUtil.createMigrationFailureException(e), loginCallback);
 			}
 		});
 	}

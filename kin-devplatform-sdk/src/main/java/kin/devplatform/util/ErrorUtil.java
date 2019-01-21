@@ -49,6 +49,7 @@ public class ErrorUtil {
 	private static final String ORDER_NOT_FOUND = "Cannot found a order";
 	private static final String THEE_APP_ID_IS_INCORRECT = "The supplied app id is not the same as the app id found on the server";
 	private static final String ACCOUNT_CREATION_TIMEOUT = "Account creation has timeout";
+	private static final String MIGRATION_FAILURE_MSG = "Migrating client to new blockchain has failed. cannot start the SDK";
 	private static final String BAD_JWT = "Bad or missing jwt";
 
 
@@ -177,6 +178,12 @@ public class ErrorUtil {
 	public static BlockchainException createCreateAccountTimeoutException(Exception e) {
 		return new BlockchainException(BlockchainException.ACCOUNT_CREATION_TIMEOUT,
 			ACCOUNT_CREATION_TIMEOUT, e);
+	}
+
+	@SuppressLint("DefaultLocale")
+	public static BlockchainException createMigrationFailureException(Exception e) {
+		return new BlockchainException(BlockchainException.MIGRATION_FAILURE,
+			MIGRATION_FAILURE_MSG, e);
 	}
 
 	public static String getPrintableStackTrace(Throwable t) {
