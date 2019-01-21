@@ -17,6 +17,6 @@ public interface KinMigrationListener {
      * Method is invoked when an error is occurred
      * @param e the exception of the error.
      */
-    void onError(Exception e); // TODO: 09/01/2019 maybe use the devplatfor base exception?
+    void onError(Exception e);
 
 }

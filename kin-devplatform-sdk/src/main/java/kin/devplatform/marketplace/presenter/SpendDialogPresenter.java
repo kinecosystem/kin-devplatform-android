@@ -82,7 +82,6 @@ public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> impl
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-				// TODO: 13/01/2019 check for not same blockchain versions and act accordingly
 				showToast("Oops something went wrong...");
 				eventLogger.send(SpendOrderCreationFailed
 					.create(ErrorUtil.getPrintableStackTrace(exception), offer.getId(),
