@@ -11,12 +11,11 @@ import com.kin.ecosystem.recovery.KeyStoreProvider;
 import com.kin.ecosystem.recovery.Validator;
 import com.kin.ecosystem.recovery.exception.BackupException;
 import java.util.regex.Pattern;
-
-import kin.sdk.migration.interfaces.IKinAccount;
-import kin.sdk.migration.interfaces.IKinClient;
 import kin.sdk.migration.exception.CorruptedDataException;
 import kin.sdk.migration.exception.CreateAccountException;
 import kin.sdk.migration.exception.CryptoException;
+import kin.sdk.migration.interfaces.IKinAccount;
+import kin.sdk.migration.interfaces.IKinClient;
 
 public class KeyStoreProviderImpl implements KeyStoreProvider {
 
@@ -29,7 +28,8 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
 	KeyStoreProviderImpl(@NonNull final IKinClient kinClient, @NonNull final IKinAccount kinAccount) {
 		this.kinClient = kinClient;
 		this.kinAccount = kinAccount;
-		this.pattern = Pattern.compile("^(?=.*\\d)(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\\[\\]])(?!.*[^a-zA-Z0-9!@#$%^&*()_+{}\\[\\]])(.{9,})$");
+		this.pattern = Pattern
+			.compile("^(?=.*\\d)(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\\[\\]])(?!.*[^a-zA-Z0-9!@#$%^&*()_+{}\\[\\]])(.{9,})$");
 	}
 
 	@Override
@@ -51,9 +51,11 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
 		Validator.checkNotNull(keystore, "password");
 		try {
 			IKinAccount importedAccount = kinClient.importAccount(keystore, password);
+			String importedPublicAddress = importedAccount.getPublicAddress();
 			int index = -1;
 			for (int i = 0; i < kinClient.getAccountCount(); i++) {
-				if (importedAccount == kinClient.getAccount(i)) {
+				if (importedPublicAddress != null &&
+					importedPublicAddress.equals(kinClient.getAccount(i).getPublicAddress())) {
 					index = i;
 				}
 			}
