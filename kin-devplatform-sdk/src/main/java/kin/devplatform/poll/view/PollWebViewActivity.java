@@ -108,8 +108,8 @@ public class PollWebViewActivity extends BaseToolbarActivity implements IPollWeb
 			public void run() {
 				removeAndReleaseWebView();
 				final AlertDialog dialog = new Builder(PollWebViewActivity.this)
-					.setTitle("Error - SDK and server blockchain versions are not the same")
-					.setMessage("Migration is needed, please restart App")
+					.setTitle(getString(R.string.kinecosystem_dialog_migration_is_needed_title))
+					.setMessage(getString(R.string.kinecosystem_dialog_migration_is_needed_message))
 					.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {

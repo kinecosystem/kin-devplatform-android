@@ -184,10 +184,9 @@ public final class KinEcosystemInitiator {
 		ConfigurationImpl.init(configurationLocal);
 	}
 
-	private void handleMigration(final Context context, final String appId,
-		final MigrationManager migrationManager,
-		final SignInData signInData,
-		final KinCallback<Void> loginCallback, final KinMigrationListener migrationCallback) throws
+	private void handleMigration(final Context context, final String appId, final MigrationManager migrationManager,
+		final SignInData signInData, final KinCallback<Void> loginCallback,
+		final KinMigrationListener migrationCallback) throws
 		MigrationInProcessException {
 		migrationManager.start(new IMigrationManagerCallbacks() {
 

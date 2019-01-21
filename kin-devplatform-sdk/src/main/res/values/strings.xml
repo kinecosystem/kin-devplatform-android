@@ -32,6 +32,10 @@
     <string name="kinecosystem_keep_your_kin_safe">Keep your Kin Safe</string>
     <string name="kinecosystem_restore_previous_wallet">Restore previous wallet</string>
     <string name="kinecosystem_could_not_restore_the_wallet">Could not restore the wallet, try again later.</string>
+    <string name="kinecosystem_dialog_migration_is_needed_title">Error - Kin update in progress</string>
+    <string name="kinecosystem_dialog_migration_is_needed_kin_saved_message">Kin is being upgraded, you will be able to complete the operation after you force close the app and restart.\n\n
+        Your Kin will appear after the upgrade is complete.</string>
+    <string name="kinecosystem_dialog_migration_is_needed_message">Kin is being upgraded, you will be able to complete the operation after you force close the app and restart.</string>
 
 
     <!--Menu-->
