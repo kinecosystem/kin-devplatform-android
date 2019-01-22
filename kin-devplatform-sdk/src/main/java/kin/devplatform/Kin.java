@@ -1,5 +1,6 @@
 package kin.devplatform;
 
+
 import static kin.devplatform.exception.ClientException.SDK_NOT_STARTED;
 
 import android.app.Activity;
@@ -16,16 +17,13 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.OrderConfirmation;
 import kin.devplatform.data.offer.OfferRepository;
 import kin.devplatform.data.order.OrderRepository;
-import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.ClientException;
-import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.main.view.EcosystemActivity;
 import kin.devplatform.marketplace.model.NativeOffer;
 import kin.devplatform.marketplace.model.NativeSpendOffer;
-import kin.devplatform.network.model.SignInData;
-import kin.devplatform.network.model.SignInData.SignInTypeEnum;
 import kin.devplatform.splash.view.SplashViewActivity;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.KinSdkVersion;
 
 
 public class Kin {
@@ -34,21 +32,9 @@ public class Kin {
 		Logger.enableLogs(enableLogs);
 	}
 
-	/**
-	 * @deprecated use {@link #start(Context, String, KinEnvironment, KinCallback)} instead.
-	 */
-	@Deprecated
-	public static void start(@NonNull Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment)
-		throws ClientException, BlockchainException {
-		start(appContext, jwt, environment, new KinCallback<Void>() {
-			@Override
-			public void onResponse(Void response) {
-			}
-
-			@Override
-			public void onFailure(KinEcosystemException error) {
-			}
-		});
+	public static void start(Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment,
+		KinCallback<Void> kinCallback) {
+		KinEcosystemInitiator.getInstance().externalInit(appContext, environment, jwt, kinCallback, null);
 	}
 
 	/**
@@ -56,25 +42,20 @@ public class Kin {
 	 * happened in initialization process. This method can be called again (retry) in case of an error.
 	 * <p></p>
 	 * <p><b>Note:</b> SDK cannot be used before calling this method.</p>
-	 * <p><b>Note:</b> This method is not thread safe, and shouldn't be called multiple times in parallel. callbacks will be fired on
+	 * <p><b>Note:</b> This method is not thread safe, and shouldn't be called multiple times in parallel. callbacks
+	 * will be fired on
 	 * the main thread.</p>
 	 * <b>Note:</b> The first call to this method will create Kin wallet account for the user on Kin blockchain, this
-	 * process can take some time (couple of seconds), callback will be called only after account setup and creation will be
-	 * completed.
+	 * process can take some time (couple of seconds), callback will be called only after account setup and creation
+	 * will be completed.
 	 *
 	 * @param jwt 'register' jwt token required for authorized the user.
-	 * @param callback success/failure callback
+	 * @param kinCallback success/failure callback
 	 */
 	public static void start(Context appContext, @NonNull String jwt, @NonNull KinEnvironment environment,
-		KinCallback<Void> callback) {
-		SignInData signInData = getJwtSignInData(jwt);
-		KinEcosystemInitiator.getInstance().externalInit(appContext, environment, signInData, callback);
-	}
-
-	private static SignInData getJwtSignInData(@NonNull final String jwt) {
-		return new SignInData()
-			.signInType(SignInTypeEnum.JWT)
-			.jwt(jwt);
+		KinCallback<Void> kinCallback, KinMigrationListener migrationProcessCallback) {
+		KinEcosystemInitiator.getInstance()
+			.externalInit(appContext, environment, jwt, kinCallback, migrationProcessCallback);
 	}
 
 	private static void checkInitialized() throws ClientException {
@@ -138,6 +119,15 @@ public class Kin {
 	public static void getBalance(@NonNull final KinCallback<Balance> callback) throws ClientException {
 		checkInitialized();
 		BlockchainSourceImpl.getInstance().getBalance(callback);
+	}
+
+	/**
+	 * @return The version of the sdk.
+	 * @throws ClientException - sdk not initialized or account not logged in.
+	 */
+	public static KinSdkVersion getKinSdkVersion() throws ClientException {
+		checkInitialized();
+		return BlockchainSourceImpl.getInstance().getKinSdkVersion();
 	}
 
 	/**

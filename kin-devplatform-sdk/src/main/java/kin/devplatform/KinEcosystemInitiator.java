@@ -2,15 +2,12 @@ package kin.devplatform;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
+import android.support.annotation.Nullable;
 import java.util.UUID;
-import kin.core.KinClient;
-import kin.core.ServiceProvider;
 import kin.devplatform.accountmanager.AccountManager;
 import kin.devplatform.accountmanager.AccountManager.AccountState;
 import kin.devplatform.accountmanager.AccountManagerImpl;
 import kin.devplatform.accountmanager.AccountManagerLocal;
-import kin.devplatform.base.ObservableData;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.EventLoggerImpl;
@@ -29,13 +26,25 @@ import kin.devplatform.data.order.OrderLocalData;
 import kin.devplatform.data.order.OrderRemoteData;
 import kin.devplatform.data.order.OrderRepository;
 import kin.devplatform.exception.BlockchainException;
+import kin.devplatform.exception.ClientException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
+import kin.devplatform.network.model.KinVersionProvider;
 import kin.devplatform.network.model.SignInData;
+import kin.devplatform.network.model.SignInData.SignInTypeEnum;
 import kin.devplatform.util.ErrorUtil;
+import kin.devplatform.util.JwtBody;
+import kin.devplatform.util.JwtDecoder;
+import kin.sdk.migration.MigrationManager;
+import kin.sdk.migration.MigrationNetworkInfo;
+import kin.sdk.migration.exception.MigrationInProcessException;
+import kin.sdk.migration.interfaces.IKinClient;
+import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
+import org.json.JSONException;
 
 public final class KinEcosystemInitiator {
 
+	private static final String TAG = KinEcosystemInitiator.class.getSimpleName();
 	private static final String KIN_ECOSYSTEM_STORE_PREFIX_KEY = "kinecosystem_store";
 	private static KinEcosystemInitiator instance;
 
@@ -62,99 +71,192 @@ public final class KinEcosystemInitiator {
 	 * Uses for internal initialization after process restart
 	 */
 	public void internalInit(Context context) {
-		try {
-			init(context, null);
-		} catch (BlockchainException e) {
-			EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
-				ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
-				"KinEcosystemInitiator internalInit failed"
-			));
-			e.printStackTrace();
+		if (!isInitialized) {
+			initConfiguration(context, null);
+			initEventManagerRelatedServices(context, null, null);
+			MigrationManager migrationManager = getMigrationManager(context, null);
+			try {
+				handleKinClientReady(migrationManager.getCurrentKinClient(), context, null, null,
+					false, null);
+			} catch (BlockchainException e) {
+				EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
+					ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
+					"KinEcosystemInitiator internalInit failed"
+				));
+				e.printStackTrace();
+			}
 		}
 	}
 
 	/**
 	 * Uses for external (public API) initialization and jwt login.
 	 */
-	public void externalInit(Context context, KinEnvironment environment, @NonNull SignInData signInData,
-		final KinCallback<Void> loginCallback) {
+	public void externalInit(Context context, KinEnvironment environment, @NonNull String jwt,
+		final KinCallback<Void> loginCallback, @Nullable final KinMigrationListener migrationProcessCallback) {
+		SignInData signInData;
+		try {
+			signInData = getJwtSignInData(jwt);
+			initEventManagerRelatedServices(context, signInData, environment);
+		} catch (JSONException | IllegalArgumentException e) {
+			fireStartError(ErrorUtil.getClientException(ClientException.BAD_CONFIGURATION, e), loginCallback);
+			return;
+		}
 		if (isInitialized && isLoggedIn) {
 			fireStartCompleted(loginCallback);
 			return;
 		}
 
-		try {
-			init(context, environment);
-		} catch (BlockchainException e) {
-			fireStartError(e, loginCallback);
-			return;
+		init(context, signInData.getAppId(), signInData, loginCallback, migrationProcessCallback);
+		// If initialized then do the login and if not then will do login at end of migration which happens inside init.
+		if (isInitialized) {
+			login(signInData, loginCallback);
 		}
-		login(signInData, loginCallback);
 	}
 
-	private void init(Context context, KinEnvironment environment) throws BlockchainException {
+	private void initEventManagerRelatedServices(Context context, SignInData signInData,
+		KinEnvironment environment) {
+		initConfiguration(context, environment);
+		AuthRepository
+			.init(AuthLocalData.getInstance(context, executorsUtil), AuthRemoteData.getInstance(executorsUtil));
+		if (signInData != null) {
+			String deviceID = AuthRepository.getInstance().getDeviceID();
+			signInData.setDeviceId(deviceID != null ? deviceID : UUID.randomUUID().toString());
+			AuthRepository.getInstance().setSignInData(signInData);
+		}
+		EventCommonDataUtil.setBaseData(context);
+	}
+
+	private SignInData getJwtSignInData(@NonNull final String jwt) throws JSONException {
+		JwtBody jwtBody = JwtDecoder.getJwtBody(jwt);
+		if (jwtBody == null) {
+			throw new IllegalArgumentException("jwt is empty");
+		}
+		return new SignInData()
+			.signInType(SignInTypeEnum.JWT)
+			.appId(jwtBody.getAppId())
+			.userId(jwtBody.getUserId())
+			.jwt(jwt);
+	}
+
+	private void init(Context context, String appId, SignInData signInData, KinCallback<Void> loginCallback,
+		KinMigrationListener migrationCallback) {
 		if (!isInitialized) {
-			ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
-			if (environment != null) {
-				configurationLocal.setEnvironment(environment);
+			MigrationManager migrationManager = getMigrationManager(context, appId);
+			try {
+				handleMigration(context, appId, migrationManager, signInData, loginCallback, migrationCallback);
+			} catch (MigrationInProcessException e) {
+				Logger.log(new Log().priority(Log.WARN).withTag(TAG)
+					.text("Start migration when it was already in migration process"));
 			}
-			ConfigurationImpl.init(configurationLocal);
-			KinEnvironment kinEnvironment = ConfigurationImpl.getInstance().getEnvironment();
-			EventLogger eventLogger = EventLoggerImpl.getInstance();
-			final String networkUrl = kinEnvironment.getBlockchainNetworkUrl();
-			final String networkId = kinEnvironment.getBlockchainPassphrase();
-			final String issuer = kinEnvironment.getIssuer();
-
-			KinClient kinClient = new KinClient(context, new ServiceProvider(networkUrl, networkId) {
-				@Override
-				protected String getIssuerAccountId() {
-					return issuer;
-				}
-			}, KIN_ECOSYSTEM_STORE_PREFIX_KEY);
-			BlockchainSourceImpl.init(eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
-
-			AuthRepository
-				.init(AuthLocalData.getInstance(context, executorsUtil),
-					AuthRemoteData.getInstance(executorsUtil));
-
-			EventCommonDataUtil.setBaseData(context);
-
-			AccountManagerImpl
-				.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),
-					BlockchainSourceImpl.getInstance());
-
-			OrderRepository.init(BlockchainSourceImpl.getInstance(),
-				eventLogger,
-				OrderRemoteData.getInstance(executorsUtil),
-				OrderLocalData.getInstance(context, executorsUtil));
-
-			OfferRepository
-				.init(OfferRemoteData.getInstance(executorsUtil), OrderRepository.getInstance());
-
-			DeviceUtils.init(context);
-
-			setAppID();
-
-			eventLogger.send(KinSdkInitiated.create());
-			isInitialized = true;
 		}
 	}
 
-	private void setAppID() {
-		ObservableData<String> observableData = AuthRepository.getInstance().getAppID();
-		String appID = observableData.getValue();
-		if (appID == null) {
-			observableData.addObserver(new Observer<String>() {
-				@Override
-				public void onChanged(String appID) {
-					if (!TextUtils.isEmpty(appID)) {
-						BlockchainSourceImpl.getInstance().setAppID(appID);
-						AuthRepository.getInstance().getAppID().removeObserver(this);
-					}
-				}
-			});
+	private MigrationManager getMigrationManager(Context context, String appId) {
+		AuthRepository
+			.init(AuthLocalData.getInstance(context, executorsUtil),
+				AuthRemoteData.getInstance(executorsUtil));
+		EventCommonDataUtil.setBaseData(context);
+		KinEnvironment kinEnvironment = ConfigurationImpl.getInstance().getEnvironment();
+
+		final String oldNetworkUrl = kinEnvironment.getOldBlockchainNetworkUrl();
+		final String oldNetworkId = kinEnvironment.getOldBlockchainPassphrase();
+		final String newNetworkUrl = kinEnvironment.getNewBlockchainNetworkUrl();
+		final String newNetworkId = kinEnvironment.getNewBlockchainPassphrase();
+		final String issuer = kinEnvironment.getOldBlockchainIssuer();
+
+		if (appId == null) {
+			appId = BlockchainSourceLocal.getInstance(context).getAppId();
 		}
-		BlockchainSourceImpl.getInstance().setAppID(appID);
+
+		MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId,
+			newNetworkUrl, newNetworkId, issuer);
+
+		MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo,
+			new KinVersionProvider(appId),
+			new MigrationEventsListener(EventLoggerImpl.getInstance()), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
+		migrationManager.enableLogs(Logger.isEnabled());
+		return migrationManager;
+	}
+
+	private void initConfiguration(Context context, KinEnvironment environment) {
+		ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
+		if (environment != null) {
+			configurationLocal.setEnvironment(environment);
+		}
+
+		ConfigurationImpl.init(configurationLocal);
+	}
+
+	private void handleMigration(final Context context, final String appId, final MigrationManager migrationManager,
+		final SignInData signInData, final KinCallback<Void> loginCallback,
+		final KinMigrationListener migrationCallback) throws
+		MigrationInProcessException {
+		migrationManager.start(new IMigrationManagerCallbacks() {
+
+			private boolean didMigrationStarted;
+
+			@Override
+			public void onMigrationStart() {
+				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onMigrationStart"));
+				didMigrationStarted = true;
+				if (migrationCallback != null) {
+					migrationCallback.onStart();
+				}
+			}
+
+			@Override
+			public void onReady(IKinClient kinClient) {
+				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
+				try {
+					handleKinClientReady(kinClient, context, appId, signInData, true, loginCallback);
+					if (migrationCallback != null && didMigrationStarted) {
+						didMigrationStarted = false;
+						migrationCallback.onFinish();
+					}
+				} catch (BlockchainException e) {
+					didMigrationStarted = false;
+					fireStartError(e, loginCallback);
+				}
+			}
+
+			@Override
+			public void onError(Exception e) {
+				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onError"));
+				if (migrationCallback != null) {
+					migrationCallback.onError(e);
+				}
+				fireStartError(ErrorUtil.createMigrationFailureException(e), loginCallback);
+			}
+		});
+	}
+
+	private void handleKinClientReady(IKinClient kinClient, Context context, String appId, SignInData signInData,
+		boolean withLogin, KinCallback<Void> loginCallback) throws BlockchainException {
+		final EventLogger eventLogger = EventLoggerImpl.getInstance();
+		BlockchainSourceImpl.init(eventLogger, kinClient, BlockchainSourceLocal.getInstance(context));
+		if (appId != null) {
+			BlockchainSourceImpl.getInstance().setAppID(appId);
+		}
+
+		AccountManagerImpl
+			.init(AccountManagerLocal.getInstance(context), eventLogger, AuthRepository.getInstance(),
+				BlockchainSourceImpl.getInstance());
+
+		OrderRepository.init(BlockchainSourceImpl.getInstance(),
+			eventLogger,
+			OrderRemoteData.getInstance(executorsUtil),
+			OrderLocalData.getInstance(context, executorsUtil));
+
+		OfferRepository
+			.init(OfferRemoteData.getInstance(executorsUtil), OrderRepository.getInstance());
+
+		DeviceUtils.init(context);
+
+		eventLogger.send(KinSdkInitiated.create());
+		isInitialized = true;
+		if (withLogin) {
+			login(signInData, loginCallback);
+		}
 	}
 
 	private void login(@NonNull SignInData signInData, final KinCallback<Void> loginCallback) {

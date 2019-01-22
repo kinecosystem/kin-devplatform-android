@@ -1,5 +1,6 @@
 package kin.devplatform.data.order;
 
+import static kin.devplatform.exception.BlockchainException.MIGRATION_IS_NEEDED;
 import static kin.devplatform.exception.ClientException.INTERNAL_INCONSISTENCY;
 import static kin.devplatform.exception.ClientException.ORDER_NOT_FOUND;
 import static kin.devplatform.util.ErrorUtil.getClientException;
@@ -30,6 +31,7 @@ import kin.devplatform.bi.events.SpendOrderCompletionSubmitted;
 import kin.devplatform.bi.events.SpendOrderCreationRequested;
 import kin.devplatform.bi.events.SpendOrderFailed;
 import kin.devplatform.core.network.ApiException;
+import kin.devplatform.core.network.model.Error;
 import kin.devplatform.data.Callback;
 import kin.devplatform.data.KinCallbackAdapter;
 import kin.devplatform.data.blockchain.BlockchainSource;
@@ -38,7 +40,9 @@ import kin.devplatform.data.model.Payment;
 import kin.devplatform.data.order.CreateExternalOrderCall.ExternalOrderCallbacks;
 import kin.devplatform.data.order.CreateExternalOrderCall.ExternalSpendOrderCallbacks;
 import kin.devplatform.exception.DataNotAvailableException;
+import kin.devplatform.exception.MigrationNeededException;
 import kin.devplatform.exception.KinEcosystemException;
+import kin.devplatform.network.model.BlockchainData;
 import kin.devplatform.network.model.JWTBodyPaymentConfirmationResult;
 import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.OpenOrder;
@@ -47,6 +51,7 @@ import kin.devplatform.network.model.Order.Origin;
 import kin.devplatform.network.model.Order.Status;
 import kin.devplatform.network.model.OrderList;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.KinSdkVersion;
 
 public class OrderRepository implements OrderDataSource {
 
@@ -125,6 +130,16 @@ public class OrderRepository implements OrderDataSource {
 		remoteData.createOrder(offerID, new Callback<OpenOrder, ApiException>() {
 			@Override
 			public void onResponse(OpenOrder response) {
+				if (response != null) {
+					boolean validationSucceed = validateBlockchainVersions(response.getBlockchainData());
+					if (!validationSucceed) {
+						cancelOrder(response.getOfferId(), response.getId(), null);
+						if (callback != null) {
+							callback.onFailure(new MigrationNeededException());
+						}
+						return;
+					}
+				}
 				cachedOpenOrder.postValue(response);
 				if (callback != null) {
 					callback.onResponse(response);
@@ -149,6 +164,16 @@ public class OrderRepository implements OrderDataSource {
 		remoteData.submitOrder(content, order.getId(), new Callback<Order, ApiException>() {
 			@Override
 			public void onResponse(Order response) {
+				boolean validationSucceed = validateBlockchainVersions(response.getBlockchainData());
+				if (!validationSucceed) {
+					updateFailure(new Error("Migration needed", MigrationNeededException.EXCEPTION_MESSAGE,
+						MIGRATION_IS_NEEDED));
+					if (callback != null) {
+						callback.onFailure(new MigrationNeededException());
+						return;
+					}
+				}
+
 				pendingOrdersCount.incrementAndGet();
 				getOrderWatcher().postValue(response);
 				if (callback != null) {
@@ -158,16 +183,33 @@ public class OrderRepository implements OrderDataSource {
 
 			@Override
 			public void onFailure(ApiException e) {
-				getOrderWatcher().postValue(
-					new Order().orderId(order.getId()).offerId(order.getOfferId()).status(Status.FAILED)
-						.error(e.getResponseBody()));
-				removeCachedOpenOrderByID(order.getId());
+				updateFailure(e.getResponseBody());
 				if (callback != null) {
 					callback.onFailure(ErrorUtil.fromApiException(e));
 				}
 			}
+
+			private void updateFailure(Error e) {
+				getOrderWatcher().postValue(
+					new Order().orderId(order.getId()).offerId(order.getOfferId()).status(Status.FAILED)
+						.error(e));
+				removeCachedOpenOrderByID(order.getId());
+			}
 		});
 	}
+
+	private boolean validateBlockchainVersions(BlockchainData blockchainData)  {
+		boolean sameVersions = true;
+		if (blockchainData != null && blockchainSource.getKinAccount() != null) {
+			KinSdkVersion serverKinSdkVersion = KinSdkVersion.get(blockchainData.getBlockchainVersion());
+			// Check if the kin account sdk has the same blockchain version as the server.
+			if (serverKinSdkVersion != blockchainSource.getKinAccount().getKinSdkVersion()) {
+				sameVersions = false;
+			}
+		}
+		return sameVersions;
+	}
+
 
 	private void listenForCompletedPayment(final String orderId, final kin.devplatform.network.model.Origin origin) {
 		final Handler mainThreadHandler = new Handler(Looper.getMainLooper());

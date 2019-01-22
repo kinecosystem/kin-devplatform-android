@@ -19,8 +19,9 @@ android {
 dependencies {
 
     implementation project(':kin-devplatform-core')
+    implementation 'com.github.kinecosystem:kin-migration-module-android:1.0.1'
     implementation 'com.github.kinecosystem.kin-ecosystem-android-sdk:recovery:d73ef56'
-    implementation devDependencies.kinCore
+    api 'com.github.kinecosystem:kin-utils-android:1.1'
     implementation devDependencies.appCompat_v7
     implementation devDependencies.recyclerView_v7
     implementation devDependencies.constraintLayout

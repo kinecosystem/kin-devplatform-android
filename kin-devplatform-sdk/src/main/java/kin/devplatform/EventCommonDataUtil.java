@@ -80,14 +80,15 @@ class EventCommonDataUtil {
 				userProxy.setBalance(new DynamicValue<Double>() {
 					@Override
 					public Double get() {
-						return BlockchainSourceImpl.getInstance().getBalance().getAmount().doubleValue();
+						return BlockchainSourceImpl.getInstance() == null ? null :
+							BlockchainSourceImpl.getInstance().getBalance().getAmount().doubleValue();
 					}
 				});
 
 				userProxy.setDigitalServiceId(new DynamicValue<String>() {
 					@Override
 					public String get() {
-						final String digitalServiceId = AuthRepository.getInstance().getAppID().getValue();
+						final String digitalServiceId = AuthRepository.getInstance().getAppID();
 						return safeguardNullString(digitalServiceId);
 					}
 				});

@@ -4,11 +4,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
-import kin.core.EventListener;
-import kin.core.KinAccount;
-import kin.core.ListenerRegistration;
-import kin.core.ResultCallback;
-import kin.core.exception.AccountNotActivatedException;
+
+import kin.core.Balance;
 import kin.devplatform.KinCallback;
 import kin.devplatform.Log;
 import kin.devplatform.Logger;
@@ -23,6 +20,12 @@ import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.exception.AccountNotActivatedException;
+import kin.sdk.migration.interfaces.IBalance;
+import kin.sdk.migration.interfaces.IEventListener;
+import kin.sdk.migration.interfaces.IKinAccount;
+import kin.sdk.migration.interfaces.IListenerRegistration;
+import kin.utils.ResultCallback;
 
 public class AccountManagerImpl implements AccountManager {
 
@@ -38,7 +41,7 @@ public class AccountManagerImpl implements AccountManager {
 	private final ObservableData<Integer> accountState;
 	private KinEcosystemException error;
 
-	private ListenerRegistration accountCreationRegistration;
+	private IListenerRegistration accountCreationRegistration;
 
 	private AccountManagerImpl(@NonNull final AccountManager.Local local,
 		@NonNull final EventLogger eventLogger,
@@ -179,8 +182,7 @@ public class AccountManagerImpl implements AccountManager {
 		removeAccountCreationRegistration();
 
 		prepareAccountCreationTimeoutFallback(handler);
-		accountCreationRegistration = getKinAccount().blockchainEvents()
-			.addAccountCreationListener(new EventListener<Void>() {
+		accountCreationRegistration = getKinAccount().addAccountCreationListener(new IEventListener<Void>() {
 				@Override
 				public void onEvent(Void data) {
 					handler.post(new Runnable() {
@@ -203,9 +205,9 @@ public class AccountManagerImpl implements AccountManager {
 				removeAccountCreationRegistration();
 				handler.removeCallbacksAndMessages(null);
 				//in case of SSE listening timeout, rely on direct call to blockchain for checking account creation
-				getKinAccount().getBalance().run(new ResultCallback<kin.core.Balance>() {
+				getKinAccount().getBalance().run(new ResultCallback<IBalance>() {
 					@Override
-					public void onResult(kin.core.Balance result) {
+					public void onResult(IBalance result) {
 						//result means we have account created successfully on kin blockchain
 						setAccountState(REQUIRE_TRUSTLINE);
 					}
@@ -254,7 +256,7 @@ public class AccountManagerImpl implements AccountManager {
 		});
 	}
 
-	private KinAccount getKinAccount() {
+	private IKinAccount getKinAccount() {
 		return blockchainSource.getKinAccount();
 	}
 

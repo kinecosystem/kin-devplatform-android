@@ -3,10 +3,13 @@ package kin.devplatform.poll.view;
 import static kin.devplatform.exception.ClientException.INTERNAL_INCONSISTENCY;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog.Builder;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -98,6 +101,29 @@ public class PollWebViewActivity extends BaseToolbarActivity implements IPollWeb
 		});
 	}
 
+	@Override
+	public void showMigrationErrorDialog() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				removeAndReleaseWebView();
+				final AlertDialog dialog = new Builder(PollWebViewActivity.this)
+					.setTitle(getString(R.string.kinecosystem_dialog_migration_is_needed_title))
+					.setMessage(getString(R.string.kinecosystem_dialog_migration_is_needed_message))
+					.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+							finish();
+						}
+					})
+					.setCancelable(false)
+					.create();
+				dialog.show();
+			}
+		});
+	}
+
 	private @StringRes
 	int getMessageResId(@Message final int msg) {
 		switch (msg) {
@@ -150,11 +176,15 @@ public class PollWebViewActivity extends BaseToolbarActivity implements IPollWeb
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				webViewContainer.removeView(webView);
-				webView.release();
+				removeAndReleaseWebView();
 			}
 		});
 		finish();
+	}
+
+	private void removeAndReleaseWebView() {
+		webViewContainer.removeView(webView);
+		webView.release();
 	}
 
 	@Override

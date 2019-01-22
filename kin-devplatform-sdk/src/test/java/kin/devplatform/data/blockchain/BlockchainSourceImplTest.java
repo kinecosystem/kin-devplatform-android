@@ -15,14 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import kin.core.BlockchainEvents;
-import kin.core.EventListener;
-import kin.core.KinAccount;
-import kin.core.KinClient;
-import kin.core.Request;
-import kin.core.ResultCallback;
-import kin.core.TransactionId;
-import kin.core.exception.OperationFailedException;
+
 import kin.devplatform.BaseTestClass;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
@@ -31,6 +24,16 @@ import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSucceeded;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.network.model.Offer.OfferType;
+import kin.sdk.migration.exception.OperationFailedException;
+import kin.sdk.migration.interfaces.IBalance;
+import kin.sdk.migration.interfaces.IEventListener;
+import kin.sdk.migration.interfaces.IKinAccount;
+import kin.sdk.migration.interfaces.IKinClient;
+import kin.sdk.migration.interfaces.ITransactionId;
+import kin.sdk.migration.interfaces.IWhitelistService;
+import kin.utils.Request;
+import kin.utils.ResultCallback;
+
 import kin.devplatform.network.model.OpenOrder;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,33 +53,30 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	private static final String PUBLIC_ADDRESS = "public_address";
 	private static final String APP_ID = "appID";
-	private static final String ORDER_ID = "orderID";
-	private static final String MEMO_EXAMPLE = "1-" + APP_ID + "-" + ORDER_ID;
-
+    private static final String ORDER_ID = "orderID";
+    private static final String MEMO_FROM_SERVER_EXAMPLE = "1-" + APP_ID + "-" + ORDER_ID;
+    private static final String MEMO_GENERATION_EXAMPLE = ORDER_ID;
 
 	@Mock
 	private EventLogger eventLogger;
 
 	@Mock
-	private KinClient kinClient;
+	private IKinClient kinClient;
 
 	@Mock
 	private BlockchainSource.Local local;
 
 	@Mock
-	private KinAccount kinAccount;
+	private IKinAccount kinAccount;
 
 	@Mock
-	private BlockchainEvents blockchainEvents;
-
-	@Mock
-	private Request<kin.core.Balance> getBalanceReq;
+	private Request<IBalance> getBalanceReq;
 
 	@Captor
-	private ArgumentCaptor<ResultCallback<kin.core.Balance>> getBalanceCaptor;
+	private ArgumentCaptor<ResultCallback<IBalance>> getBalanceCaptor;
 
 	@Mock
-	private kin.core.Balance balanceObj;
+	private IBalance balanceObj;
 
 
 	private BlockchainSourceImpl blockchainSource;
@@ -87,7 +87,6 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		super.setUp();
 		MockitoAnnotations.initMocks(this);
 		when(kinClient.addAccount()).thenReturn(kinAccount);
-		when(kinAccount.blockchainEvents()).thenReturn(blockchainEvents);
 		when(kinAccount.getBalance()).thenReturn(getBalanceReq);
 		when(balanceObj.value()).thenReturn(new BigDecimal(20));
 		when(kinAccount.getPublicAddress()).thenReturn(PUBLIC_ADDRESS);
@@ -128,7 +127,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	@Test
 	public void set_app_id_memo_generated_correctly() {
 		blockchainSource.setAppID(APP_ID);
-		assertEquals(MEMO_EXAMPLE, blockchainSource.generateMemo(ORDER_ID));
+		assertEquals(MEMO_GENERATION_EXAMPLE, ORDER_ID);
 	}
 
 	@Test
@@ -140,11 +139,11 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 	public void extract_order_id() {
 		// without app id set
 		assertNull(blockchainSource.extractOrderId("123"));
-		assertNull(blockchainSource.extractOrderId(MEMO_EXAMPLE));
+		assertNull(blockchainSource.extractOrderId(MEMO_FROM_SERVER_EXAMPLE));
 
 		// with app id
 		blockchainSource.setAppID(APP_ID);
-		assertEquals(ORDER_ID, blockchainSource.extractOrderId(MEMO_EXAMPLE));
+		assertEquals(ORDER_ID, blockchainSource.extractOrderId(MEMO_FROM_SERVER_EXAMPLE));
 	}
 
 	@Test
@@ -153,8 +152,8 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		final BigDecimal amount = new BigDecimal(10);
 		final String orderID = "someID";
 
-		when(kinAccount.sendTransactionSync(anyString(), (BigDecimal) any(), anyString())).thenReturn(
-			new TransactionId() {
+		when(kinAccount.sendTransactionSync(anyString(), (BigDecimal) any(), (IWhitelistService) any(), anyString())).thenReturn(
+			new ITransactionId() {
 				@Override
 				public String id() {
 					return "transactionID";
@@ -176,7 +175,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 		final String orderID = "someID";
 
 		final OperationFailedException exception = new OperationFailedException("failed");
-		when(kinAccount.sendTransactionSync(any(String.class), any(BigDecimal.class), any(String.class)))
+		when(kinAccount.sendTransactionSync(any(String.class), any(BigDecimal.class), any(IWhitelistService.class), any(String.class)))
 			.thenThrow(exception);
 
 		blockchainSource.setAppID(APP_ID);
@@ -204,7 +203,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	@Test
 	public void add_balance_observer_get_onChanged() {
-		kin.core.Balance innerBalance = mock(kin.core.Balance.class);
+		IBalance innerBalance = mock(IBalance.class);
 		blockchainSource.addBalanceObserver(new Observer<Balance>() {
 			@Override
 			public void onChanged(Balance value) {
@@ -236,7 +235,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 
 	@Test
 	public void add_balance_observer_and_start_listen() throws Exception {
-		ArgumentCaptor<EventListener<kin.core.Balance>> balanceEventListener = forClass(EventListener.class);
+		ArgumentCaptor<IEventListener<IBalance>> balanceEventListener = forClass(IEventListener.class);
 
 		blockchainSource.addBalanceObserver(new Observer<Balance>() {
 			@Override
@@ -245,7 +244,7 @@ public class BlockchainSourceImplTest extends BaseTestClass {
 			}
 		}, true);
 
-		verify(blockchainEvents).addBalanceListener(balanceEventListener.capture());
+		verify(kinAccount).addBalanceListener(balanceEventListener.capture());
 		BigDecimal value = new BigDecimal(123);
 
 		when(balanceObj.value()).thenReturn(value);

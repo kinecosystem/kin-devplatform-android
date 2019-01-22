@@ -2,11 +2,15 @@ package kin.devplatform;
 
 public interface KinEnvironment {
 
-	String getBlockchainNetworkUrl();
+	String getOldBlockchainNetworkUrl();
 
-	String getBlockchainPassphrase();
+	String getOldBlockchainPassphrase();
 
-	String getIssuer();
+	String getNewBlockchainNetworkUrl();
+
+	String getNewBlockchainPassphrase();
+
+	String getOldBlockchainIssuer();
 
 	String getEcosystemServerUrl();
 

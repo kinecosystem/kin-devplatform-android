@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.support.annotation.NonNull;
 import kin.devplatform.core.util.ExecutorsUtil;
-import kin.devplatform.data.Callback;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.SignInData.SignInTypeEnum;
@@ -62,6 +61,7 @@ public class AuthLocalData implements AuthDataSource.Local {
 
 				if (signInData.getSignInType() == SignInTypeEnum.JWT) {
 					editor.putString(JWT_KEY, signInData.getJwt());
+					editor.putString(USER_ID_KEY, signInData.getUserId());
 				} else {
 					editor.putString(USER_ID_KEY, signInData.getUserId());
 					editor.putString(APP_ID_KEY, signInData.getAppId());
@@ -109,24 +109,8 @@ public class AuthLocalData implements AuthDataSource.Local {
 	}
 
 	@Override
-	public void getAppId(@NonNull final Callback<String, Void> callback) {
-		final Runnable command = new Runnable() {
-			@Override
-			public void run() {
-				final String appID = signInSharedPreferences.getString(APP_ID_KEY, null);
-				executorsUtil.mainThread().execute(new Runnable() {
-					@Override
-					public void run() {
-						if (appID != null) {
-							callback.onResponse(appID);
-						} else {
-							callback.onFailure(null);
-						}
-					}
-				});
-			}
-		};
-		executorsUtil.diskIO().execute(command);
+	public String getAppId() {
+		return signInSharedPreferences.getString(APP_ID_KEY, null);
 	}
 
 	@Override

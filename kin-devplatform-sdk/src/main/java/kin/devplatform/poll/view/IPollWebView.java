@@ -31,4 +31,6 @@ public interface IPollWebView extends IBaseView<PollWebViewPresenter> {
 	void hideToolbar();
 
 	void setTitle(String title);
+
+	void showMigrationErrorDialog();
 }

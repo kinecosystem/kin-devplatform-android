@@ -12,6 +12,10 @@ public class Logger {
 	private Logger() {
 	}
 
+	static boolean isEnabled() {
+		return shouldLog;
+	}
+
 	public static void log(kin.devplatform.Log ecosystemLog) {
 		ecosystemLog.log();
 	}

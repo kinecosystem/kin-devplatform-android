@@ -7,14 +7,6 @@ import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import com.kin.ecosystem.recovery.KeyStoreProvider;
 import java.math.BigDecimal;
-import kin.core.EventListener;
-import kin.core.KinAccount;
-import kin.core.KinClient;
-import kin.core.ListenerRegistration;
-import kin.core.PaymentInfo;
-import kin.core.ResultCallback;
-import kin.core.exception.CreateAccountException;
-import kin.core.exception.OperationFailedException;
 import kin.devplatform.KinCallback;
 import kin.devplatform.Log;
 import kin.devplatform.Logger;
@@ -36,8 +28,20 @@ import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.network.model.Offer.OfferType;
+import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.KinSdkVersion;
+import kin.sdk.migration.exception.CreateAccountException;
+import kin.sdk.migration.exception.OperationFailedException;
+import kin.sdk.migration.interfaces.IBalance;
+import kin.sdk.migration.interfaces.IEventListener;
+import kin.sdk.migration.interfaces.IKinAccount;
+import kin.sdk.migration.interfaces.IKinClient;
+import kin.sdk.migration.interfaces.IListenerRegistration;
+import kin.sdk.migration.interfaces.IPaymentInfo;
+import kin.sdk.migration.interfaces.ITransactionId;
+import kin.utils.ResultCallback;
 
 public class BlockchainSourceImpl implements BlockchainSource {
 
@@ -48,8 +52,8 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	private final EventLogger eventLogger;
 
-	private final KinClient kinClient;
-	private KinAccount account;
+	private final IKinClient kinClient;
+	private IKinAccount account;
 	private ObservableData<Balance> balance = ObservableData.create(new Balance());
 	/**
 	 * Listen for {@code completedPayment} in order to be notify about completed transaction sent to the blockchain, it
@@ -61,24 +65,21 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	private int paymentObserversCount;
 	private int balanceObserversCount;
 
-	private ListenerRegistration paymentRegistration;
-	private ListenerRegistration balanceRegistration;
+	private IListenerRegistration paymentRegistration;
+	private IListenerRegistration balanceRegistration;
 
 	private final MainThreadExecutor mainThread = new MainThreadExecutor();
 
 	private String appID;
-	private static final int MEMO_FORMAT_VERSION = 1;
 	private static final String MEMO_DELIMITER = "-";
-	private static final String MEMO_FORMAT =
-		"%d" + MEMO_DELIMITER + "%s" + MEMO_DELIMITER + "%s"; // version-appID-orderID
 
 	private static final int APP_ID_INDEX = 1;
 	private static final int ORDER_ID_INDEX = 2;
 	private static final int MEMO_SPLIT_LENGTH = 3;
 
-	private BlockchainSourceImpl(@NonNull EventLogger eventLogger, @NonNull final KinClient kinClient,
-		@NonNull BlockchainSource.Local local)
-		throws BlockchainException {
+	private BlockchainSourceImpl(@NonNull EventLogger eventLogger, @NonNull final IKinClient kinClient,
+								 @NonNull BlockchainSource.Local local)
+			throws BlockchainException {
 		this.eventLogger = eventLogger;
 		this.kinClient = kinClient;
 		this.local = local;
@@ -86,9 +87,9 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		initBalance();
 	}
 
-	public static void init(@NonNull EventLogger eventLogger, @NonNull final KinClient kinClient,
-		@NonNull BlockchainSource.Local local)
-		throws BlockchainException {
+	public static void init(@NonNull EventLogger eventLogger, @NonNull final IKinClient kinClient,
+							@NonNull BlockchainSource.Local local)
+			throws BlockchainException {
 		if (instance == null) {
 			synchronized (BlockchainSourceImpl.class) {
 				if (instance == null) {
@@ -122,7 +123,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	@Override
 	@Nullable
-	public KinAccount getKinAccount() {
+	public IKinAccount getKinAccount() {
 		return account;
 	}
 
@@ -130,7 +131,13 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	public void setAppID(String appID) {
 		if (!TextUtils.isEmpty(appID)) {
 			this.appID = appID;
+			local.setAppId(appID);
 		}
+	}
+
+	@Override
+	public String getAppId() {
+		return appID != null ? appID : local.getAppId();
 	}
 
 	@Override
@@ -142,8 +149,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 		sendBroadcastToBlockchainSubmittedEvent(offerType, offerId, orderId);
 		try {
-			String transactionId = account.sendTransactionSync(publicAddress, amount, generateMemo(orderId))
-				.id();
+			String transactionId = account.sendTransactionSync(publicAddress, amount, new WhitelistService(orderId), orderId).id();
 			sendTransactionSucceededEvent(offerType, offerId, orderId, transactionId);
 			Logger.log(new Log().withTag(TAG).put("sendTransaction onResult", transactionId));
 		} catch (OperationFailedException e) {
@@ -185,13 +191,6 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		}
 	}
 
-	@SuppressLint("DefaultLocale")
-	@VisibleForTesting
-	String generateMemo(@NonNull final String orderID) {
-		return String.format(MEMO_FORMAT, MEMO_FORMAT_VERSION, appID, orderID);
-	}
-
-
 	private void initBalance() {
 		balance.postValue(getBalance());
 		getBalance(null);
@@ -206,9 +205,9 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	@Override
 	public void getBalance(@Nullable final KinCallback<Balance> callback) {
-		account.getBalance().run(new ResultCallback<kin.core.Balance>() {
+		account.getBalance().run(new ResultCallback<IBalance>() {
 			@Override
-			public void onResult(final kin.core.Balance balanceObj) {
+			public void onResult(final IBalance balanceObj) {
 				setBalance(balanceObj);
 				if (callback != null) {
 					mainThread.execute(new Runnable() {
@@ -237,6 +236,11 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
+	public KinSdkVersion getKinSdkVersion() {
+		return account.getKinSdkVersion();
+	}
+
+	@Override
 	public void reconnectBalanceConnection() {
 		synchronized (balanceObserversLock) {
 			if (balanceObserversCount > 0) {
@@ -249,7 +253,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@VisibleForTesting
-	void setBalance(final kin.core.Balance balanceObj) {
+	void setBalance(final IBalance balanceObj) {
 		Balance balanceTemp = balance.getValue();
 		// if the values are not equals so we need to update,
 		// no need to update for equal values.
@@ -284,15 +288,14 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	private void startBalanceListener() {
 		Logger.log(new Log().withTag(TAG).text("startBalanceListener"));
-		balanceRegistration = account.blockchainEvents()
-			.addBalanceListener(new EventListener<kin.core.Balance>() {
-				@Override
-				public void onEvent(kin.core.Balance data) {
-					final double prevBalance = balance.getValue().getAmount().doubleValue();
-					setBalance(data);
-					eventLogger.send(KinBalanceUpdated.create(prevBalance));
-				}
-			});
+		balanceRegistration = account.addBalanceListener(new IEventListener<IBalance>() {
+					@Override
+					public void onEvent(IBalance data) {
+						final double prevBalance = balance.getValue().getAmount().doubleValue();
+						setBalance(data);
+						eventLogger.send(KinBalanceUpdated.create(prevBalance));
+					}
+				});
 	}
 
 	@Override
@@ -330,7 +333,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	@Override
 	@Nullable
 	public String getPublicAddress(final int accountIndex) {
-		KinAccount account = kinClient.getAccount(accountIndex);
+		IKinAccount account = kinClient.getAccount(accountIndex);
 		return account != null ? account.getPublicAddress() : null;
 	}
 
@@ -350,22 +353,21 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	private void startPaymentListener() {
-		paymentRegistration = account.blockchainEvents()
-			.addPaymentListener(new EventListener<PaymentInfo>() {
-				@Override
-				public void onEvent(PaymentInfo data) {
-					final String orderID = extractOrderId(data.memo());
-					Logger.log(new Log().withTag(TAG).put("startPaymentListener onEvent: the orderId", orderID)
-						.put("with memo", data.memo()));
-					final String accountPublicAddress = getPublicAddress();
-					if (orderID != null && accountPublicAddress != null) {
-						completedPayment.postValue(PaymentConverter.toPayment(data, orderID, accountPublicAddress));
-						Logger.log(new Log().withTag(TAG).put("completedPayment order id", orderID));
+		paymentRegistration = account.addPaymentListener(new IEventListener<IPaymentInfo>() {
+					@Override
+					public void onEvent(IPaymentInfo data) {
+						final String orderID = extractOrderId(data.memo());
+						Logger.log(new Log().withTag(TAG).put("startPaymentListener onEvent: the orderId", orderID)
+								.put("with memo", data.memo()));
+						final String accountPublicAddress = getPublicAddress();
+						if (orderID != null && accountPublicAddress != null) {
+							completedPayment.postValue(PaymentConverter.toPayment(data, orderID, accountPublicAddress));
+							Logger.log(new Log().withTag(TAG).put("completedPayment order id", orderID));
+						}
+						// UpdateBalance
+						getBalance(null);
 					}
-					// UpdateBalance
-					getBalance(null);
-				}
-			});
+				});
 	}
 
 	@Override
@@ -391,7 +393,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 			@Override
 			public void onFailure(final OperationFailedException e) {
 				eventLogger.send(
-					StellarKinTrustlineSetupFailed.create(ErrorUtil.getPrintableStackTrace(e), "", e.getMessage()));
+						StellarKinTrustlineSetupFailed.create(ErrorUtil.getPrintableStackTrace(e), "", e.getMessage()));
 				mainThread.execute(new Runnable() {
 					@Override
 					public void run() {
@@ -434,7 +436,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		}
 	}
 
-	private void removeRegistration(ListenerRegistration listenerRegistration) {
+	private void removeRegistration(IListenerRegistration listenerRegistration) {
 		Logger.log(new Log().withTag(TAG).text("removeRegistration"));
 		if (listenerRegistration != null) {
 			listenerRegistration.remove();

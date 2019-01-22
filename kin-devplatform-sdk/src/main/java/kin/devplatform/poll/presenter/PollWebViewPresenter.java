@@ -1,6 +1,7 @@
 package kin.devplatform.poll.presenter;
 
 
+import static kin.devplatform.exception.BlockchainException.MIGRATION_IS_NEEDED;
 import static kin.devplatform.poll.view.IPollWebView.ORDER_SUBMISSION_FAILED;
 import static kin.devplatform.poll.view.IPollWebView.SOMETHING_WENT_WRONG;
 
@@ -94,12 +95,16 @@ public class PollWebViewPresenter extends BasePresenter<IPollWebView> implements
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-				showToast(SOMETHING_WENT_WRONG);
 				eventLogger
 					.send(EarnOrderCreationFailed.create(ErrorUtil.getPrintableStackTrace(exception), offerID,
 						EarnOrderCreationFailed.Origin.MARKETPLACE, String.valueOf(exception.getCode()),
 						exception.getMessage()));
-				closeView();
+				if (view != null && exception.getCode() == MIGRATION_IS_NEEDED) {
+					view.showMigrationErrorDialog();
+				} else {
+					showToast(SOMETHING_WENT_WRONG);
+					closeView();
+				}
 			}
 		});
 	}

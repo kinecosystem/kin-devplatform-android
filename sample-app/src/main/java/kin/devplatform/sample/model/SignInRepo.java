@@ -17,7 +17,7 @@ public class SignInRepo {
 	}
 
 	@NonNull
-	private static String getAppId() {
+	public static String getAppId() {
 		return BuildConfig.SAMPLE_APP_ID;
 	}
 

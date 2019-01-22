@@ -1,9 +1,12 @@
 package kin.devplatform.marketplace.view;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog.Builder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -126,6 +129,22 @@ public class MarketplaceFragment extends Fragment implements IMarketplaceView {
 		SpendDialog spendDialog = new SpendDialog(getActivity(), marketplacePresenter.getNavigator(),
 			spendDialogPresenter);
 		spendDialog.show();
+	}
+
+	@Override
+	public void showMigrationErrorDialog() {
+		final AlertDialog dialog = new Builder(getContext())
+			.setTitle(getString(R.string.kinecosystem_dialog_migration_is_needed_title))
+			.setMessage(getString(R.string.kinecosystem_dialog_migration_is_needed_kin_saved_message))
+			.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			})
+			.setCancelable(false)
+			.create();
+		dialog.show();
 	}
 
 	@Override
