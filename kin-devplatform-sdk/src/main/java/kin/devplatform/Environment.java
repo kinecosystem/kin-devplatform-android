@@ -87,8 +87,8 @@ public class Environment implements KinEnvironment {
 			PRODUCTION = new Environment(
 				"https://horizon-ecosystem.kininfrastructure.com/",
 				"Public Global Kin Ecosystem Network ; June 2018",
-				"",
-				"",
+				"https://horizon.kinfederation.com",
+				"Kin Mainnet ; December 2018",
 				"GDF42M3IPERQCBLWFEZKQRK77JQ65SCKTU3CW36HZVCX7XX5A5QXZIVK",
 				"https://api-prod.developers.kinecosystem.com/v1",
 				"https://s3.amazonaws.com/assets.developers.kinecosystem.com/web-offers/cards-based/index.html",

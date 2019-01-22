@@ -144,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
 			new KinCallback<Void>() {
 			@Override
 			public void onResponse(Void response) {
-				// TODO: 09/01/2019 maybe remove the progress bar that we added when migration was started?
 				Toast.makeText(MainActivity.this, "Starting SDK succeeded", Toast.LENGTH_LONG).show();
 				addNativeSpendOffer(nativeSpendOffer);
 				addNativeOfferClickedObserver();
