@@ -171,8 +171,11 @@ public final class KinEcosystemInitiator {
 		MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId,
 			newNetworkUrl, newNetworkId, issuer);
 
-		return new MigrationManager(context, appId, migrationNetworkInfo, new KinVersionProvider(appId),
+		MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo,
+			new KinVersionProvider(appId),
 			new MigrationEventsListener(EventLoggerImpl.getInstance()), KIN_ECOSYSTEM_STORE_PREFIX_KEY);
+		migrationManager.enableLogs(Logger.isEnabled());
+		return migrationManager;
 	}
 
 	private void initConfiguration(Context context, KinEnvironment environment) {
