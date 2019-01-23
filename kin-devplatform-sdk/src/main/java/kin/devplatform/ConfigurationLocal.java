@@ -70,7 +70,7 @@ public class ConfigurationLocal implements Configuration.Local {
 		editor.putString(NEW_BLOCKCHAIN_NETWORK_URL_KEY, kinEnvironment.getNewBlockchainNetworkUrl());
 		editor.putString(NEW_BLOCKCHAIN_PASSPHRASE_KEY, kinEnvironment.getNewBlockchainPassphrase());
 		editor.putString(OLD_BLOCKCHAIN_ISSUER_KEY, kinEnvironment.getOldBlockchainIssuer());
-		editor.putString(MIGRATION_SERVICE_URL_KEY, kinEnvironment.getOldBlockchainIssuer());
+		editor.putString(MIGRATION_SERVICE_URL_KEY, kinEnvironment.getMigrationServiceUrl());
 		editor.putString(ECOSYSTEM_SERVER_URL_KEY, kinEnvironment.getEcosystemServerUrl());
 		editor.putString(ECOSYSTEM_WEB_FRONT_URL_KEY, kinEnvironment.getEcosystemWebFront());
 		editor.putString(BI_URL_KEY, kinEnvironment.getBiUrl());
