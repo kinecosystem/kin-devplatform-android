@@ -163,13 +163,14 @@ public final class KinEcosystemInitiator {
 		final String newNetworkUrl = kinEnvironment.getNewBlockchainNetworkUrl();
 		final String newNetworkId = kinEnvironment.getNewBlockchainPassphrase();
 		final String issuer = kinEnvironment.getOldBlockchainIssuer();
+		final String migrationServiceUrl = kinEnvironment.getMigrationServiceUrl();
 
 		if (appId == null) {
 			appId = BlockchainSourceLocal.getInstance(context).getAppId();
 		}
 
 		MigrationNetworkInfo migrationNetworkInfo = new MigrationNetworkInfo(oldNetworkUrl, oldNetworkId,
-			newNetworkUrl, newNetworkId, issuer);
+			newNetworkUrl, newNetworkId, issuer, migrationServiceUrl);
 
 		MigrationManager migrationManager = new MigrationManager(context, appId, migrationNetworkInfo,
 			new KinVersionProvider(appId),
