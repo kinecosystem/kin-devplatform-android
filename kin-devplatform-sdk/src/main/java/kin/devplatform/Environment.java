@@ -10,18 +10,21 @@ public class Environment implements KinEnvironment {
 	private final String oldBlockchainPassphrase;
 	private final String newBlockchainPassphrase;
 	private final String issuer;
+	private final String migrationServiceUrl;
 	private final String ecosystemServerUrl;
 	private final String ecosystemWebFront;
 	private final String biUrl;
 
 	public Environment(String oldBlockchainNetworkUrl, String oldBlockchainPassphrase, String newBlockchainNetworkUrl,
-		String newBlockchainPassphrase, String oldBlockchainIssuer, String ecosystemServerUrl, String ecosystemWebFront,
+		String newBlockchainPassphrase, String oldBlockchainIssuer, String migrationServiceUrl,
+		String ecosystemServerUrl, String ecosystemWebFront,
 		String biUrl) {
 		this.oldBlockchainNetworkUrl = oldBlockchainNetworkUrl;
 		this.newBlockchainNetworkUrl = newBlockchainNetworkUrl;
 		this.oldBlockchainPassphrase = oldBlockchainPassphrase;
 		this.newBlockchainPassphrase = newBlockchainPassphrase;
 		this.issuer = oldBlockchainIssuer;
+		this.migrationServiceUrl = migrationServiceUrl;
 		this.ecosystemServerUrl = ecosystemServerUrl;
 		this.ecosystemWebFront = ecosystemWebFront;
 		this.biUrl = biUrl;
@@ -53,6 +56,11 @@ public class Environment implements KinEnvironment {
 	}
 
 	@Override
+	public String getMigrationServiceUrl() {
+		return migrationServiceUrl;
+	}
+
+	@Override
 	public String getEcosystemServerUrl() {
 		return ecosystemServerUrl;
 	}
@@ -75,6 +83,7 @@ public class Environment implements KinEnvironment {
 				"http://horizon-testnet.kininfrastructure.com",
 				"Kin Testnet ; December 2018",
 				"GBC3SG6NGTSZ2OMH3FFGB7UVRQWILW367U4GSOOF4TFSZONV42UJXUH7",
+				"https://migration-devplatform-playground.developers.kinecosystem.com/migrate?address=",
 				"https://api.developers.kinecosystem.com/v1",
 				"https://s3.amazonaws.com/assets.developers.kinecosystem.com/web-offers/cards-based/index.html",
 				"https://kin-bi.appspot.com/devp_play_");
@@ -90,6 +99,7 @@ public class Environment implements KinEnvironment {
 				"https://horizon.kinfederation.com",
 				"Kin Mainnet ; December 2018",
 				"GDF42M3IPERQCBLWFEZKQRK77JQ65SCKTU3CW36HZVCX7XX5A5QXZIVK",
+				"https://migration-devplatform-production.developers.kinecosystem.com/migrate?address=",
 				"https://api-prod.developers.kinecosystem.com/v1",
 				"https://s3.amazonaws.com/assets.developers.kinecosystem.com/web-offers/cards-based/index.html",
 				"https://kin-bi.appspot.com/devp_");

@@ -12,6 +12,8 @@ public interface KinEnvironment {
 
 	String getOldBlockchainIssuer();
 
+	String getMigrationServiceUrl();
+
 	String getEcosystemServerUrl();
 
 	String getEcosystemWebFront();

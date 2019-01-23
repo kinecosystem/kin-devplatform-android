@@ -16,6 +16,7 @@ public class ConfigurationLocal implements Configuration.Local {
 	private static final String NEW_BLOCKCHAIN_NETWORK_URL_KEY = "new_blockchain_network_url";
 	private static final String NEW_BLOCKCHAIN_PASSPHRASE_KEY = "new_blockchain_passphrase";
 	private static final String OLD_BLOCKCHAIN_ISSUER_KEY = "old_blockchain_issuer";
+	private static final String MIGRATION_SERVICE_URL_KEY = "migration_service_url";
 	private static final String ECOSYSTEM_SERVER_URL_KEY = "ecosystem_server_url";
 	private static final String ECOSYSTEM_WEB_FRONT_URL_KEY = "ecosystem_web_front_url";
 	private static final String BI_URL_KEY = "bi_url";
@@ -47,6 +48,7 @@ public class ConfigurationLocal implements Configuration.Local {
 		final String newBlockchainNetworkUrl = configurationSharedPreferences.getString(NEW_BLOCKCHAIN_NETWORK_URL_KEY, null);
 		final String newBlockchainPassphrase = configurationSharedPreferences.getString(NEW_BLOCKCHAIN_PASSPHRASE_KEY, null);
 		final String issuer = configurationSharedPreferences.getString(OLD_BLOCKCHAIN_ISSUER_KEY, null);
+		final String migrationServiceUrl = configurationSharedPreferences.getString(MIGRATION_SERVICE_URL_KEY, null);
 		final String ecosystemServerUrl = configurationSharedPreferences.getString(ECOSYSTEM_SERVER_URL_KEY, null);
 		final String ecosystemWebFrontUrl = configurationSharedPreferences.getString(ECOSYSTEM_WEB_FRONT_URL_KEY, null);
 		final String biUrl = configurationSharedPreferences.getString(BI_URL_KEY, null);
@@ -55,7 +57,7 @@ public class ConfigurationLocal implements Configuration.Local {
 			return null;
 		} else {
 			return new Environment(oldBlockchainNetworkUrl, oldBlockchainPassphrase, newBlockchainNetworkUrl, newBlockchainPassphrase,
-					issuer, ecosystemServerUrl, ecosystemWebFrontUrl, biUrl);
+				issuer, migrationServiceUrl, ecosystemServerUrl, ecosystemWebFrontUrl, biUrl);
 		}
 
 	}
@@ -68,6 +70,7 @@ public class ConfigurationLocal implements Configuration.Local {
 		editor.putString(NEW_BLOCKCHAIN_NETWORK_URL_KEY, kinEnvironment.getNewBlockchainNetworkUrl());
 		editor.putString(NEW_BLOCKCHAIN_PASSPHRASE_KEY, kinEnvironment.getNewBlockchainPassphrase());
 		editor.putString(OLD_BLOCKCHAIN_ISSUER_KEY, kinEnvironment.getOldBlockchainIssuer());
+		editor.putString(MIGRATION_SERVICE_URL_KEY, kinEnvironment.getMigrationServiceUrl());
 		editor.putString(ECOSYSTEM_SERVER_URL_KEY, kinEnvironment.getEcosystemServerUrl());
 		editor.putString(ECOSYSTEM_WEB_FRONT_URL_KEY, kinEnvironment.getEcosystemWebFront());
 		editor.putString(BI_URL_KEY, kinEnvironment.getBiUrl());
