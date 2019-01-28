@@ -7,13 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
+import io.jsonwebtoken.io.Serializer;
+import java.security.*;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 
 public class JwtUtil {
@@ -36,6 +36,7 @@ public class JwtUtil {
 
 	private static final String JWT_HEADER_TYP = "typ";
 	private static final String JWT = "jwt";
+	private static final PrivateKey privateKey = getES256PrivateKey();
 
 	public static String lastId;
 
@@ -43,7 +44,7 @@ public class JwtUtil {
 		String jwt = getBasicJWT(appID)
 			.setSubject(JWT_SUBJECT_REGISTER)
 			.claim(JWT_KEY_USER_ID, userId)
-			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
+			.signWith(privateKey, SignatureAlgorithm.ES256).compact();
 		return jwt;
 	}
 
@@ -52,7 +53,7 @@ public class JwtUtil {
 			.setSubject(JWT_SUBJECT_SPEND)
 			.claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
 			.claim(JWT_CLAIM_OBJECT_SENDER_PART, new JWTSenderPart(userID, "Bought a sticker", "Lion sticker"))
-			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
+			.signWith(privateKey, SignatureAlgorithm.ES256).compact();
 		return jwt;
 	}
 
@@ -62,7 +63,7 @@ public class JwtUtil {
 			.claim(JWT_CLAIM_OBJECT_OFFER_PART, createOfferPartExampleObject())
 			.claim(JWT_CLAIM_OBJECT_RECIPIENT_PART,
 				new JWTRecipientPart(userID, "Received Kin", null))
-			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
+			.signWith(privateKey, SignatureAlgorithm.ES256).compact();
 		return jwt;
 	}
 
@@ -74,7 +75,7 @@ public class JwtUtil {
 			.claim(JWT_CLAIM_OBJECT_SENDER_PART, new JWTSenderPart(userID, "Pay to user", "P2P example"))
 			.claim(JWT_CLAIM_OBJECT_RECIPIENT_PART,
 				new JWTRecipientPart(recipientUserID, "P2P - Received Kin", "Received via P2P"))
-			.signWith(SignatureAlgorithm.ES256, getES256PrivateKey()).compact();
+			.signWith(privateKey, SignatureAlgorithm.ES256).compact();
 		return jwt;
 	}
 
@@ -93,6 +94,8 @@ public class JwtUtil {
 
 	@Nullable
 	private static PrivateKey getES256PrivateKey() {
+		// Adds a new provider, at a specified position
+		Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
 		try {
 			KeyFactory kf = KeyFactory.getInstance(ALGORITHM_EC);
 			byte[] bytes = Base64.decode(getPrivateKeyForJWT(), Base64.NO_WRAP);
