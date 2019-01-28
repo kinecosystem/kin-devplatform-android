@@ -80,7 +80,7 @@ public class Environment implements KinEnvironment {
 			PLAYGROUND = new Environment(
 				"https://horizon-playground.kininfrastructure.com",
 				"Kin Playground Network ; June 2018",
-				"http://horizon-testnet.kininfrastructure.com",
+				"https://horizon-testnet.kininfrastructure.com",
 				"Kin Testnet ; December 2018",
 				"GBC3SG6NGTSZ2OMH3FFGB7UVRQWILW367U4GSOOF4TFSZONV42UJXUH7",
 				"https://migration-devplatform-playground.developers.kinecosystem.com/migrate?address=",
