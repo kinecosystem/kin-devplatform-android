@@ -24,9 +24,9 @@
 -keepnames interface com.fasterxml.jackson.** { *; }
 -dontwarn com.fasterxml.jackson.databind.**
 
--keep class org.bouncycastle.** { *; }
--keepnames class org.bouncycastle.** { *; }
--dontwarn org.bouncycastle.**
+-keep class org.spongycastle.** { *; }
+-keepnames class org.spongycastle.** { *; }
+-dontwarn org.spongycastle.**
 
 -keep class io.jsonwebtoken.** { *; }
 -keepnames class io.jsonwebtoken.* { *; }
