@@ -65,8 +65,6 @@ dependencies {
     implementation('io.jsonwebtoken:jjwt-orgjson:0.10.5') {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
-    // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
-//    runtimeOnly 'org.bouncycastle:bcprov-jdk15on:1.60'
     implementation 'com.madgag.spongycastle:bctls-jdk15on:1.58.0.0'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.10.5'
     implementation 'com.android.support:appcompat-v7:28.0.0'
