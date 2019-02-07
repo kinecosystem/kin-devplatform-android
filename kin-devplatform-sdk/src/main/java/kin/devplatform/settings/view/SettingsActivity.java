@@ -1,9 +1,12 @@
 package kin.devplatform.settings.view;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog.Builder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
@@ -18,12 +21,14 @@ import kin.devplatform.data.settings.SettingsDataSourceLocal;
 import kin.devplatform.settings.presenter.ISettingsPresenter;
 import kin.devplatform.settings.presenter.SettingsPresenter;
 
-public class SettingsActivity extends BaseToolbarActivity implements kin.devplatform.settings.view.ISettingsView, OnClickListener {
+public class SettingsActivity extends BaseToolbarActivity implements kin.devplatform.settings.view.ISettingsView,
+	OnClickListener {
 
 	private ISettingsPresenter settingsPresenter;
 
 	private kin.devplatform.settings.view.SettingsItem backupItem;
 	private kin.devplatform.settings.view.SettingsItem restoreItem;
+	private AlertDialog migrationDialog;
 
 	@Override
 	protected int getLayoutRes() {
@@ -85,6 +90,48 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		} else if (vId == R.id.restore_prev_wallet) {
 			settingsPresenter.restoreClicked();
 		}
+	}
+
+	@Override
+	public void showMigrationStartedDialog() {
+		showDialog(getString(R.string.kinecosystem_dialog_backup_migration_started_title),
+			getString(R.string.kinecosystem_dialog_backup_migration_started_message));
+	}
+
+	@Override
+	public void showMigrationFinishedDialog() {
+		showDialog(getString(R.string.kinecosystem_dialog_backup_migration_finished_title),
+			getString(R.string.kinecosystem_dialog_backup_migration_finished_message));
+	}
+
+	@Override
+	public void showMigrationErrorDialog(Exception e) {
+		showDialog(getString(R.string.kinecosystem_dialog_backup_migration_error_title),
+			getString(R.string.kinecosystem_dialog_backup_migration_error_message, e.getCause(), e.getMessage()));
+		// TODO: 07/02/2019 maybe we can add button which will let them retry the migration.
+	}
+
+	private void showDialog(String title, String message) {
+		if (migrationDialog == null) {
+			migrationDialog = new Builder(this, R.style.KinrecoveryAlertDialogTheme)
+				.setTitle(title)
+				.setMessage(message)
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				})
+				.setCancelable(false)
+				.create();
+		} else {
+			if (migrationDialog.isShowing()) {
+				migrationDialog.dismiss();
+			}
+			migrationDialog.setTitle(title);
+			migrationDialog.setMessage(message);
+		}
+		migrationDialog.show();
 	}
 
 	@Override

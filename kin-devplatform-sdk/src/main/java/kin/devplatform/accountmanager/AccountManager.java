@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.Observer;
 import kin.devplatform.exception.KinEcosystemException;
+import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
 
 public interface AccountManager {
 
@@ -28,11 +29,13 @@ public interface AccountManager {
 
 
 	}
+
 	void start();
 
 	void retry();
 
-	void switchAccount(int accountIndex, @NonNull final KinCallback<Boolean> callback);
+	void switchAccount(int accountIndex, @NonNull final KinCallback<Boolean> callback,
+		@NonNull final IMigrationManagerCallbacks migrationManagerCallbacks);
 
 	@AccountState
 	int getAccountState();

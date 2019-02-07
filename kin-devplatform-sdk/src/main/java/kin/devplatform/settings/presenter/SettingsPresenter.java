@@ -30,6 +30,8 @@ import kin.devplatform.settings.view.ISettingsView;
 import kin.devplatform.settings.view.ISettingsView.IconColor;
 import kin.devplatform.settings.view.ISettingsView.Item;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.interfaces.IKinClient;
+import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
 
 public class SettingsPresenter extends BasePresenter<ISettingsView> implements ISettingsPresenter {
 
@@ -186,6 +188,35 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),
 						"SettingsPresenter.switchAccount onFailure"));
 				showCouldNotImportAccountError();
+			}
+		}, new IMigrationManagerCallbacks() {
+
+			@Override
+			public void onMigrationStart() {
+				if (view != null) {
+					// TODO: 07/02/2019 confirm with Ayelet
+					view.showMigrationStartedDialog();
+				}
+			}
+
+			@Override
+			public void onReady(IKinClient kinClient) {
+				if (view != null) {
+					// TODO: 07/02/2019 Maybe if it is not started then show different message because there were no actual migration.
+					// TODO: 07/02/2019 Although it can start even if it was migrated, for example if the account was migrated but currently not saved locally in the device.
+					// TODO: 07/02/2019 It can be solved only if we will add a bit complicate method which checks if an account is already migrated.
+
+					// TODO: 07/02/2019 Also maybe it will be correct to update the user that he can go back and use the app only after the wallet address is finished and not here...
+					view.showMigrationFinishedDialog();
+				}
+			}
+
+			@Override
+			public void onError(Exception e) {
+				// TODO: 07/02/2019 confirm with Ayelet
+				if (view != null) {
+					view.showMigrationErrorDialog(e);
+				}
 			}
 		});
 	}

@@ -9,10 +9,11 @@ import kin.devplatform.base.Observer;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
+import kin.devplatform.network.model.OpenOrder;
 import kin.sdk.migration.KinSdkVersion;
 import kin.sdk.migration.exception.OperationFailedException;
 import kin.sdk.migration.interfaces.IKinAccount;
-import kin.devplatform.network.model.OpenOrder;
+import kin.sdk.migration.interfaces.IKinClient;
 
 public interface BlockchainSource {
 
@@ -108,6 +109,8 @@ public interface BlockchainSource {
 	KeyStoreProvider getKeyStoreProvider();
 
 	void updateActiveAccount(int accountIndex) throws BlockchainException;
+
+	void updateKinClientAndAccount(IKinClient kinClient, int accountIndex);
 
 	interface Local {
 

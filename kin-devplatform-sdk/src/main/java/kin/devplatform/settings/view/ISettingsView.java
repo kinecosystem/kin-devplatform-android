@@ -1,15 +1,22 @@
 package kin.devplatform.settings.view;
 
 import android.support.annotation.IntDef;
-import kin.devplatform.base.IBaseView;
-import kin.devplatform.settings.presenter.ISettingsPresenter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import kin.devplatform.base.IBaseView;
+import kin.devplatform.settings.presenter.ISettingsPresenter;
 
 public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 
 	int ITEM_BACKUP = 0x00000001;
 	int ITEM_RESTORE = 0x00000002;
+
+	void showMigrationStartedDialog();
+
+	void showMigrationFinishedDialog();
+
+	void showMigrationErrorDialog(Exception e);
+
 
 	@IntDef({ITEM_BACKUP, ITEM_RESTORE})
 	@Retention(RetentionPolicy.SOURCE)
