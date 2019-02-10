@@ -1,29 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <include layout="@layout/kinecosystem_toolbar_layout"/>
-
-    <kin.devplatform.settings.view.SettingsItem
-        android:id="@+id/keep_your_kin_safe"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/kinecosystem_settings_item_height"
-        app:kinecosystem_src="@drawable/kinecosystem_grey_backup_icon"
-        app:kinecosysem_text="@string/kinecosystem_keep_your_kin_safe"/>
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical">
 
-    <include layout="@layout/kinecosystem_separator_line"/>
+        <include layout="@layout/kinecosystem_toolbar_layout"/>
 
-    <kin.devplatform.settings.view.SettingsItem
-        android:id="@+id/restore_prev_wallet"
+        <kin.devplatform.settings.view.SettingsItem
+            android:id="@+id/keep_your_kin_safe"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/kinecosystem_settings_item_height"
+            app:kinecosystem_src="@drawable/kinecosystem_grey_backup_icon"
+            app:kinecosysem_text="@string/kinecosystem_keep_your_kin_safe"/>
+
+        <include layout="@layout/kinecosystem_separator_line"/>
+
+        <kin.devplatform.settings.view.SettingsItem
+            android:id="@+id/restore_prev_wallet"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/kinecosystem_settings_item_height"
+            app:kinecosystem_src="@drawable/kinecosystem_grey_restore_icon"
+            app:kinecosystem_indicatorVisibility="false"
+            app:kinecosysem_text="@string/kinecosystem_restore_previous_wallet"/>
+
+        <include layout="@layout/kinecosystem_separator_line"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/backup_migration_progress_layout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/kinecosystem_settings_item_height"
-        app:kinecosystem_src="@drawable/kinecosystem_grey_restore_icon"
-        app:kinecosystem_indicatorVisibility="false"
-        app:kinecosysem_text="@string/kinecosystem_restore_previous_wallet"/>
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:gravity="center"
+        android:visibility="gone">
 
-    <include layout="@layout/kinecosystem_separator_line"/>
+        <ProgressBar
+            android:id="@+id/backup_migration_progress"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:visibility="visible"/>
 
-</LinearLayout>
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>
+
+

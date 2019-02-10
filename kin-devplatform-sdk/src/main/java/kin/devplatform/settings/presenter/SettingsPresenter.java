@@ -143,17 +143,18 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 		backupManager.registerBackupCallback(new BackupCallback() {
 			@Override
 			public void onSuccess() {
+				Logger.log(new Log().withTag(TAG).put("BackupCallback", "onSuccess"));
 				onBackupSuccess();
 			}
 
 			@Override
 			public void onCancel() {
-
+				Logger.log(new Log().withTag(TAG).put("BackupCallback", "onCancel"));
 			}
 
 			@Override
 			public void onFailure(Throwable throwable) {
-
+				Logger.log(new Log().withTag(TAG).put("BackupCallback", "onFailure"));
 			}
 		});
 
@@ -161,6 +162,9 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			@Override
 			public void onSuccess(int accountIndex) {
 				Logger.log(new Log().withTag(TAG).put("RestoreCallback", "onSuccess"));
+				if (view != null) {
+					view.startWaiting();
+				}
 				switchAccount(accountIndex);
 			}
 
@@ -171,6 +175,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 			@Override
 			public void onFailure(Throwable throwable) {
+				Logger.log(new Log().withTag(TAG).put("RestoreCallback", "onFailure"));
 			}
 		});
 	}
@@ -179,11 +184,13 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 		accountManager.switchAccount(accountIndex, new KinCallback<Boolean>() {
 			@Override
 			public void onResponse(Boolean response) {
+				view.stopWaiting();
 				eventLogger.send(RestoreWalletCompleted.create());
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
+				view.stopWaiting();
 				eventLogger.send(GeneralEcosystemSdkError
 					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),
 						"SettingsPresenter.switchAccount onFailure"));
@@ -215,6 +222,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			public void onError(Exception e) {
 				// TODO: 07/02/2019 confirm with Ayelet
 				if (view != null) {
+					view.stopWaiting();
 					view.showMigrationErrorDialog(e);
 				}
 			}

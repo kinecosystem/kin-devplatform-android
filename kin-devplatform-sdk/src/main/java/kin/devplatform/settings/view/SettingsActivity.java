@@ -25,7 +25,7 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	OnClickListener {
 
 	private ISettingsPresenter settingsPresenter;
-
+	private View progressBarLayout;
 	private kin.devplatform.settings.view.SettingsItem backupItem;
 	private kin.devplatform.settings.view.SettingsItem restoreItem;
 	private AlertDialog migrationDialog;
@@ -60,7 +60,7 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		super.onCreate(savedInstanceState);
 		backupItem = findViewById(R.id.keep_your_kin_safe);
 		restoreItem = findViewById(R.id.restore_prev_wallet);
-
+		progressBarLayout = findViewById(R.id.backup_migration_progress_layout);
 		backupItem.setOnClickListener(this);
 		restoreItem.setOnClickListener(this);
 
@@ -109,6 +109,15 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		showDialog(getString(R.string.kinecosystem_dialog_backup_migration_error_title),
 			getString(R.string.kinecosystem_dialog_backup_migration_error_message, e.getCause(), e.getMessage()));
 		// TODO: 07/02/2019 maybe we can add button which will let them retry the migration.
+	}
+
+	public void startWaiting() {
+		progressBarLayout.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void stopWaiting() {
+		progressBarLayout.setVisibility(View.GONE);
 	}
 
 	private void showDialog(String title, String message) {
@@ -183,6 +192,13 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 				return R.color.kinecosystem_gray_dark;
 			default:
 				return -1;
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (progressBarLayout.getVisibility() == View.GONE) {
+			super.onBackPressed();
 		}
 	}
 

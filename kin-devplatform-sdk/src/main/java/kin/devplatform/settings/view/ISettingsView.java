@@ -17,6 +17,10 @@ public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 
 	void showMigrationErrorDialog(Exception e);
 
+	void stopWaiting();
+
+	void startWaiting();
+
 
 	@IntDef({ITEM_BACKUP, ITEM_RESTORE})
 	@Retention(RetentionPolicy.SOURCE)
