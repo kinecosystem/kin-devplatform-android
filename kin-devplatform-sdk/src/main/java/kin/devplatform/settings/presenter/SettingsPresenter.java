@@ -30,8 +30,8 @@ import kin.devplatform.settings.view.ISettingsView;
 import kin.devplatform.settings.view.ISettingsView.IconColor;
 import kin.devplatform.settings.view.ISettingsView.Item;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.interfaces.IKinClient;
-import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
+import kin.sdk.migration.common.interfaces.IKinClient;
+import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 
 public class SettingsPresenter extends BasePresenter<ISettingsView> implements ISettingsPresenter {
 
@@ -184,13 +184,17 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 		accountManager.switchAccount(accountIndex, new KinCallback<Boolean>() {
 			@Override
 			public void onResponse(Boolean response) {
-				view.stopWaiting();
+				if (view != null) {
+					view.stopWaiting();
+				}
 				eventLogger.send(RestoreWalletCompleted.create());
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-				view.stopWaiting();
+				if (view != null) {
+					view.stopWaiting();
+				}
 				eventLogger.send(GeneralEcosystemSdkError
 					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),
 						"SettingsPresenter.switchAccount onFailure"));

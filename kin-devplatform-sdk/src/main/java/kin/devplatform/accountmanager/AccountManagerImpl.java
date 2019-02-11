@@ -19,14 +19,14 @@ import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.MigrationManager;
-import kin.sdk.migration.exception.AccountNotActivatedException;
-import kin.sdk.migration.exception.MigrationInProcessException;
-import kin.sdk.migration.interfaces.IBalance;
-import kin.sdk.migration.interfaces.IEventListener;
-import kin.sdk.migration.interfaces.IKinAccount;
-import kin.sdk.migration.interfaces.IKinClient;
-import kin.sdk.migration.interfaces.IListenerRegistration;
-import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
+import kin.sdk.migration.common.exception.AccountNotActivatedException;
+import kin.sdk.migration.common.exception.MigrationInProcessException;
+import kin.sdk.migration.common.interfaces.IBalance;
+import kin.sdk.migration.common.interfaces.IEventListener;
+import kin.sdk.migration.common.interfaces.IKinAccount;
+import kin.sdk.migration.common.interfaces.IKinClient;
+import kin.sdk.migration.common.interfaces.IListenerRegistration;
+import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 import kin.utils.ResultCallback;
 
 public class AccountManagerImpl implements AccountManager {
@@ -254,9 +254,8 @@ public class AccountManagerImpl implements AccountManager {
 				@Override
 				public void onReady(IKinClient kinClient) {
 					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
-					blockchainSource.updateKinClientAndAccount(kinClient, accountIndex);
 					migrationManagerCallbacks.onReady(kinClient);
-					updateWalletAddress(accountIndex, callback);
+					updateWalletAddress(kinClient, accountIndex, callback);
 				}
 
 				@Override
@@ -266,11 +265,12 @@ public class AccountManagerImpl implements AccountManager {
 				}
 			});
 		} catch (MigrationInProcessException e) {
-			// Couldn't happen in this restore scenario.
+			Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("MigrationInProcessException"));
+			migrationManagerCallbacks.onError(e);
 		}
 	}
 
-	private void updateWalletAddress(final int accountIndex,
+	private void updateWalletAddress(final IKinClient kinClient, final int accountIndex,
 		@NonNull final KinCallback<Boolean> callback) {
 		final String address = blockchainSource.getPublicAddress(accountIndex);
 		//update sign in data with new wallet address and update servers
@@ -279,7 +279,7 @@ public class AccountManagerImpl implements AccountManager {
 			public void onResponse(Boolean response) {
 				try {
 					//switch to the new KinAccount
-					blockchainSource.updateActiveAccount(accountIndex);
+					blockchainSource.updateActiveAccount(kinClient, accountIndex);
 				} catch (BlockchainException e) {
 					callback.onFailure(ErrorUtil.getBlockchainException(e));
 					return;

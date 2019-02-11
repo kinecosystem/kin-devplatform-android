@@ -30,15 +30,15 @@ import kin.devplatform.network.model.Offer.OfferType;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.KinSdkVersion;
-import kin.sdk.migration.exception.CreateAccountException;
-import kin.sdk.migration.exception.OperationFailedException;
-import kin.sdk.migration.interfaces.IBalance;
-import kin.sdk.migration.interfaces.IEventListener;
-import kin.sdk.migration.interfaces.IKinAccount;
-import kin.sdk.migration.interfaces.IKinClient;
-import kin.sdk.migration.interfaces.IListenerRegistration;
-import kin.sdk.migration.interfaces.IPaymentInfo;
+import kin.sdk.migration.common.KinSdkVersion;
+import kin.sdk.migration.common.exception.CreateAccountException;
+import kin.sdk.migration.common.exception.OperationFailedException;
+import kin.sdk.migration.common.interfaces.IBalance;
+import kin.sdk.migration.common.interfaces.IEventListener;
+import kin.sdk.migration.common.interfaces.IKinAccount;
+import kin.sdk.migration.common.interfaces.IKinClient;
+import kin.sdk.migration.common.interfaces.IListenerRegistration;
+import kin.sdk.migration.common.interfaces.IPaymentInfo;
 import kin.utils.ResultCallback;
 
 public class BlockchainSourceImpl implements BlockchainSource {
@@ -407,7 +407,8 @@ public class BlockchainSourceImpl implements BlockchainSource {
 	}
 
 	@Override
-	public void updateActiveAccount(int accountIndex) throws BlockchainException {
+	public void updateActiveAccount(IKinClient kinClient, int accountIndex) throws BlockchainException {
+		this.kinClient = kinClient;
 		local.setAccountIndex(accountIndex);
 		createKinAccountIfNeeded();
 
@@ -419,12 +420,6 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		}
 		//trigger balance update
 		getBalance(null);
-	}
-
-	@Override
-	public void updateKinClientAndAccount(IKinClient kinClient, int accountIndex) {
-		this.kinClient = kinClient;
-		this.account = kinClient.getAccount(accountIndex);
 	}
 
 	private void decrementPaymentCount() {

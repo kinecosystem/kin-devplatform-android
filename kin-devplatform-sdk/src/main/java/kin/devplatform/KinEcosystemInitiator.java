@@ -37,9 +37,9 @@ import kin.devplatform.util.JwtBody;
 import kin.devplatform.util.JwtDecoder;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.MigrationNetworkInfo;
-import kin.sdk.migration.exception.MigrationInProcessException;
-import kin.sdk.migration.interfaces.IKinClient;
-import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
+import kin.sdk.migration.common.exception.MigrationInProcessException;
+import kin.sdk.migration.common.interfaces.IKinClient;
+import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 import org.json.JSONException;
 
 public final class KinEcosystemInitiator {
@@ -250,7 +250,7 @@ public final class KinEcosystemInitiator {
 			}
 		} else {
 			// if already initialized then we only did the migration so only update the kinClient and account.
-			BlockchainSourceImpl.getInstance().updateKinClientAndAccount(kinClient, kinClient.getAccountCount() - 1);
+			BlockchainSourceImpl.getInstance().updateActiveAccount(kinClient, kinClient.getAccountCount() - 1);
 		}
 
 		eventLogger.send(KinSdkInitiated.create());
