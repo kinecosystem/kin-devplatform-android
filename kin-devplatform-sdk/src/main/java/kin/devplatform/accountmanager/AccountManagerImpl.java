@@ -272,7 +272,8 @@ public class AccountManagerImpl implements AccountManager {
 
 	private void updateWalletAddress(final IKinClient kinClient, final int accountIndex,
 		@NonNull final KinCallback<Boolean> callback) {
-		final String address = blockchainSource.getPublicAddress(accountIndex);
+		IKinAccount account = kinClient.getAccount(accountIndex);
+		final String address = account != null ? account.getPublicAddress() : null;
 		//update sign in data with new wallet address and update servers
 		authRepository.updateWalletAddress(address, new KinCallback<Boolean>() {
 			@Override

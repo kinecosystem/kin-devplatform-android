@@ -36,6 +36,7 @@ import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 public class SettingsPresenter extends BasePresenter<ISettingsView> implements ISettingsPresenter {
 
 	private static final String TAG = SettingsPresenter.class.getSimpleName();
+
 	private final BackupManager backupManager;
 	private final SettingsDataSource settingsDataSource;
 	private final BlockchainSource blockchainSource;
@@ -185,7 +186,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			@Override
 			public void onResponse(Boolean response) {
 				if (view != null) {
-					view.stopWaiting();
+					view.showUpdateWalletAddressFinished();
 				}
 				eventLogger.send(RestoreWalletCompleted.create());
 			}
@@ -193,50 +194,40 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			@Override
 			public void onFailure(KinEcosystemException exception) {
 				if (view != null) {
-					view.stopWaiting();
+					view.showUpdateWalletAddressError();
 				}
 				eventLogger.send(GeneralEcosystemSdkError
 					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),
 						"SettingsPresenter.switchAccount onFailure"));
-				showCouldNotImportAccountError();
 			}
 		}, new IMigrationManagerCallbacks() {
 
+			private boolean didStart;
+
 			@Override
 			public void onMigrationStart() {
+				didStart = true;
 				if (view != null) {
-					// TODO: 07/02/2019 confirm with Ayelet
-					view.showMigrationStartedDialog();
+					view.showMigrationStarted();
 				}
 			}
 
 			@Override
 			public void onReady(IKinClient kinClient) {
-				if (view != null) {
-					// TODO: 07/02/2019 Maybe if it is not started then show different message because there were no actual migration.
-					// TODO: 07/02/2019 Although it can start even if it was migrated, for example if the account was migrated but currently not saved locally in the device.
-					// TODO: 07/02/2019 It can be solved only if we will add a bit complicate method which checks if an account is already migrated.
-
-					// TODO: 07/02/2019 Also maybe it will be correct to update the user that he can go back and use the app only after the wallet address is finished and not here...
-					view.showMigrationFinishedDialog();
+				if (view != null && didStart) {
+					view.showMigrationFinished();
 				}
+				didStart = false;
 			}
 
 			@Override
 			public void onError(Exception e) {
-				// TODO: 07/02/2019 confirm with Ayelet
+				didStart = false;
 				if (view != null) {
-					view.stopWaiting();
-					view.showMigrationErrorDialog(e);
+					view.showMigrationError(e);
 				}
 			}
 		});
-	}
-
-	private void showCouldNotImportAccountError() {
-		if (view != null) {
-			view.showCouldNotImportAccount();
-		}
 	}
 
 	private void onBackupSuccess() {

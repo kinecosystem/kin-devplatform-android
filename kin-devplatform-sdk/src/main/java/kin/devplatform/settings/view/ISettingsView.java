@@ -11,13 +11,15 @@ public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 	int ITEM_BACKUP = 0x00000001;
 	int ITEM_RESTORE = 0x00000002;
 
-	void showMigrationStartedDialog();
+	void showMigrationStarted();
 
-	void showMigrationFinishedDialog();
+	void showMigrationFinished();
 
-	void showMigrationErrorDialog(Exception e);
+	void showMigrationError(Exception e);
 
-	void stopWaiting();
+	void showUpdateWalletAddressFinished();
+
+	void showUpdateWalletAddressError();
 
 	void startWaiting();
 
@@ -44,5 +46,4 @@ public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 
 	void changeTouchIndicatorVisibility(@Item final int item, boolean isVisible);
 
-	void showCouldNotImportAccount();
 }
