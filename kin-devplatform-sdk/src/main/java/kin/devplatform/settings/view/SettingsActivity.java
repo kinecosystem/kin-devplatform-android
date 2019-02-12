@@ -35,8 +35,9 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	private ISettingsPresenter settingsPresenter;
 	private kin.devplatform.settings.view.SettingsItem backupItem;
 	private kin.devplatform.settings.view.SettingsItem restoreItem;
-	private ProgressDialog dialog;
+	private ProgressDialog progressDialog;
 	private Button dialogButton;
+	private ProgressBar progressBar;
 
 	@Override
 	protected int getLayoutRes() {
@@ -101,42 +102,42 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 
 	@Override
 	public void showMigrationStarted() {
-		dialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_started_message));
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_started_message));
 	}
 
 	@Override
 	public void showMigrationFinished() {
-		dialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_finished_message));
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_finished_message));
 	}
 
 	@Override
 	public void showMigrationError(Exception e) {
 		Logger.log(new Log().withTag(TAG)
 			.put("showMigrationError", "cause = " + e.getCause() + ", message = " + e.getMessage()));
-		dialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_error_message));
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_error_message));
 		addDismissButtonToProgressDialog();
 	}
 
 	@Override
 	public void showUpdateWalletAddressFinished() {
-		dialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_finished_message));
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_finished_message));
 		addDismissButtonToProgressDialog();
 	}
 
 	@Override
 	public void showUpdateWalletAddressError() {
-		dialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_error_message));
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_error_message));
 		addDismissButtonToProgressDialog();
 	}
 
 	public void startWaiting() {
-		dialog = new ProgressDialog(this) {
+		progressDialog = new ProgressDialog(this) {
 			@Override
 			protected void onCreate(Bundle savedInstanceState) {
 				super.onCreate(savedInstanceState);
 				ProgressBar progress = findViewById(android.R.id.progress);
 				LinearLayout bodyLayout = (LinearLayout) progress.getParent();
-				ProgressBar progressBar = (ProgressBar) bodyLayout.getChildAt(0);
+				progressBar = (ProgressBar) bodyLayout.getChildAt(0);
 				TextView messageText = (TextView) bodyLayout.getChildAt(1);
 				messageText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
 					getResources().getDimension(R.dimen.kinecosystem_dialog_after_restore_process));
@@ -146,7 +147,7 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 			}
 		};
 
-		dialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.kinecosystem_ok),
+		progressDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.kinecosystem_ok),
 			new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -154,17 +155,20 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 				}
 			});
 
-		dialog.setCancelable(false);
-		dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		dialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_start_update_message));
-		dialog.show();
-		dialogButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+		progressDialog.setCancelable(false);
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_start_update_message));
+		progressDialog.show();
+		dialogButton = progressDialog.getButton(DialogInterface.BUTTON_POSITIVE);
 		dialogButton.setVisibility(View.GONE);
 	}
 
 	private void addDismissButtonToProgressDialog() {
 		if (dialogButton != null) {
 			dialogButton.setVisibility(View.VISIBLE);
+		}
+		if (progressBar != null) {
+			progressBar.setVisibility(View.GONE);
 		}
 	}
 
