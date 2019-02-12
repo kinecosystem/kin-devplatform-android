@@ -195,7 +195,6 @@ public final class KinEcosystemInitiator {
 				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
 				try {
 					handleKinClientReady(kinClient, migrationManager, context, appId, signInData, true, loginCallback);
-					// TODO: 07/02/2019 don't remember why we added the didMigrationStarted but if not started then i don't see a reason why not calling onFinish
 					if (migrationCallback != null && didMigrationStarted) {
 						didMigrationStarted = false;
 						migrationCallback.onFinish();
