@@ -13,11 +13,9 @@ public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 
 	void showMigrationStarted();
 
-	void showMigrationFinished();
-
 	void showMigrationError(Exception e);
 
-	void showUpdateWalletAddressFinished();
+	void showUpdateWalletAddressFinished(boolean didMigrationStarted);
 
 	void showUpdateWalletAddressError();
 

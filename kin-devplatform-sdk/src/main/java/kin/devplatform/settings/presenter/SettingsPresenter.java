@@ -45,6 +45,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 	private Observer<Balance> balanceObserver;
 	private Balance currentBalance;
+	private boolean didMigrationStarted;
 
 	public SettingsPresenter(@NonNull final ISettingsView view, @NonNull final SettingsDataSource settingsDataSource,
 		@NonNull final BlockchainSource blockchainSource, @NonNull final BackupManager backupManager,
@@ -186,13 +187,15 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			@Override
 			public void onResponse(Boolean response) {
 				if (view != null) {
-					view.showUpdateWalletAddressFinished();
+					view.showUpdateWalletAddressFinished(didMigrationStarted);
 				}
+				didMigrationStarted = false;
 				eventLogger.send(RestoreWalletCompleted.create());
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
+				didMigrationStarted = false;
 				if (view != null) {
 					view.showUpdateWalletAddressError();
 				}
@@ -202,11 +205,9 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			}
 		}, new IMigrationManagerCallbacks() {
 
-			private boolean didStart;
-
 			@Override
 			public void onMigrationStart() {
-				didStart = true;
+				didMigrationStarted = true;
 				if (view != null) {
 					view.showMigrationStarted();
 				}
@@ -214,15 +215,11 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 			@Override
 			public void onReady(IKinClient kinClient) {
-				if (view != null && didStart) {
-					view.showMigrationFinished();
-				}
-				didStart = false;
 			}
 
 			@Override
 			public void onError(Exception e) {
-				didStart = false;
+				didMigrationStarted = false;
 				if (view != null) {
 					view.showMigrationError(e);
 				}

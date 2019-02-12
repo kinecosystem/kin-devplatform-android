@@ -106,11 +106,6 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	}
 
 	@Override
-	public void showMigrationFinished() {
-		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_finished_message));
-	}
-
-	@Override
 	public void showMigrationError(Exception e) {
 		Logger.log(new Log().withTag(TAG)
 			.put("showMigrationError", "cause = " + e.getCause() + ", message = " + e.getMessage()));
@@ -119,8 +114,11 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	}
 
 	@Override
-	public void showUpdateWalletAddressFinished() {
-		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_finished_message));
+	public void showUpdateWalletAddressFinished(boolean didMigrationStarted) {
+		String migrationFinishedMessage = getString(
+			didMigrationStarted ? R.string.kinecosystem_dialog_migration_and_wallet_address_finished_message :
+				R.string.kinecosystem_dialog_wallet_address_finished_message);
+		progressDialog.setMessage(migrationFinishedMessage);
 		addDismissButtonToProgressDialog();
 	}
 

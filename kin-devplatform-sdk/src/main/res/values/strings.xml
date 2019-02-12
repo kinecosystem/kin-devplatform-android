@@ -37,15 +37,12 @@
     <string name="kinecosystem_dialog_migration_is_needed_kin_saved_message">Kin is being upgraded, you will be able to complete the operation after you force close the app and restart.\n\n
         Your Kin will appear after the upgrade is complete.</string>
     <string name="kinecosystem_dialog_migration_is_needed_message">Kin is being upgraded, you will be able to complete the operation after you force close the app and restart.</string>
-    <string name="kinecosystem_dialog_backup_migration_started_title">Migration Started</string>
-    <string name="kinecosystem_dialog_backup_migration_started_message">Migration has been started for the restored account.\nPlease be patient because this process may take a few seconds.</string>
-    <string name="kinecosystem_dialog_backup_migration_finished_title">Migration Finished</string>
-    <string name="kinecosystem_dialog_backup_migration_finished_message">Migration process finished successfully.\nContinue with updating the wallet address.</string>
-    <string name="kinecosystem_dialog_backup_migration_error_title">Migration Error</string>
-    <string name="kinecosystem_dialog_backup_migration_error_message">Migration of the restored account has failed.\nYour previous account is active, please try to restore again later.</string>
+    <string name="kinecosystem_dialog_backup_migration_started_message">Your wallet requires migration.\nThis may take a few seconds.</string>
     <string name="kinecosystem_dialog_wallet_address_start_update_message">Starting to update your wallet address.</string>
-    <string name="kinecosystem_dialog_wallet_address_finished_message">Wallet address update finished successfully.\nYou can now continue and use the app with your restored account.</string>
-    <string name="kinecosystem_dialog_wallet_address_error_message">"Error in migration process.\nRestoring the account has failed.\nYour previous account is active.\nPlease try to restore again later."</string>
+    <string name="kinecosystem_dialog_wallet_address_finished_message">Wallet address update finished successfully.\nYou can now continue using the app.</string>
+    <string name="kinecosystem_dialog_migration_and_wallet_address_finished_message">Wallet migration and address update finished successfully.\nYou can now continue using the app.</string>
+    <string name="kinecosystem_dialog_backup_migration_error_message">Restore process failed due to migration error.\nPlease try again later.\nYour current wallet is still active.</string>
+    <string name="kinecosystem_dialog_wallet_address_error_message">Restore process failed due to wallet address update error.\nPlease try again later.\nYour current wallet is still active.</string>
 
     <!--Menu-->
     <string name="kinecosystem_info_menu">Info</string>
