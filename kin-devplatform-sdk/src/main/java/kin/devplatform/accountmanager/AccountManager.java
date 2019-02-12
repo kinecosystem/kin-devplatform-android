@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import kin.devplatform.KinCallback;
 import kin.devplatform.base.Observer;
 import kin.devplatform.exception.KinEcosystemException;
-import kin.sdk.migration.interfaces.IMigrationManagerCallbacks;
+import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 
 public interface AccountManager {
 

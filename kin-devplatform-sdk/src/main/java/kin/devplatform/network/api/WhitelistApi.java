@@ -1,19 +1,18 @@
 package kin.devplatform.network.api;
 
+import static kin.devplatform.core.network.ApiClient.POST;
+
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-
 import kin.devplatform.ConfigurationImpl;
 import kin.devplatform.core.network.ApiClient;
 import kin.devplatform.core.network.ApiException;
 import kin.devplatform.core.network.ApiResponse;
 import kin.devplatform.network.model.WhitelistTransactionRequest;
-import kin.sdk.migration.interfaces.IWhitelistableTransaction;
+import kin.sdk.migration.common.interfaces.IWhitelistableTransaction;
 import okhttp3.Call;
-
-import static kin.devplatform.core.network.ApiClient.POST;
 
 public class WhitelistApi {
 

@@ -20,8 +20,8 @@ import kin.devplatform.bi.events.MigrationVersionCheckStarted;
 import kin.devplatform.bi.events.MigrationVersionCheckSucceeded;
 import kin.devplatform.bi.events.MigrationVersionCheckSucceeded.SdkVersion;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.KinSdkVersion;
 import kin.sdk.migration.bi.IMigrationEventsListener;
+import kin.sdk.migration.common.KinSdkVersion;
 
 public class MigrationEventsListener implements IMigrationEventsListener {
 

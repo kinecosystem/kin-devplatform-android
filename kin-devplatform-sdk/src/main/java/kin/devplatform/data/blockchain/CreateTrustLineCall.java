@@ -1,7 +1,7 @@
 package kin.devplatform.data.blockchain;
 
-import kin.sdk.migration.exception.OperationFailedException;
-import kin.sdk.migration.interfaces.IKinAccount;
+import kin.sdk.migration.common.exception.OperationFailedException;
+import kin.sdk.migration.common.interfaces.IKinAccount;
 
 class CreateTrustLineCall extends Thread {
 

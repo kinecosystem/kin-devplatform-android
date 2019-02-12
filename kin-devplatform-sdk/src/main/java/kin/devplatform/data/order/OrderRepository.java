@@ -40,8 +40,8 @@ import kin.devplatform.data.model.Payment;
 import kin.devplatform.data.order.CreateExternalOrderCall.ExternalOrderCallbacks;
 import kin.devplatform.data.order.CreateExternalOrderCall.ExternalSpendOrderCallbacks;
 import kin.devplatform.exception.DataNotAvailableException;
-import kin.devplatform.exception.MigrationNeededException;
 import kin.devplatform.exception.KinEcosystemException;
+import kin.devplatform.exception.MigrationNeededException;
 import kin.devplatform.network.model.BlockchainData;
 import kin.devplatform.network.model.JWTBodyPaymentConfirmationResult;
 import kin.devplatform.network.model.Offer.OfferType;
@@ -51,7 +51,7 @@ import kin.devplatform.network.model.Order.Origin;
 import kin.devplatform.network.model.Order.Status;
 import kin.devplatform.network.model.OrderList;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.KinSdkVersion;
+import kin.sdk.migration.common.KinSdkVersion;
 
 public class OrderRepository implements OrderDataSource {
 
