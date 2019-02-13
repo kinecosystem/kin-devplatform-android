@@ -26,11 +26,11 @@ import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.exception.ServiceException;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
-import kin.sdk.migration.exception.AccountNotActivatedException;
-import kin.sdk.migration.exception.AccountNotFoundException;
-import kin.sdk.migration.exception.CreateAccountException;
-import kin.sdk.migration.exception.InsufficientKinException;
-import kin.sdk.migration.exception.TransactionFailedException;
+import kin.sdk.migration.common.exception.AccountNotActivatedException;
+import kin.sdk.migration.common.exception.AccountNotFoundException;
+import kin.sdk.migration.common.exception.CreateAccountException;
+import kin.sdk.migration.common.exception.InsufficientKinException;
+import kin.sdk.migration.common.exception.TransactionFailedException;
 
 public class ErrorUtil {
 

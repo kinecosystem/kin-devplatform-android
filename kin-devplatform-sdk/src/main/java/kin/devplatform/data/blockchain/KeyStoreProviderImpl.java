@@ -11,11 +11,11 @@ import com.kin.ecosystem.recovery.KeyStoreProvider;
 import com.kin.ecosystem.recovery.Validator;
 import com.kin.ecosystem.recovery.exception.BackupException;
 import java.util.regex.Pattern;
-import kin.sdk.migration.exception.CorruptedDataException;
-import kin.sdk.migration.exception.CreateAccountException;
-import kin.sdk.migration.exception.CryptoException;
-import kin.sdk.migration.interfaces.IKinAccount;
-import kin.sdk.migration.interfaces.IKinClient;
+import kin.sdk.migration.common.exception.CorruptedDataException;
+import kin.sdk.migration.common.exception.CreateAccountException;
+import kin.sdk.migration.common.exception.CryptoException;
+import kin.sdk.migration.common.interfaces.IKinAccount;
+import kin.sdk.migration.common.interfaces.IKinClient;
 
 public class KeyStoreProviderImpl implements KeyStoreProvider {
 

@@ -29,9 +29,9 @@ import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.network.model.Order;
 import kin.devplatform.network.model.Order.Status;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.KinSdkVersion;
-import kin.sdk.migration.exception.InsufficientKinException;
-import kin.sdk.migration.exception.OperationFailedException;
+import kin.sdk.migration.common.KinSdkVersion;
+import kin.sdk.migration.common.exception.InsufficientKinException;
+import kin.sdk.migration.common.exception.OperationFailedException;
 
 class CreateExternalOrderCall extends Thread {
 

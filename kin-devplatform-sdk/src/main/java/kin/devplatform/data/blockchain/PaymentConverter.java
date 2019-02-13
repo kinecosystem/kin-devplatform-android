@@ -2,7 +2,7 @@ package kin.devplatform.data.blockchain;
 
 import android.support.annotation.NonNull;
 import kin.devplatform.data.model.Payment;
-import kin.sdk.migration.interfaces.IPaymentInfo;
+import kin.sdk.migration.common.interfaces.IPaymentInfo;
 
 public class PaymentConverter {
 

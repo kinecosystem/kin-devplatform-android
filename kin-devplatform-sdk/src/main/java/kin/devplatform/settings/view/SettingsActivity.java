@@ -1,13 +1,22 @@
 package kin.devplatform.settings.view;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Toast;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import com.kin.ecosystem.recovery.BackupManager;
+import kin.devplatform.Log;
+import kin.devplatform.Logger;
 import kin.devplatform.R;
 import kin.devplatform.accountmanager.AccountManagerImpl;
 import kin.devplatform.base.BaseToolbarActivity;
@@ -18,12 +27,17 @@ import kin.devplatform.data.settings.SettingsDataSourceLocal;
 import kin.devplatform.settings.presenter.ISettingsPresenter;
 import kin.devplatform.settings.presenter.SettingsPresenter;
 
-public class SettingsActivity extends BaseToolbarActivity implements kin.devplatform.settings.view.ISettingsView, OnClickListener {
+public class SettingsActivity extends BaseToolbarActivity implements kin.devplatform.settings.view.ISettingsView,
+	OnClickListener {
+
+	private static final String TAG = SettingsActivity.class.getSimpleName();
 
 	private ISettingsPresenter settingsPresenter;
-
 	private kin.devplatform.settings.view.SettingsItem backupItem;
 	private kin.devplatform.settings.view.SettingsItem restoreItem;
+	private ProgressDialog progressDialog;
+	private Button dialogButton;
+	private ProgressBar progressBar;
 
 	@Override
 	protected int getLayoutRes() {
@@ -55,7 +69,6 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		super.onCreate(savedInstanceState);
 		backupItem = findViewById(R.id.keep_your_kin_safe);
 		restoreItem = findViewById(R.id.restore_prev_wallet);
-
 		backupItem.setOnClickListener(this);
 		restoreItem.setOnClickListener(this);
 
@@ -88,6 +101,76 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	}
 
 	@Override
+	public void showMigrationStarted() {
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_started_message));
+	}
+
+	@Override
+	public void showMigrationError(Exception e) {
+		Logger.log(new Log().withTag(TAG)
+			.put("showMigrationError", "cause = " + e.getCause() + ", message = " + e.getMessage()));
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_backup_migration_error_message));
+		addDismissButtonToProgressDialog();
+	}
+
+	@Override
+	public void showUpdateWalletAddressFinished(boolean didMigrationStarted) {
+		String migrationFinishedMessage = getString(
+			didMigrationStarted ? R.string.kinecosystem_dialog_migration_and_wallet_address_finished_message :
+				R.string.kinecosystem_dialog_wallet_address_finished_message);
+		progressDialog.setMessage(migrationFinishedMessage);
+		addDismissButtonToProgressDialog();
+	}
+
+	@Override
+	public void showUpdateWalletAddressError() {
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_error_message));
+		addDismissButtonToProgressDialog();
+	}
+
+	public void startWaiting() {
+		progressDialog = new ProgressDialog(this) {
+			@Override
+			protected void onCreate(Bundle savedInstanceState) {
+				super.onCreate(savedInstanceState);
+				ProgressBar progress = findViewById(android.R.id.progress);
+				LinearLayout bodyLayout = (LinearLayout) progress.getParent();
+				progressBar = (ProgressBar) bodyLayout.getChildAt(0);
+				TextView messageText = (TextView) bodyLayout.getChildAt(1);
+				messageText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+					getResources().getDimension(R.dimen.kinecosystem_dialog_after_restore_process));
+				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) progressBar.getLayoutParams();
+				params.gravity = Gravity.CENTER_VERTICAL;
+				progress.setLayoutParams(params);
+			}
+		};
+
+		progressDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.kinecosystem_ok),
+			new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			});
+
+		progressDialog.setCancelable(false);
+		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_start_update_message));
+		progressDialog.show();
+		dialogButton = progressDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+		dialogButton.setVisibility(View.GONE);
+	}
+
+	private void addDismissButtonToProgressDialog() {
+		if (dialogButton != null) {
+			dialogButton.setVisibility(View.VISIBLE);
+		}
+		if (progressBar != null) {
+			progressBar.setVisibility(View.GONE);
+		}
+	}
+
+	@Override
 	public void navigateBack() {
 		onBackPressed();
 		overridePendingTransition(0, R.anim.kinecosystem_slide_out_right);
@@ -110,11 +193,6 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		if (settingsItem != null) {
 			settingsItem.setTouchIndicatorVisibility(isVisible);
 		}
-	}
-
-	@Override
-	public void showCouldNotImportAccount() {
-		Toast.makeText(this, R.string.kinecosystem_could_not_restore_the_wallet, Toast.LENGTH_SHORT).show();
 	}
 
 	private kin.devplatform.settings.view.SettingsItem getSettingsItem(@Item final int item) {

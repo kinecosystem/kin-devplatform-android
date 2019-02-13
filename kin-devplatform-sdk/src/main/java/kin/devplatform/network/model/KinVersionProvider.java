@@ -2,9 +2,9 @@ package kin.devplatform.network.model;
 
 import kin.devplatform.core.network.ApiException;
 import kin.devplatform.network.api.KinVersionApi;
-import kin.sdk.migration.KinSdkVersion;
-import kin.sdk.migration.exception.FailedToResolveSdkVersionException;
-import kin.sdk.migration.interfaces.IKinVersionProvider;
+import kin.sdk.migration.common.KinSdkVersion;
+import kin.sdk.migration.common.exception.FailedToResolveSdkVersionException;
+import kin.sdk.migration.common.interfaces.IKinVersionProvider;
 
 public class KinVersionProvider implements IKinVersionProvider {
 

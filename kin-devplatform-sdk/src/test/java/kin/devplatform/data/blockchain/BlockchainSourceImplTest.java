@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-
 import kin.devplatform.BaseTestClass;
 import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
@@ -24,17 +23,16 @@ import kin.devplatform.bi.events.SpendTransactionBroadcastToBlockchainSucceeded;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.model.Payment;
 import kin.devplatform.network.model.Offer.OfferType;
-import kin.sdk.migration.exception.OperationFailedException;
-import kin.sdk.migration.interfaces.IBalance;
-import kin.sdk.migration.interfaces.IEventListener;
-import kin.sdk.migration.interfaces.IKinAccount;
-import kin.sdk.migration.interfaces.IKinClient;
-import kin.sdk.migration.interfaces.ITransactionId;
-import kin.sdk.migration.interfaces.IWhitelistService;
+import kin.devplatform.network.model.OpenOrder;
+import kin.sdk.migration.common.exception.OperationFailedException;
+import kin.sdk.migration.common.interfaces.IBalance;
+import kin.sdk.migration.common.interfaces.IEventListener;
+import kin.sdk.migration.common.interfaces.IKinAccount;
+import kin.sdk.migration.common.interfaces.IKinClient;
+import kin.sdk.migration.common.interfaces.ITransactionId;
+import kin.sdk.migration.common.interfaces.IWhitelistService;
 import kin.utils.Request;
 import kin.utils.ResultCallback;
-
-import kin.devplatform.network.model.OpenOrder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

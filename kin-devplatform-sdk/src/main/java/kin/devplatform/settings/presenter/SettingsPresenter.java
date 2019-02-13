@@ -30,10 +30,13 @@ import kin.devplatform.settings.view.ISettingsView;
 import kin.devplatform.settings.view.ISettingsView.IconColor;
 import kin.devplatform.settings.view.ISettingsView.Item;
 import kin.devplatform.util.ErrorUtil;
+import kin.sdk.migration.common.interfaces.IKinClient;
+import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 
 public class SettingsPresenter extends BasePresenter<ISettingsView> implements ISettingsPresenter {
 
 	private static final String TAG = SettingsPresenter.class.getSimpleName();
+
 	private final BackupManager backupManager;
 	private final SettingsDataSource settingsDataSource;
 	private final BlockchainSource blockchainSource;
@@ -42,6 +45,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 	private Observer<Balance> balanceObserver;
 	private Balance currentBalance;
+	private boolean didMigrationStarted;
 
 	public SettingsPresenter(@NonNull final ISettingsView view, @NonNull final SettingsDataSource settingsDataSource,
 		@NonNull final BlockchainSource blockchainSource, @NonNull final BackupManager backupManager,
@@ -141,17 +145,18 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 		backupManager.registerBackupCallback(new BackupCallback() {
 			@Override
 			public void onSuccess() {
+				Logger.log(new Log().withTag(TAG).put("BackupCallback", "onSuccess"));
 				onBackupSuccess();
 			}
 
 			@Override
 			public void onCancel() {
-
+				Logger.log(new Log().withTag(TAG).put("BackupCallback", "onCancel"));
 			}
 
 			@Override
 			public void onFailure(Throwable throwable) {
-
+				Logger.log(new Log().withTag(TAG).put("BackupCallback", "onFailure"));
 			}
 		});
 
@@ -159,6 +164,9 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			@Override
 			public void onSuccess(int accountIndex) {
 				Logger.log(new Log().withTag(TAG).put("RestoreCallback", "onSuccess"));
+				if (view != null) {
+					view.startWaiting();
+				}
 				switchAccount(accountIndex);
 			}
 
@@ -169,6 +177,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 			@Override
 			public void onFailure(Throwable throwable) {
+				Logger.log(new Log().withTag(TAG).put("RestoreCallback", "onFailure"));
 			}
 		});
 	}
@@ -177,23 +186,45 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 		accountManager.switchAccount(accountIndex, new KinCallback<Boolean>() {
 			@Override
 			public void onResponse(Boolean response) {
+				if (view != null) {
+					view.showUpdateWalletAddressFinished(didMigrationStarted);
+				}
+				didMigrationStarted = false;
 				eventLogger.send(RestoreWalletCompleted.create());
 			}
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
+				didMigrationStarted = false;
+				if (view != null) {
+					view.showUpdateWalletAddressError();
+				}
 				eventLogger.send(GeneralEcosystemSdkError
 					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),
 						"SettingsPresenter.switchAccount onFailure"));
-				showCouldNotImportAccountError();
+			}
+		}, new IMigrationManagerCallbacks() {
+
+			@Override
+			public void onMigrationStart() {
+				didMigrationStarted = true;
+				if (view != null) {
+					view.showMigrationStarted();
+				}
+			}
+
+			@Override
+			public void onReady(IKinClient kinClient) {
+			}
+
+			@Override
+			public void onError(Exception e) {
+				didMigrationStarted = false;
+				if (view != null) {
+					view.showMigrationError(e);
+				}
 			}
 		});
-	}
-
-	private void showCouldNotImportAccountError() {
-		if (view != null) {
-			view.showCouldNotImportAccount();
-		}
 	}
 
 	private void onBackupSuccess() {

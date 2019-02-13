@@ -3,6 +3,7 @@
     <string name="kinecosystem_kin_marketplace">Kin Marketplace (Beta)</string>
     <string name="kinecosystem_transaction_history">Transaction History</string>
     <string name="kinecosystem_settings">Settings</string>
+    <string name="kinecosystem_ok">OK</string>
 
     <!--Button-->
     <string name="kinecosystem_more">MORE</string>
@@ -36,7 +37,12 @@
     <string name="kinecosystem_dialog_migration_is_needed_kin_saved_message">Kin is being upgraded, you will be able to complete the operation after you force close the app and restart.\n\n
         Your Kin will appear after the upgrade is complete.</string>
     <string name="kinecosystem_dialog_migration_is_needed_message">Kin is being upgraded, you will be able to complete the operation after you force close the app and restart.</string>
-
+    <string name="kinecosystem_dialog_backup_migration_started_message">Your wallet requires migration.\nThis may take a few seconds.</string>
+    <string name="kinecosystem_dialog_wallet_address_start_update_message">Starting to update your wallet address.</string>
+    <string name="kinecosystem_dialog_wallet_address_finished_message">Wallet address update finished successfully.\nYou can now continue using the app.</string>
+    <string name="kinecosystem_dialog_migration_and_wallet_address_finished_message">Wallet migration and address update finished successfully.\nYou can now continue using the app.</string>
+    <string name="kinecosystem_dialog_backup_migration_error_message">Restore process failed due to migration error.\nPlease try again later.\nYour current wallet is still active.</string>
+    <string name="kinecosystem_dialog_wallet_address_error_message">Restore process failed due to wallet address update error.\nPlease try again later.\nYour current wallet is still active.</string>
 
     <!--Menu-->
     <string name="kinecosystem_info_menu">Info</string>

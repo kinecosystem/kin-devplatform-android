@@ -23,7 +23,7 @@ import kin.devplatform.marketplace.model.NativeOffer;
 import kin.devplatform.marketplace.model.NativeSpendOffer;
 import kin.devplatform.splash.view.SplashViewActivity;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.KinSdkVersion;
+import kin.sdk.migration.common.KinSdkVersion;
 
 
 public class Kin {

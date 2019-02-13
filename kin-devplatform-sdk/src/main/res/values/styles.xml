@@ -68,4 +68,14 @@
         <item name="android:windowEnterAnimation">@anim/kinecosystem_slide_up</item>
         <item name="android:windowExitAnimation">@anim/kinecosystem_slide_down</item>
     </style>
+
+    <style name="KinAlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="buttonBarNegativeButtonStyle">@style/KinDialogButtonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/KinDialogButtonStyle</item>
+    </style>
+
+    <style name="KinDialogButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/kinecosystem_hot_blue</item>
+    </style>
+
 </resources>

@@ -2,10 +2,10 @@ package kin.devplatform.network.model;
 
 import kin.devplatform.core.network.ApiException;
 import kin.devplatform.network.api.WhitelistApi;
-import kin.sdk.migration.exception.WhitelistTransactionFailedException;
-import kin.sdk.migration.interfaces.IWhitelistService;
-import kin.sdk.migration.interfaces.IWhitelistableTransaction;
-import kin.sdk.migration.sdk_related.WhitelistResult;
+import kin.sdk.migration.common.WhitelistResult;
+import kin.sdk.migration.common.exception.WhitelistTransactionFailedException;
+import kin.sdk.migration.common.interfaces.IWhitelistService;
+import kin.sdk.migration.common.interfaces.IWhitelistableTransaction;
 
 public class WhitelistService implements IWhitelistService {
 

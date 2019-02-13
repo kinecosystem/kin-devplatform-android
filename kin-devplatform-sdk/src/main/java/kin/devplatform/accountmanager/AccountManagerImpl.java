@@ -4,8 +4,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
-
-import kin.core.Balance;
 import kin.devplatform.KinCallback;
 import kin.devplatform.Log;
 import kin.devplatform.Logger;
@@ -20,11 +18,15 @@ import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.exception.AccountNotActivatedException;
-import kin.sdk.migration.interfaces.IBalance;
-import kin.sdk.migration.interfaces.IEventListener;
-import kin.sdk.migration.interfaces.IKinAccount;
-import kin.sdk.migration.interfaces.IListenerRegistration;
+import kin.sdk.migration.MigrationManager;
+import kin.sdk.migration.common.exception.AccountNotActivatedException;
+import kin.sdk.migration.common.exception.MigrationInProcessException;
+import kin.sdk.migration.common.interfaces.IBalance;
+import kin.sdk.migration.common.interfaces.IEventListener;
+import kin.sdk.migration.common.interfaces.IKinAccount;
+import kin.sdk.migration.common.interfaces.IKinClient;
+import kin.sdk.migration.common.interfaces.IListenerRegistration;
+import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 import kin.utils.ResultCallback;
 
 public class AccountManagerImpl implements AccountManager {
@@ -35,6 +37,7 @@ public class AccountManagerImpl implements AccountManager {
 	private static volatile AccountManagerImpl instance;
 
 	private final AccountManager.Local local;
+	private final MigrationManager migrationManager;
 	private final EventLogger eventLogger;
 	private AuthDataSource authRepository;
 	private BlockchainSource blockchainSource;
@@ -43,25 +46,27 @@ public class AccountManagerImpl implements AccountManager {
 
 	private IListenerRegistration accountCreationRegistration;
 
-	private AccountManagerImpl(@NonNull final AccountManager.Local local,
-		@NonNull final EventLogger eventLogger,
+	private AccountManagerImpl(@NonNull final Local local,
+		MigrationManager migrationManager, @NonNull final EventLogger eventLogger,
 		@NonNull final AuthDataSource authRepository,
 		@NonNull final BlockchainSource blockchainSource) {
 		this.local = local;
+		this.migrationManager = migrationManager;
 		this.eventLogger = eventLogger;
 		this.authRepository = authRepository;
 		this.blockchainSource = blockchainSource;
 		this.accountState = ObservableData.create(local.getAccountState());
 	}
 
-	public static void init(@NonNull final AccountManager.Local local,
-		@NonNull final EventLogger eventLogger,
+	public static void init(@NonNull final Local local,
+		MigrationManager migrationManager, @NonNull final EventLogger eventLogger,
 		@NonNull final AuthDataSource authRepository,
 		@NonNull final BlockchainSource blockchainSource) {
 		if (instance == null) {
 			synchronized (AccountManagerImpl.class) {
 				if (instance == null) {
-					instance = new AccountManagerImpl(local, eventLogger, authRepository, blockchainSource);
+					instance = new AccountManagerImpl(local, migrationManager, eventLogger, authRepository,
+						blockchainSource);
 				}
 			}
 		}
@@ -183,18 +188,18 @@ public class AccountManagerImpl implements AccountManager {
 
 		prepareAccountCreationTimeoutFallback(handler);
 		accountCreationRegistration = getKinAccount().addAccountCreationListener(new IEventListener<Void>() {
-				@Override
-				public void onEvent(Void data) {
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							removeAccountCreationRegistration();
-							handler.removeCallbacksAndMessages(null);
-							setAccountState(REQUIRE_TRUSTLINE);
-						}
-					});
-				}
-			});
+			@Override
+			public void onEvent(Void data) {
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						removeAccountCreationRegistration();
+						handler.removeCallbacksAndMessages(null);
+						setAccountState(REQUIRE_TRUSTLINE);
+					}
+				});
+			}
+		});
 	}
 
 	private void prepareAccountCreationTimeoutFallback(final Handler handler) {
@@ -229,16 +234,53 @@ public class AccountManagerImpl implements AccountManager {
 	}
 
 	@Override
-	public void switchAccount(final int accountIndex, @NonNull final KinCallback<Boolean> callback) {
+	public void switchAccount(final int accountIndex, @NonNull final KinCallback<Boolean> callback,
+		@NonNull final IMigrationManagerCallbacks migrationManagerCallbacks) {
 		Logger.log(new Log().withTag(TAG).put("switchAccount", "start"));
-		final String address = blockchainSource.getPublicAddress(accountIndex);
+		startMigration(accountIndex, callback, migrationManagerCallbacks);
+	}
+
+	private void startMigration(final int accountIndex, final KinCallback<Boolean> callback,
+		final IMigrationManagerCallbacks migrationManagerCallbacks) {
+		Logger.log(new Log().withTag(TAG).put("startMigration", "start"));
+		try {
+			migrationManager.start(new IMigrationManagerCallbacks() {
+				@Override
+				public void onMigrationStart() {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onMigrationStart"));
+					migrationManagerCallbacks.onMigrationStart();
+				}
+
+				@Override
+				public void onReady(IKinClient kinClient) {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
+					migrationManagerCallbacks.onReady(kinClient);
+					updateWalletAddress(kinClient, accountIndex, callback);
+				}
+
+				@Override
+				public void onError(Exception e) {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onError"));
+					migrationManagerCallbacks.onError(e);
+				}
+			});
+		} catch (MigrationInProcessException e) {
+			Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("MigrationInProcessException"));
+			migrationManagerCallbacks.onError(e);
+		}
+	}
+
+	private void updateWalletAddress(final IKinClient kinClient, final int accountIndex,
+		@NonNull final KinCallback<Boolean> callback) {
+		IKinAccount account = kinClient.getAccount(accountIndex);
+		final String address = account != null ? account.getPublicAddress() : null;
 		//update sign in data with new wallet address and update servers
 		authRepository.updateWalletAddress(address, new KinCallback<Boolean>() {
 			@Override
 			public void onResponse(Boolean response) {
 				try {
 					//switch to the new KinAccount
-					blockchainSource.updateActiveAccount(accountIndex);
+					blockchainSource.updateActiveAccount(kinClient, accountIndex);
 				} catch (BlockchainException e) {
 					callback.onFailure(ErrorUtil.getBlockchainException(e));
 					return;

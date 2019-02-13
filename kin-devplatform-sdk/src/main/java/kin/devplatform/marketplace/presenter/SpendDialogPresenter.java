@@ -25,7 +25,7 @@ import kin.devplatform.network.model.OfferInfo;
 import kin.devplatform.network.model.OfferInfo.Confirmation;
 import kin.devplatform.network.model.OpenOrder;
 import kin.devplatform.util.ErrorUtil;
-import kin.sdk.migration.exception.OperationFailedException;
+import kin.sdk.migration.common.exception.OperationFailedException;
 
 
 public class SpendDialogPresenter extends BaseDialogPresenter<ISpendDialog> implements ISpendDialogPresenter {
