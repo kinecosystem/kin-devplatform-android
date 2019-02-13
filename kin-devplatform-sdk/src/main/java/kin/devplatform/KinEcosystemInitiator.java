@@ -120,6 +120,14 @@ public final class KinEcosystemInitiator {
 		EventCommonDataUtil.setBaseData(context);
 	}
 
+	private void initConfiguration(Context context, KinEnvironment environment) {
+		ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
+		if (environment != null) {
+			configurationLocal.setEnvironment(environment);
+		}
+		ConfigurationImpl.init(configurationLocal);
+	}
+
 	private SignInData getJwtSignInData(@NonNull final String jwt) throws JSONException {
 		JwtBody jwtBody = JwtDecoder.getJwtBody(jwt);
 		if (jwtBody == null) {
@@ -166,14 +174,6 @@ public final class KinEcosystemInitiator {
 		return migrationManager;
 	}
 
-	private void initConfiguration(Context context, KinEnvironment environment) {
-		ConfigurationLocal configurationLocal = ConfigurationLocal.getInstance(context);
-		if (environment != null) {
-			configurationLocal.setEnvironment(environment);
-		}
-		ConfigurationImpl.init(configurationLocal);
-	}
-
 	private void handleMigration(final Context context, final String appId, final MigrationManager migrationManager,
 		final SignInData signInData, final KinCallback<Void> loginCallback,
 		final KinMigrationListener migrationCallback) throws MigrationInProcessException {
@@ -194,11 +194,11 @@ public final class KinEcosystemInitiator {
 			public void onReady(IKinClient kinClient) {
 				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
 				try {
-					handleKinClientReady(kinClient, migrationManager, context, appId, signInData, true, loginCallback);
 					if (migrationCallback != null && didMigrationStarted) {
 						didMigrationStarted = false;
 						migrationCallback.onFinish();
 					}
+					handleKinClientReady(kinClient, migrationManager, context, appId, signInData, true, loginCallback);
 				} catch (BlockchainException e) {
 					didMigrationStarted = false;
 					fireStartError(e, loginCallback);
@@ -256,8 +256,9 @@ public final class KinEcosystemInitiator {
 		// If somehow initialized and not logged in then do also the login.
 		if (withLogin && isInitialized && !isLoggedIn) {
 			login(signInData, loginCallback);
+		} else {
+			loginCallback.onResponse(null);
 		}
-
 	}
 
 	private void login(@NonNull SignInData signInData, final KinCallback<Void> loginCallback) {
