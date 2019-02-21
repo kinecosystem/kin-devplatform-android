@@ -21,6 +21,8 @@ public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 
 	void startWaiting();
 
+	void showUWalletWasNotCreatedInThisAppError();
+
 
 	@IntDef({ITEM_BACKUP, ITEM_RESTORE})
 	@Retention(RetentionPolicy.SOURCE)

@@ -56,13 +56,13 @@ public class AuthApi {
 
 
 	/**
-	 * Build call for activateAcount
+	 * Build call for activateAccount
 	 *
 	 * @param X_REQUEST_ID A unique id for the request. A retransmitted request will have the same id  (required)
 	 * @return Call to execute
 	 * @throws ApiException If fail to serialize the request body object
 	 */
-	public Call activateAcountCall(String X_REQUEST_ID) throws ApiException {
+	public Call activateAccountCall(String X_REQUEST_ID) throws ApiException {
 		Object localVarPostBody = null;
 
 		// create path and map variables
@@ -99,14 +99,14 @@ public class AuthApi {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Call activateAcountValidateBeforeCall(String X_REQUEST_ID) throws ApiException {
+	private Call activateAccountValidateBeforeCall(String X_REQUEST_ID) throws ApiException {
 
 		// verify the required parameter 'X_REQUEST_ID' is set
 		if (X_REQUEST_ID == null) {
-			throw new ApiException("Missing the required parameter 'X_REQUEST_ID' when calling activateAcount(Async)");
+			throw new ApiException("Missing the required parameter 'X_REQUEST_ID' when calling activateAccount(Async)");
 		}
 
-		Call call = activateAcountCall(X_REQUEST_ID);
+		Call call = activateAccountCall(X_REQUEST_ID);
 		return call;
 
 
@@ -119,8 +119,8 @@ public class AuthApi {
 	 * @return AuthToken
 	 * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
 	 */
-	public AuthToken activateAcount(String X_REQUEST_ID) throws ApiException {
-		ApiResponse<AuthToken> resp = activateAcountWithHttpInfo(X_REQUEST_ID);
+	public AuthToken activateAccount(String X_REQUEST_ID) throws ApiException {
+		ApiResponse<AuthToken> resp = activateAccountWithHttpInfo(X_REQUEST_ID);
 		return resp.getData();
 	}
 
@@ -131,8 +131,8 @@ public class AuthApi {
 	 * @return ApiResponse&lt;AuthToken&gt;
 	 * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
 	 */
-	public ApiResponse<AuthToken> activateAcountWithHttpInfo(String X_REQUEST_ID) throws ApiException {
-		Call call = activateAcountValidateBeforeCall(X_REQUEST_ID);
+	public ApiResponse<AuthToken> activateAccountWithHttpInfo(String X_REQUEST_ID) throws ApiException {
+		Call call = activateAccountValidateBeforeCall(X_REQUEST_ID);
 		Type localVarReturnType = new TypeToken<AuthToken>() {
 		}.getType();
 		return apiClient.execute(call, localVarReturnType);
@@ -146,8 +146,8 @@ public class AuthApi {
 	 * @return The request call
 	 * @throws ApiException If fail to process the API call, e.g. serializing the request body object
 	 */
-	public Call activateAcountAsync(String X_REQUEST_ID, final ApiCallback<AuthToken> callback) throws ApiException {
-		Call call = activateAcountValidateBeforeCall(X_REQUEST_ID);
+	public Call activateAccountAsync(String X_REQUEST_ID, final ApiCallback<AuthToken> callback) throws ApiException {
+		Call call = activateAccountValidateBeforeCall(X_REQUEST_ID);
 		Type localVarReturnType = new TypeToken<AuthToken>() {
 		}.getType();
 		apiClient.executeAsync(call, localVarReturnType, callback);

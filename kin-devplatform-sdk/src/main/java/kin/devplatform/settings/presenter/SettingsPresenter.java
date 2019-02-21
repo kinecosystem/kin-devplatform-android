@@ -26,6 +26,7 @@ import kin.devplatform.data.blockchain.BlockchainSource;
 import kin.devplatform.data.model.Balance;
 import kin.devplatform.data.settings.SettingsDataSource;
 import kin.devplatform.exception.KinEcosystemException;
+import kin.devplatform.exception.ServiceException;
 import kin.devplatform.settings.view.ISettingsView;
 import kin.devplatform.settings.view.ISettingsView.IconColor;
 import kin.devplatform.settings.view.ISettingsView.Item;
@@ -197,7 +198,12 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			public void onFailure(KinEcosystemException exception) {
 				didMigrationStarted = false;
 				if (view != null) {
-					view.showUpdateWalletAddressError();
+					if (exception instanceof ServiceException
+						&& exception.getCode() == ServiceException.WALLET_WAS_NOT_CREATED_IN_THIS_APP) {
+						view.showUWalletWasNotCreatedInThisAppError();
+					} else {
+						view.showUpdateWalletAddressError();
+					}
 				}
 				eventLogger.send(GeneralEcosystemSdkError
 					.create(ErrorUtil.getPrintableStackTrace(exception), String.valueOf(exception.getCode()),

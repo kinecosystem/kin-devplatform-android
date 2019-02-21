@@ -43,9 +43,11 @@
     <string name="kinecosystem_dialog_migration_and_wallet_address_finished_message">Wallet migration and address update finished successfully.\nYou can now continue using the app.</string>
     <string name="kinecosystem_dialog_backup_migration_error_message">Restore process failed due to migration error.\nPlease try again later.\nYour current wallet is still active.</string>
     <string name="kinecosystem_dialog_wallet_address_error_message">Restore process failed due to wallet address update error.\nPlease try again later.\nYour current wallet is still active.</string>
+    <string name="kinecosystem_dialog_wallet_was_not_created_in_this_app_error_message">This action is currently not supported as the wallet was created in a different application.\nYou can restore it from the application in which it was created.\nYour current wallet is still active.</string>
 
     <!--Menu-->
     <string name="kinecosystem_info_menu">Info</string>
 
 
 </resources>
+

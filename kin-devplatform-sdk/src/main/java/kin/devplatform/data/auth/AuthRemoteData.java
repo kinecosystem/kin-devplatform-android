@@ -95,7 +95,7 @@ public class AuthRemoteData implements AuthDataSource.Remote {
 	@Override
 	public void activateAccount(@NonNull final Callback<AuthToken, ApiException> callback) {
 		try {
-			authApi.activateAcountAsync("", new ApiCallback<AuthToken>() {
+			authApi.activateAccountAsync("", new ApiCallback<AuthToken>() {
 				@Override
 				public void onFailure(final ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
 					executorsUtil.mainThread().execute(new Runnable() {

@@ -128,6 +128,13 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		addDismissButtonToProgressDialog();
 	}
 
+	@Override
+	public void showUWalletWasNotCreatedInThisAppError() {
+		progressDialog
+			.setMessage(getString(R.string.kinecosystem_dialog_wallet_was_not_created_in_this_app_error_message));
+		addDismissButtonToProgressDialog();
+	}
+
 	public void startWaiting() {
 		progressDialog = new ProgressDialog(this) {
 			@Override

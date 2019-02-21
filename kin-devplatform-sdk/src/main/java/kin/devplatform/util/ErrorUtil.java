@@ -51,6 +51,7 @@ public class ErrorUtil {
 	private static final String ACCOUNT_CREATION_TIMEOUT = "Account creation has timeout";
 	private static final String MIGRATION_FAILURE_MSG = "Migrating client to new blockchain has failed. cannot start the SDK";
 	private static final String BAD_JWT = "Bad or missing jwt";
+	private static final String WALLET_WAS_NOT_CREATED_IN_THIS_APP = "This wallet was not created in this app";
 
 
 	private static final int REQUEST_TIMEOUT_CODE = 408;
@@ -202,5 +203,10 @@ public class ErrorUtil {
 	public static BlockchainException createAccountCannotLoadedException(int accountIndex) {
 		return new BlockchainException(BlockchainException.ACCOUNT_LOADING_FAILED,
 			String.format(FAILED_TO_LOAD_ACCOUNT_ON_INDEX, accountIndex), null);
+	}
+
+	public static ServiceException createWWalletWasNotCreatedInThisAppException() {
+		return new ServiceException(ServiceException.WALLET_WAS_NOT_CREATED_IN_THIS_APP,
+			WALLET_WAS_NOT_CREATED_IN_THIS_APP, null);
 	}
 }
