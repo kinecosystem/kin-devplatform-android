@@ -188,6 +188,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			@Override
 			public void onResponse(Boolean response) {
 				if (view != null) {
+					backupManager.release();
 					backupManager = view.getBackupManager(); //update the backupManager
 					registerToEvents();
 					registerToCallbacks();
