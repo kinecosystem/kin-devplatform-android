@@ -1,13 +1,9 @@
 package kin.devplatform.accountmanager;
 
-import static kin.devplatform.exception.KinEcosystemException.UNKNOWN;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.text.format.DateUtils;
-import java.util.List;
-import java.util.Map;
 import kin.devplatform.KinCallback;
 import kin.devplatform.Log;
 import kin.devplatform.Logger;
@@ -16,15 +12,11 @@ import kin.devplatform.base.Observer;
 import kin.devplatform.bi.EventLogger;
 import kin.devplatform.bi.events.StellarAccountCreationRequested;
 import kin.devplatform.bi.events.WalletCreationSucceeded;
-import kin.devplatform.core.network.ApiCallback;
-import kin.devplatform.core.network.ApiException;
 import kin.devplatform.data.auth.AuthDataSource;
 import kin.devplatform.data.blockchain.BlockchainSource;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.exception.KinEcosystemException;
-import kin.devplatform.network.api.AuthApi;
 import kin.devplatform.network.model.AuthToken;
-import kin.devplatform.network.model.RestorableWalletRequest;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.common.exception.AccountNotActivatedException;
@@ -247,56 +239,28 @@ public class AccountManagerImpl implements AccountManager {
 	public void switchAccount(final int accountIndex, @NonNull final KinCallback<Boolean> callback,
 		@NonNull final IMigrationManagerCallbacks migrationManagerCallbacks) {
 		Logger.log(new Log().withTag(TAG).put("switchAccount", "start"));
-		try {
-			updateWalletAddressProcess(accountIndex, callback, migrationManagerCallbacks);
-		} catch (ApiException e) {
-			Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("getIsRestorableWallet: error is " + e));
-			callback.onFailure(ErrorUtil.fromApiException(e));
-		}
+		updateWalletAddressProcess(accountIndex, callback, migrationManagerCallbacks);
 	}
 
-	//TODO maybe need a better method name...
 	private void updateWalletAddressProcess(final int accountIndex, @NonNull final KinCallback<Boolean> callback,
-		@NonNull final IMigrationManagerCallbacks migrationManagerCallbacks) throws ApiException {
-		AuthApi authApi = new AuthApi();
-		authApi.getIsRestorableWallet(blockchainSource.getPublicAddress(accountIndex),
-			new ApiCallback<RestorableWalletRequest>() {
+		@NonNull final IMigrationManagerCallbacks migrationManagerCallbacks) {
+		authRepository.isRestorableWallet(blockchainSource.getPublicAddress(accountIndex),
+			new KinCallback<Boolean>() {
 				@Override
-				public void onFailure(final ApiException e, int statusCode, Map<String, List<String>> responseHeaders) {
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							Logger.log(
-								new Log().priority(Log.ERROR).withTag(TAG).text("getIsRestorableWallet: onFailure"));
-							callback.onFailure(ErrorUtil.fromApiException(e));
-						}
-					});
-
+				public void onResponse(Boolean isRestorable) {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG)
+						.text("getIsRestorableWallet: onSuccess - restorable = " + isRestorable));
+					if (isRestorable) {
+						startMigration(accountIndex, callback, migrationManagerCallbacks);
+					} else {
+						callback.onFailure(ErrorUtil.createWalletWasNotCreatedInThisAppException());
+					}
 				}
 
 				@Override
-				public void onSuccess(final RestorableWalletRequest response, final int statusCode,
-					final Map<String, List<String>> responseHeaders) {
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							if (response == null) {
-								Logger.log(new Log().priority(Log.ERROR).withTag(TAG)
-									.text("getIsRestorableWallet: onSuccess but response is null"));
-								callback.onFailure(new KinEcosystemException(UNKNOWN, "Unknown exception", null));
-							} else {
-								Logger.log(new Log().priority(Log.DEBUG).withTag(TAG)
-									.text(
-										"getIsRestorableWallet: onSuccess - restorable = " + response.isRestorable()));
-								if (response.isRestorable()) {
-									startMigration(accountIndex, callback, migrationManagerCallbacks);
-								} else {
-
-									callback.onFailure(ErrorUtil.createWalletWasNotCreatedInThisAppException());
-								}
-							}
-						}
-					});
+				public void onFailure(KinEcosystemException error) {
+					Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("getIsRestorableWallet: onFailure"));
+					callback.onFailure(error);
 				}
 			});
 	}

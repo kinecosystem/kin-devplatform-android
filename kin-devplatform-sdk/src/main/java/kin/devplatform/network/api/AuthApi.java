@@ -332,7 +332,7 @@ public class AuthApi {
 				localVarHeaderParams, localVarFormParams, localVarAuthNames);
 	}
 
-	public void getIsRestorableWallet(String publicAddress, final ApiCallback<RestorableWalletRequest> apiCallback)
+	public void isRestorableWallet(String publicAddress, final ApiCallback<RestorableWalletRequest> apiCallback)
 		throws ApiException {
 		validateRestorableWalletParams(publicAddress);
 		Call call = getRestorableApiCall(publicAddress);

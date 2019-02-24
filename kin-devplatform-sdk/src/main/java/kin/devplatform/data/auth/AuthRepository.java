@@ -1,8 +1,10 @@
 package kin.devplatform.data.auth;
 
+import static kin.devplatform.Log.ERROR;
+import static kin.devplatform.exception.ClientException.INCORRECT_APP_ID;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import java.util.Calendar;
 import java.util.Date;
 import kin.devplatform.KinCallback;
@@ -16,9 +18,6 @@ import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.UserProperties;
 import kin.devplatform.util.ErrorUtil;
-
-import static kin.devplatform.Log.ERROR;
-import static kin.devplatform.exception.ClientException.INCORRECT_APP_ID;
 
 public class AuthRepository implements AuthDataSource {
 
@@ -59,6 +58,21 @@ public class AuthRepository implements AuthDataSource {
 		cachedSignInData = signInData;
 		localData.setSignInData(signInData);
 		remoteData.setSignInData(signInData);
+	}
+
+	@Override
+	public void isRestorableWallet(String publicAddress, @NonNull final KinCallback<Boolean> callback) {
+		remoteData.isRestorableWallet(publicAddress, new Callback<Boolean, ApiException>() {
+			@Override
+			public void onResponse(Boolean isRestorable) {
+				callback.onResponse(isRestorable);
+			}
+
+			@Override
+			public void onFailure(ApiException exception) {
+				callback.onFailure(ErrorUtil.fromApiException(exception));
+			}
+		});
 	}
 
 	@Override
