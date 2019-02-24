@@ -13,6 +13,7 @@
 
 package kin.devplatform.network.api;
 
+import static kin.devplatform.core.network.ApiClient.GET;
 import static kin.devplatform.core.network.ApiClient.PATCH;
 import static kin.devplatform.core.network.ApiClient.POST;
 
@@ -29,6 +30,7 @@ import kin.devplatform.core.network.ApiException;
 import kin.devplatform.core.network.ApiResponse;
 import kin.devplatform.core.network.Pair;
 import kin.devplatform.network.model.AuthToken;
+import kin.devplatform.network.model.RestorableWalletRequest;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.UserProperties;
 import okhttp3.Call;
@@ -328,6 +330,32 @@ public class AuthApi {
 		return apiClient
 			.buildCall(localVarPath, PATCH, localVarQueryParams, localVarCollectionQueryParams, localVarPostBody,
 				localVarHeaderParams, localVarFormParams, localVarAuthNames);
+	}
+
+	public void getIsRestorableWallet(String publicAddress, final ApiCallback<RestorableWalletRequest> apiCallback)
+		throws ApiException {
+		validateRestorableWalletParams(publicAddress);
+		Call call = getRestorableApiCall(publicAddress);
+		Type localVarReturnType = new TypeToken<RestorableWalletRequest>() {
+		}.getType();
+		apiClient.executeAsync(call, localVarReturnType, apiCallback);
+	}
+
+	private void validateRestorableWalletParams(String publicAddress) throws ApiException {
+		// verify 'publicAddress'
+		if (publicAddress == null || publicAddress.length() == 0) {
+			throw new ApiException(
+				"Missing the required parameter 'publicAddress' when calling getIsRestorableWallet(...)");
+		}
+	}
+
+	private Call getRestorableApiCall(String publicAddress) throws ApiException {
+		String localVarPath = "/users/me/restorable/" + publicAddress;
+		Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+		Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+		return apiClient.buildCall(localVarPath, GET, null, null, null,
+			localVarHeaderParams, localVarFormParams, null);
+
 	}
 
 }

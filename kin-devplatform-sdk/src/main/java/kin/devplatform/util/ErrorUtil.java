@@ -205,7 +205,7 @@ public class ErrorUtil {
 			String.format(FAILED_TO_LOAD_ACCOUNT_ON_INDEX, accountIndex), null);
 	}
 
-	public static ServiceException createWWalletWasNotCreatedInThisAppException() {
+	public static ServiceException createWalletWasNotCreatedInThisAppException() {
 		return new ServiceException(ServiceException.WALLET_WAS_NOT_CREATED_IN_THIS_APP,
 			WALLET_WAS_NOT_CREATED_IN_THIS_APP, null);
 	}
