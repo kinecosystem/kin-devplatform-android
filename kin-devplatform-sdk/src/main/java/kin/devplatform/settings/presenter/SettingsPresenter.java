@@ -38,7 +38,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 
 	private static final String TAG = SettingsPresenter.class.getSimpleName();
 
-	private final BackupManager backupManager;
+	private BackupManager backupManager;
 	private final SettingsDataSource settingsDataSource;
 	private final BlockchainSource blockchainSource;
 	private final EventLogger eventLogger;
@@ -188,6 +188,9 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 			@Override
 			public void onResponse(Boolean response) {
 				if (view != null) {
+					backupManager = view.getBackupManager(); //update the backupManager
+					registerToEvents();
+					registerToCallbacks();
 					view.showUpdateWalletAddressFinished(didMigrationStarted);
 				}
 				didMigrationStarted = false;
