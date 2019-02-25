@@ -249,7 +249,8 @@ public final class KinEcosystemInitiator {
 			}
 		} else {
 			// if already initialized then we only did the migration so only update the kinClient and account.
-			BlockchainSourceImpl.getInstance().updateActiveAccount(kinClient, kinClient.getAccountCount() - 1);
+			BlockchainSourceImpl.getInstance()
+				.updateActiveAccount(kinClient, BlockchainSourceLocal.getInstance(context).getAccountIndex());
 		}
 
 		eventLogger.send(KinSdkInitiated.create());

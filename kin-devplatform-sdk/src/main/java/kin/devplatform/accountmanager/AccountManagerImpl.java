@@ -20,6 +20,7 @@ import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.common.exception.AccountNotActivatedException;
+import kin.sdk.migration.common.exception.DeleteAccountException;
 import kin.sdk.migration.common.exception.MigrationInProcessException;
 import kin.sdk.migration.common.interfaces.IBalance;
 import kin.sdk.migration.common.interfaces.IEventListener;
@@ -253,13 +254,14 @@ public class AccountManagerImpl implements AccountManager {
 					if (isRestorable) {
 						startMigration(accountIndex, callback, migrationManagerCallbacks);
 					} else {
-						callback.onFailure(ErrorUtil.createWalletWasNotCreatedInThisAppException());
+						onFailure(ErrorUtil.createWalletWasNotCreatedInThisAppException());
 					}
 				}
 
 				@Override
 				public void onFailure(KinEcosystemException error) {
 					Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("getIsRestorableWallet: onFailure"));
+					deleteImportedAccount(accountIndex);
 					callback.onFailure(error);
 				}
 			});
@@ -286,11 +288,13 @@ public class AccountManagerImpl implements AccountManager {
 				@Override
 				public void onError(Exception e) {
 					Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("onError"));
+					deleteImportedAccount(accountIndex);
 					migrationManagerCallbacks.onError(e);
 				}
 			});
 		} catch (MigrationInProcessException e) {
 			Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("MigrationInProcessException"));
+			deleteImportedAccount(accountIndex);
 			migrationManagerCallbacks.onError(e);
 		}
 	}
@@ -307,7 +311,7 @@ public class AccountManagerImpl implements AccountManager {
 					//switch to the new KinAccount
 					blockchainSource.updateActiveAccount(kinClient, accountIndex);
 				} catch (BlockchainException e) {
-					callback.onFailure(ErrorUtil.getBlockchainException(e));
+					onFailure(ErrorUtil.getBlockchainException(e));
 					return;
 				}
 				Logger.log(new Log().withTag(TAG).put("switchAccount", "ended successfully"));
@@ -316,11 +320,20 @@ public class AccountManagerImpl implements AccountManager {
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-				//switch to the new KinAccount
+				deleteImportedAccount(accountIndex);
 				callback.onFailure(exception);
-				Logger.log(new Log().withTag(TAG).put("switchAccount", "ended with failure"));
+				Logger.log(new Log().priority(Log.ERROR).withTag(TAG).put("switchAccount", "ended with failure"));
 			}
 		});
+	}
+
+	private void deleteImportedAccount(int accountIndex) {
+		try {
+			Logger.log(new Log().withTag(TAG).put("deleteImportedAccount", "account index = " + accountIndex));
+			blockchainSource.deleteAccount(accountIndex);
+		} catch (DeleteAccountException e) {
+			Logger.log(new Log().priority(Log.ERROR).withTag(TAG).put("deleteImportedAccount", "error " + e));
+		}
 	}
 
 	private IKinAccount getKinAccount() {

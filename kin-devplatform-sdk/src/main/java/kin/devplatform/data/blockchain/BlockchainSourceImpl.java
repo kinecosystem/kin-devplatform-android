@@ -32,6 +32,7 @@ import kin.devplatform.network.model.WhitelistService;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.common.KinSdkVersion;
 import kin.sdk.migration.common.exception.CreateAccountException;
+import kin.sdk.migration.common.exception.DeleteAccountException;
 import kin.sdk.migration.common.exception.OperationFailedException;
 import kin.sdk.migration.common.interfaces.IBalance;
 import kin.sdk.migration.common.interfaces.IEventListener;
@@ -420,6 +421,13 @@ public class BlockchainSourceImpl implements BlockchainSource {
 		}
 		//trigger balance update
 		getBalance(null);
+	}
+
+	@Override
+	public void deleteAccount(int accountIndex) throws DeleteAccountException {
+		if (local.getAccountIndex() != accountIndex) {
+			kinClient.deleteAccount(accountIndex);
+		}
 	}
 
 	private void decrementPaymentCount() {
