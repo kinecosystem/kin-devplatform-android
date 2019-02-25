@@ -256,9 +256,10 @@ public final class KinEcosystemInitiator {
 		// If somehow initialized and not logged in then do also the login.
 		if (withLogin && isInitialized && !isLoggedIn) {
 			login(signInData, loginCallback);
-		} else {
+		} else if (loginCallback != null) {
 			loginCallback.onResponse(null);
 		}
+
 	}
 
 	private void login(@NonNull SignInData signInData, final KinCallback<Void> loginCallback) {
