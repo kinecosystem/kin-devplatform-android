@@ -15,16 +15,6 @@ public abstract class KinEcosystemBaseActivity extends AppCompatActivity {
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(getLayoutRes());
-
-//		getInitiatorProgressBar().start()
-//		KinEcosystemInitiator.getInstance().internalInit(this new callback{
-//			onfinish() {
-//				getInitiatorProgressBar().start().stop
-//			}
-//		});
-
 		KinEcosystemInitiator.getInstance().internalInit(this);
 	}
-
-//	abstract getInitiatorProgressBar()
 }
