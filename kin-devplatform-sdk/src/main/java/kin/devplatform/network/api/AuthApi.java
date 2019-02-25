@@ -13,6 +13,7 @@
 
 package kin.devplatform.network.api;
 
+import static kin.devplatform.core.network.ApiClient.GET;
 import static kin.devplatform.core.network.ApiClient.PATCH;
 import static kin.devplatform.core.network.ApiClient.POST;
 
@@ -29,6 +30,7 @@ import kin.devplatform.core.network.ApiException;
 import kin.devplatform.core.network.ApiResponse;
 import kin.devplatform.core.network.Pair;
 import kin.devplatform.network.model.AuthToken;
+import kin.devplatform.network.model.RestorableWalletRequest;
 import kin.devplatform.network.model.SignInData;
 import kin.devplatform.network.model.UserProperties;
 import okhttp3.Call;
@@ -56,13 +58,13 @@ public class AuthApi {
 
 
 	/**
-	 * Build call for activateAcount
+	 * Build call for activateAccount
 	 *
 	 * @param X_REQUEST_ID A unique id for the request. A retransmitted request will have the same id  (required)
 	 * @return Call to execute
 	 * @throws ApiException If fail to serialize the request body object
 	 */
-	public Call activateAcountCall(String X_REQUEST_ID) throws ApiException {
+	public Call activateAccountCall(String X_REQUEST_ID) throws ApiException {
 		Object localVarPostBody = null;
 
 		// create path and map variables
@@ -99,14 +101,14 @@ public class AuthApi {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Call activateAcountValidateBeforeCall(String X_REQUEST_ID) throws ApiException {
+	private Call activateAccountValidateBeforeCall(String X_REQUEST_ID) throws ApiException {
 
 		// verify the required parameter 'X_REQUEST_ID' is set
 		if (X_REQUEST_ID == null) {
-			throw new ApiException("Missing the required parameter 'X_REQUEST_ID' when calling activateAcount(Async)");
+			throw new ApiException("Missing the required parameter 'X_REQUEST_ID' when calling activateAccount(Async)");
 		}
 
-		Call call = activateAcountCall(X_REQUEST_ID);
+		Call call = activateAccountCall(X_REQUEST_ID);
 		return call;
 
 
@@ -119,8 +121,8 @@ public class AuthApi {
 	 * @return AuthToken
 	 * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
 	 */
-	public AuthToken activateAcount(String X_REQUEST_ID) throws ApiException {
-		ApiResponse<AuthToken> resp = activateAcountWithHttpInfo(X_REQUEST_ID);
+	public AuthToken activateAccount(String X_REQUEST_ID) throws ApiException {
+		ApiResponse<AuthToken> resp = activateAccountWithHttpInfo(X_REQUEST_ID);
 		return resp.getData();
 	}
 
@@ -131,8 +133,8 @@ public class AuthApi {
 	 * @return ApiResponse&lt;AuthToken&gt;
 	 * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
 	 */
-	public ApiResponse<AuthToken> activateAcountWithHttpInfo(String X_REQUEST_ID) throws ApiException {
-		Call call = activateAcountValidateBeforeCall(X_REQUEST_ID);
+	public ApiResponse<AuthToken> activateAccountWithHttpInfo(String X_REQUEST_ID) throws ApiException {
+		Call call = activateAccountValidateBeforeCall(X_REQUEST_ID);
 		Type localVarReturnType = new TypeToken<AuthToken>() {
 		}.getType();
 		return apiClient.execute(call, localVarReturnType);
@@ -146,8 +148,8 @@ public class AuthApi {
 	 * @return The request call
 	 * @throws ApiException If fail to process the API call, e.g. serializing the request body object
 	 */
-	public Call activateAcountAsync(String X_REQUEST_ID, final ApiCallback<AuthToken> callback) throws ApiException {
-		Call call = activateAcountValidateBeforeCall(X_REQUEST_ID);
+	public Call activateAccountAsync(String X_REQUEST_ID, final ApiCallback<AuthToken> callback) throws ApiException {
+		Call call = activateAccountValidateBeforeCall(X_REQUEST_ID);
 		Type localVarReturnType = new TypeToken<AuthToken>() {
 		}.getType();
 		apiClient.executeAsync(call, localVarReturnType, callback);
@@ -328,6 +330,32 @@ public class AuthApi {
 		return apiClient
 			.buildCall(localVarPath, PATCH, localVarQueryParams, localVarCollectionQueryParams, localVarPostBody,
 				localVarHeaderParams, localVarFormParams, localVarAuthNames);
+	}
+
+	public void isRestorableWallet(String publicAddress, final ApiCallback<RestorableWalletRequest> apiCallback)
+		throws ApiException {
+		validateRestorableWalletParams(publicAddress);
+		Call call = getRestorableApiCall(publicAddress);
+		Type localVarReturnType = new TypeToken<RestorableWalletRequest>() {
+		}.getType();
+		apiClient.executeAsync(call, localVarReturnType, apiCallback);
+	}
+
+	private void validateRestorableWalletParams(String publicAddress) throws ApiException {
+		// verify 'publicAddress'
+		if (publicAddress == null || publicAddress.length() == 0) {
+			throw new ApiException(
+				"Missing the required parameter 'publicAddress' when calling getIsRestorableWallet(...)");
+		}
+	}
+
+	private Call getRestorableApiCall(String publicAddress) throws ApiException {
+		String localVarPath = "/users/me/restorable/" + publicAddress;
+		Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+		Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+		return apiClient.buildCall(localVarPath, GET, null, null, null,
+			localVarHeaderParams, localVarFormParams, null);
+
 	}
 
 }

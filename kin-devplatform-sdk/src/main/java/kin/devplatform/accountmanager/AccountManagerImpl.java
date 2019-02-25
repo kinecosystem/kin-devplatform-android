@@ -43,6 +43,7 @@ public class AccountManagerImpl implements AccountManager {
 	private BlockchainSource blockchainSource;
 	private final ObservableData<Integer> accountState;
 	private KinEcosystemException error;
+	private final Handler handler;
 
 	private IListenerRegistration accountCreationRegistration;
 
@@ -56,6 +57,7 @@ public class AccountManagerImpl implements AccountManager {
 		this.authRepository = authRepository;
 		this.blockchainSource = blockchainSource;
 		this.accountState = ObservableData.create(local.getAccountState());
+		handler = new Handler(Looper.getMainLooper());
 	}
 
 	public static void init(@NonNull final Local local,
@@ -237,7 +239,30 @@ public class AccountManagerImpl implements AccountManager {
 	public void switchAccount(final int accountIndex, @NonNull final KinCallback<Boolean> callback,
 		@NonNull final IMigrationManagerCallbacks migrationManagerCallbacks) {
 		Logger.log(new Log().withTag(TAG).put("switchAccount", "start"));
-		startMigration(accountIndex, callback, migrationManagerCallbacks);
+		updateWalletAddressProcess(accountIndex, callback, migrationManagerCallbacks);
+	}
+
+	private void updateWalletAddressProcess(final int accountIndex, @NonNull final KinCallback<Boolean> callback,
+		@NonNull final IMigrationManagerCallbacks migrationManagerCallbacks) {
+		authRepository.isRestorableWallet(blockchainSource.getPublicAddress(accountIndex),
+			new KinCallback<Boolean>() {
+				@Override
+				public void onResponse(Boolean isRestorable) {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG)
+						.text("getIsRestorableWallet: onSuccess - restorable = " + isRestorable));
+					if (isRestorable) {
+						startMigration(accountIndex, callback, migrationManagerCallbacks);
+					} else {
+						callback.onFailure(ErrorUtil.createWalletWasNotCreatedInThisAppException());
+					}
+				}
+
+				@Override
+				public void onFailure(KinEcosystemException error) {
+					Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("getIsRestorableWallet: onFailure"));
+					callback.onFailure(error);
+				}
+			});
 	}
 
 	private void startMigration(final int accountIndex, final KinCallback<Boolean> callback,
@@ -260,7 +285,7 @@ public class AccountManagerImpl implements AccountManager {
 
 				@Override
 				public void onError(Exception e) {
-					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onError"));
+					Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("onError"));
 					migrationManagerCallbacks.onError(e);
 				}
 			});

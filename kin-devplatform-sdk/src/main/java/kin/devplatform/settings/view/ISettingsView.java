@@ -1,6 +1,7 @@
 package kin.devplatform.settings.view;
 
 import android.support.annotation.IntDef;
+import com.kin.ecosystem.recovery.BackupManager;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import kin.devplatform.base.IBaseView;
@@ -20,6 +21,8 @@ public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 	void showUpdateWalletAddressError();
 
 	void startWaiting();
+
+	void showUWalletWasNotCreatedInThisAppError();
 
 
 	@IntDef({ITEM_BACKUP, ITEM_RESTORE})
@@ -43,5 +46,7 @@ public interface ISettingsView extends IBaseView<ISettingsPresenter> {
 	void setIconColor(@Item final int item, @IconColor final int color);
 
 	void changeTouchIndicatorVisibility(@Item final int item, boolean isVisible);
+
+	BackupManager getBackupManager();
 
 }

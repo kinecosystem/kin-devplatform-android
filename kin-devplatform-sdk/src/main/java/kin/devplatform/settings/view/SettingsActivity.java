@@ -75,7 +75,7 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		settingsPresenter = new SettingsPresenter(this,
 			new SettingsDataSourceImpl(new SettingsDataSourceLocal(getApplicationContext())),
 			BlockchainSourceImpl.getInstance(),
-			new BackupManager(this, BlockchainSourceImpl.getInstance().getKeyStoreProvider()),
+			getBackupManager(),
 			EventLoggerImpl.getInstance(), AccountManagerImpl.getInstance());
 	}
 
@@ -125,6 +125,13 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 	@Override
 	public void showUpdateWalletAddressError() {
 		progressDialog.setMessage(getString(R.string.kinecosystem_dialog_wallet_address_error_message));
+		addDismissButtonToProgressDialog();
+	}
+
+	@Override
+	public void showUWalletWasNotCreatedInThisAppError() {
+		progressDialog
+			.setMessage(getString(R.string.kinecosystem_dialog_wallet_was_not_created_in_this_app_error_message));
 		addDismissButtonToProgressDialog();
 	}
 
@@ -193,6 +200,11 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 		if (settingsItem != null) {
 			settingsItem.setTouchIndicatorVisibility(isVisible);
 		}
+	}
+
+	@Override
+	public BackupManager getBackupManager() {
+		return new BackupManager(this, BlockchainSourceImpl.getInstance().getKeyStoreProvider());
 	}
 
 	private kin.devplatform.settings.view.SettingsItem getSettingsItem(@Item final int item) {

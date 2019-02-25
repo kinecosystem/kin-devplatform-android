@@ -14,6 +14,8 @@ public interface AuthDataSource {
 
 	void setSignInData(@NonNull final SignInData signInData);
 
+	void isRestorableWallet(String publicAddress, @NonNull KinCallback<Boolean> callback);
+
 	void updateWalletAddress(String address, @NonNull KinCallback<Boolean> callback);
 
 	String getAppID();
@@ -70,6 +72,8 @@ public interface AuthDataSource {
 		AuthToken getAuthTokenSync();
 
 		void activateAccount(@NonNull final Callback<AuthToken, ApiException> callback);
+
+		void isRestorableWallet(@NonNull String publicAddress, @NonNull final Callback<Boolean, ApiException> callback);
 
 		void updateWalletAddress(@NonNull UserProperties userProperties, @NonNull final Callback<Void, ApiException> callback);
 	}
