@@ -44,7 +44,6 @@ public class AccountManagerImpl implements AccountManager {
 	private BlockchainSource blockchainSource;
 	private final ObservableData<Integer> accountState;
 	private KinEcosystemException error;
-	private final Handler handler;
 
 	private IListenerRegistration accountCreationRegistration;
 
@@ -58,7 +57,6 @@ public class AccountManagerImpl implements AccountManager {
 		this.authRepository = authRepository;
 		this.blockchainSource = blockchainSource;
 		this.accountState = ObservableData.create(local.getAccountState());
-		handler = new Handler(Looper.getMainLooper());
 	}
 
 	public static void init(@NonNull final Local local,
