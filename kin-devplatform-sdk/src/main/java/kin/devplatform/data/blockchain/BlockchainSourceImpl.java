@@ -425,7 +425,7 @@ public class BlockchainSourceImpl implements BlockchainSource {
 
 	@Override
 	public void deleteAccount(int accountIndex) throws DeleteAccountException {
-		if (local.getAccountIndex() > accountIndex) {
+		if (local.getAccountIndex() < accountIndex) {
 			kinClient.deleteAccount(accountIndex);
 		}
 	}
