@@ -325,6 +325,13 @@ public class AccountManagerImpl implements AccountManager {
 		});
 	}
 
+	/**
+	 * This method should be called in case the restore process is failed somewhere in the way. Because currently when
+	 * restoring an account the restored account is added to kinClient(to the end of the account list if it wasn't there
+	 * before) even before the restore process is finished successfully. That is why if the restore is failed we need to
+	 * delete the restored account from the end of the account list(if it was added), if it was already there then we
+	 * don't care about it because the active one will be the same as before.
+	 */
 	private void deleteImportedAccount(int accountIndex) {
 		try {
 			Logger.log(new Log().withTag(TAG).put("deleteImportedAccount", "account index = " + accountIndex));
