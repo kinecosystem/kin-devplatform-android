@@ -11,6 +11,7 @@ import kin.devplatform.data.model.Payment;
 import kin.devplatform.exception.BlockchainException;
 import kin.devplatform.network.model.OpenOrder;
 import kin.sdk.migration.common.KinSdkVersion;
+import kin.sdk.migration.common.exception.DeleteAccountException;
 import kin.sdk.migration.common.exception.OperationFailedException;
 import kin.sdk.migration.common.interfaces.IKinAccount;
 import kin.sdk.migration.common.interfaces.IKinClient;
@@ -109,6 +110,8 @@ public interface BlockchainSource {
 	KeyStoreProvider getKeyStoreProvider();
 
 	void updateActiveAccount(IKinClient kinClient, int accountIndex) throws BlockchainException;
+
+	void deleteAccount(int accountIndex) throws DeleteAccountException;
 
 	interface Local {
 

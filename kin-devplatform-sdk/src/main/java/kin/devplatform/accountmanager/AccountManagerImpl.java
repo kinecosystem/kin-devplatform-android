@@ -20,6 +20,7 @@ import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.common.exception.AccountNotActivatedException;
+import kin.sdk.migration.common.exception.DeleteAccountException;
 import kin.sdk.migration.common.exception.MigrationInProcessException;
 import kin.sdk.migration.common.interfaces.IBalance;
 import kin.sdk.migration.common.interfaces.IEventListener;
@@ -43,7 +44,6 @@ public class AccountManagerImpl implements AccountManager {
 	private BlockchainSource blockchainSource;
 	private final ObservableData<Integer> accountState;
 	private KinEcosystemException error;
-	private final Handler handler;
 
 	private IListenerRegistration accountCreationRegistration;
 
@@ -57,7 +57,6 @@ public class AccountManagerImpl implements AccountManager {
 		this.authRepository = authRepository;
 		this.blockchainSource = blockchainSource;
 		this.accountState = ObservableData.create(local.getAccountState());
-		handler = new Handler(Looper.getMainLooper());
 	}
 
 	public static void init(@NonNull final Local local,
@@ -253,13 +252,14 @@ public class AccountManagerImpl implements AccountManager {
 					if (isRestorable) {
 						startMigration(accountIndex, callback, migrationManagerCallbacks);
 					} else {
-						callback.onFailure(ErrorUtil.createWalletWasNotCreatedInThisAppException());
+						onFailure(ErrorUtil.createWalletWasNotCreatedInThisAppException());
 					}
 				}
 
 				@Override
 				public void onFailure(KinEcosystemException error) {
 					Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("getIsRestorableWallet: onFailure"));
+					deleteImportedAccount(accountIndex);
 					callback.onFailure(error);
 				}
 			});
@@ -286,11 +286,13 @@ public class AccountManagerImpl implements AccountManager {
 				@Override
 				public void onError(Exception e) {
 					Logger.log(new Log().priority(Log.ERROR).withTag(TAG).text("onError"));
+					deleteImportedAccount(accountIndex);
 					migrationManagerCallbacks.onError(e);
 				}
 			});
 		} catch (MigrationInProcessException e) {
 			Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("MigrationInProcessException"));
+			deleteImportedAccount(accountIndex);
 			migrationManagerCallbacks.onError(e);
 		}
 	}
@@ -307,7 +309,7 @@ public class AccountManagerImpl implements AccountManager {
 					//switch to the new KinAccount
 					blockchainSource.updateActiveAccount(kinClient, accountIndex);
 				} catch (BlockchainException e) {
-					callback.onFailure(ErrorUtil.getBlockchainException(e));
+					onFailure(ErrorUtil.getBlockchainException(e));
 					return;
 				}
 				Logger.log(new Log().withTag(TAG).put("switchAccount", "ended successfully"));
@@ -316,11 +318,27 @@ public class AccountManagerImpl implements AccountManager {
 
 			@Override
 			public void onFailure(KinEcosystemException exception) {
-				//switch to the new KinAccount
+				deleteImportedAccount(accountIndex);
 				callback.onFailure(exception);
-				Logger.log(new Log().withTag(TAG).put("switchAccount", "ended with failure"));
+				Logger.log(new Log().priority(Log.ERROR).withTag(TAG).put("switchAccount", "ended with failure"));
 			}
 		});
+	}
+
+	/**
+	 * This method should be called in case the restore process is failed somewhere in the way. Because currently when
+	 * restoring an account the restored account is added to kinClient(to the end of the account list if it wasn't there
+	 * before) even before the restore process is finished successfully. That is why if the restore is failed we need to
+	 * delete the restored account from the end of the account list(if it was added), if it was already there then we
+	 * don't care about it because the active one will be the same as before.
+	 */
+	private void deleteImportedAccount(int accountIndex) {
+		try {
+			Logger.log(new Log().withTag(TAG).put("deleteImportedAccount", "account index = " + accountIndex));
+			blockchainSource.deleteAccount(accountIndex);
+		} catch (DeleteAccountException e) {
+			Logger.log(new Log().priority(Log.ERROR).withTag(TAG).put("deleteImportedAccount", "error " + e));
+		}
 	}
 
 	private IKinAccount getKinAccount() {

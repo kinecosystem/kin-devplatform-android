@@ -183,7 +183,7 @@ public class SettingsPresenter extends BasePresenter<ISettingsView> implements I
 		});
 	}
 
-	private void switchAccount(int accountIndex) {
+	private void switchAccount(final int accountIndex) {
 		accountManager.switchAccount(accountIndex, new KinCallback<Boolean>() {
 			@Override
 			public void onResponse(Boolean response) {
