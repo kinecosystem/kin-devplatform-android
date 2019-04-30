@@ -10,4 +10,4 @@ You can find the most up-to-date documentation on our [documentation site](https
 
 ## License
 
-The `kin-devplatform-android` library is licensed under the MIT license.
+The `kin-devplatform-android` library is licensed under the Kin Ecosystem SDK License.
