@@ -19,6 +19,7 @@ import kin.devplatform.exception.KinEcosystemException;
 import kin.devplatform.network.model.AuthToken;
 import kin.devplatform.util.ErrorUtil;
 import kin.sdk.migration.MigrationManager;
+import kin.sdk.migration.common.KinSdkVersion;
 import kin.sdk.migration.common.exception.AccountNotActivatedException;
 import kin.sdk.migration.common.exception.DeleteAccountException;
 import kin.sdk.migration.common.exception.MigrationInProcessException;
@@ -269,7 +270,7 @@ public class AccountManagerImpl implements AccountManager {
 		final IMigrationManagerCallbacks migrationManagerCallbacks) {
 		Logger.log(new Log().withTag(TAG).put("startMigration", "start"));
 		try {
-			migrationManager.start(new IMigrationManagerCallbacks() {
+			migrationManager.start(getRestoredAccountPublicAddress(accountIndex), new IMigrationManagerCallbacks() {
 				@Override
 				public void onMigrationStart() {
 					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onMigrationStart"));
@@ -295,6 +296,12 @@ public class AccountManagerImpl implements AccountManager {
 			deleteImportedAccount(accountIndex);
 			migrationManagerCallbacks.onError(e);
 		}
+	}
+
+	private String getRestoredAccountPublicAddress(int accountIndex) {
+		IKinClient kinClient = migrationManager.getKinClient(KinSdkVersion.OLD_KIN_SDK);
+		IKinAccount kinAccount = kinClient.getAccount(accountIndex);
+		return kinAccount != null ? kinAccount.getPublicAddress() : null;
 	}
 
 	private void updateWalletAddress(final IKinClient kinClient, final int accountIndex,
