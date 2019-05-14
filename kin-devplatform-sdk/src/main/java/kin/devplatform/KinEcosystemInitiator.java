@@ -37,7 +37,9 @@ import kin.devplatform.util.JwtBody;
 import kin.devplatform.util.JwtDecoder;
 import kin.sdk.migration.MigrationManager;
 import kin.sdk.migration.MigrationNetworkInfo;
+import kin.sdk.migration.common.KinSdkVersion;
 import kin.sdk.migration.common.exception.MigrationInProcessException;
+import kin.sdk.migration.common.interfaces.IKinAccount;
 import kin.sdk.migration.common.interfaces.IKinClient;
 import kin.sdk.migration.common.interfaces.IMigrationManagerCallbacks;
 import org.json.JSONException;
@@ -76,8 +78,17 @@ public final class KinEcosystemInitiator {
 			initEventManagerRelatedServices(context, null, null);
 			MigrationManager migrationManager = getMigrationManager(context, null);
 			try {
-				handleKinClientReady(migrationManager.getCurrentKinClient(), migrationManager, context, null, null,
-					false, null);
+				int accountIndex = BlockchainSourceLocal.getInstance(context).getAccountIndex();
+				// Note that it is not really matter what version we are sending to the 'getKinClient' method because
+				// we are just using the kinClient to get the account public address.
+				IKinClient kinClient = migrationManager.getKinClient(KinSdkVersion.OLD_KIN_SDK);
+				IKinAccount account = kinClient.getAccount(accountIndex);
+				KinSdkVersion kinSdkVersion =
+					migrationManager.accountAlreadyMigrated(account.getPublicAddress()) ?
+						KinSdkVersion.NEW_KIN_SDK : KinSdkVersion.OLD_KIN_SDK;
+				// Here we actually are using the correct kinClient according to the real sdk version
+				handleKinClientReady(migrationManager.getKinClient(kinSdkVersion), migrationManager,
+					context, null, null, false, null);
 			} catch (BlockchainException e) {
 				EventLoggerImpl.getInstance().send(GeneralEcosystemSdkError.create(
 					ErrorUtil.getPrintableStackTrace(e), String.valueOf(e.getCode()),
@@ -177,43 +188,52 @@ public final class KinEcosystemInitiator {
 	private void handleMigration(final Context context, final String appId, final MigrationManager migrationManager,
 		final SignInData signInData, final KinCallback<Void> loginCallback,
 		final KinMigrationListener migrationCallback) throws MigrationInProcessException {
-		migrationManager.start(new IMigrationManagerCallbacks() {
+		migrationManager.start(getCurrentAccountPublicAddress(context, migrationManager),
+			new IMigrationManagerCallbacks() {
 
-			private boolean didMigrationStarted;
+				private boolean didMigrationStarted;
 
-			@Override
-			public void onMigrationStart() {
-				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onMigrationStart"));
-				didMigrationStarted = true;
-				if (migrationCallback != null) {
-					migrationCallback.onStart();
-				}
-			}
-
-			@Override
-			public void onReady(IKinClient kinClient) {
-				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
-				try {
-					if (migrationCallback != null && didMigrationStarted) {
-						didMigrationStarted = false;
-						migrationCallback.onFinish();
+				@Override
+				public void onMigrationStart() {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onMigrationStart"));
+					didMigrationStarted = true;
+					if (migrationCallback != null) {
+						migrationCallback.onStart();
 					}
-					handleKinClientReady(kinClient, migrationManager, context, appId, signInData, true, loginCallback);
-				} catch (BlockchainException e) {
-					didMigrationStarted = false;
-					fireStartError(e, loginCallback);
 				}
-			}
 
-			@Override
-			public void onError(Exception e) {
-				Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onError"));
-				if (migrationCallback != null) {
-					migrationCallback.onError(e);
+				@Override
+				public void onReady(IKinClient kinClient) {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onReady"));
+					try {
+						if (migrationCallback != null && didMigrationStarted) {
+							didMigrationStarted = false;
+							migrationCallback.onFinish();
+						}
+						handleKinClientReady(kinClient, migrationManager, context, appId, signInData, true,
+							loginCallback);
+					} catch (BlockchainException e) {
+						didMigrationStarted = false;
+						fireStartError(e, loginCallback);
+					}
 				}
-				fireStartError(ErrorUtil.createMigrationFailureException(e), loginCallback);
-			}
-		});
+
+				@Override
+				public void onError(Exception e) {
+					Logger.log(new Log().priority(Log.DEBUG).withTag(TAG).text("onError"));
+					if (migrationCallback != null) {
+						migrationCallback.onError(e);
+					}
+					fireStartError(ErrorUtil.createMigrationFailureException(e), loginCallback);
+				}
+			});
+	}
+
+	private String getCurrentAccountPublicAddress(Context context, MigrationManager migrationManager) {
+		int accountIndex = BlockchainSourceLocal.getInstance(context).getAccountIndex();
+		IKinClient kinClient = migrationManager.getKinClient(KinSdkVersion.OLD_KIN_SDK);
+		IKinAccount kinAccount = kinClient.getAccount(accountIndex);
+		return kinAccount != null ? kinAccount.getPublicAddress() : null;
 	}
 
 	private void handleKinClientReady(IKinClient kinClient, MigrationManager migrationManager,
@@ -248,7 +268,7 @@ public final class KinEcosystemInitiator {
 				return;
 			}
 		} else {
-			// if already initialized then we only did the migration so only update the kinClient and account.
+			// If already initialized then we only did the migration so only update the kinClient and the account.
 			BlockchainSourceImpl.getInstance()
 				.updateActiveAccount(kinClient, BlockchainSourceLocal.getInstance(context).getAccountIndex());
 		}

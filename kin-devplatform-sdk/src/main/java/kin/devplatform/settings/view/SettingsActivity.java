@@ -74,8 +74,7 @@ public class SettingsActivity extends BaseToolbarActivity implements kin.devplat
 
 		settingsPresenter = new SettingsPresenter(this,
 			new SettingsDataSourceImpl(new SettingsDataSourceLocal(getApplicationContext())),
-			BlockchainSourceImpl.getInstance(),
-			getBackupManager(),
+			BlockchainSourceImpl.getInstance(), getBackupManager(),
 			EventLoggerImpl.getInstance(), AccountManagerImpl.getInstance());
 	}
 
